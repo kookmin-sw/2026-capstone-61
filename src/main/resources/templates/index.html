@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<body>
+    <div layout:fragment="content">
+        
+        <div id="mainCarousel" class="carousel slide carousel-fade shadow-sm" data-bs-ride="carousel" style="margin: 50px 0; margin-bottom: 25px;">
+            <div class="carousel-inner" style="border-radius: 15px; overflow: hidden; max-width: 95%; margin: 0 auto;">
+                
+                <div class="carousel-item active">
+                    <a th:href="@{/breed/list_by_cat_no(cat_no=1)}" class="text-decoration-none">
+                        <div style="background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%); height: 100px; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
+                            <div>
+                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 2px;">📖 강아지 백과사전</h2>
+                                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">우리 아이는 어떤 특징이 있을까? <b>견종 정보 검색하기</b></p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/dog_dbti/create.do" class="text-decoration-none">
+                        <div style="background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%); height: 100px; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
+                            <div>
+                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 2px;">🐾 댕댕이 DBTI</h2>
+                                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">나와 찰떡궁합인 강아지 성향은? <b>1분 만에 테스트!</b></p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/breed/gallery" class="text-decoration-none">
+                        <div style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); height: 100px; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
+                            <div>
+                                <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 2px;">🖼️ 댕댕 갤러리</h2>
+                                <p style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0;">오늘 가장 귀여운 강아지는 누구? <b>아이들의 일상 보기</b></p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev" style="width: 7.5%;">
+                <span class="carousel-control-prev-icon" style="width: 15px;"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next" style="width: 7.5%;">
+                <span class="carousel-control-next-icon" style="width: 15px;"></span>
+            </button>
+        </div>
+
+        <div class="container-fluid" style="max-width: 95%; padding: 0; margin: 0 auto;">
+            
+            <div class="mb-4">
+                <div class="p-3 shadow-sm rounded-4 border-0" style="background: linear-gradient(to right, #ffffff, #f0f7ff); border-left: 5px solid #4facfe !important;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted" style="font-size: 0.75rem;">오늘 우리 동네 산책 지수</span>
+                            <h6 class="fw-bold mb-0" style="color: #333;">지금 산책하기 <span style="color: #4facfe;">아주 좋아요!</span> 🌳</h6>
+                        </div>
+                        <div class="text-end">
+                            <span style="font-size: 1.4rem;">☀️</span>
+                            <span class="fw-bold" style="font-size: 1.1rem; color: #444; margin-left: 5px;">22°C</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="py-2">
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <h5 class="fw-bold m-0" style="font-size: 1.1rem; color: #444;">✨ 오늘의 댕댕이</h5>
+                    <a href="/breed/gallery" style="color: #999; text-decoration: none; font-size: 0.8rem;">더보기 ></a>
+                </div>
+                
+                <div class="row g-2">
+                    <th:block th:if="${randomGallery != null and !randomGallery.isEmpty()}">
+                        <div class="col-6 col-md-4 col-lg-2" th:each="gallery : ${randomGallery}">
+                            <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius: 12px;">
+                                <a th:href="@{|/breed/read?breedno=${gallery.breedno}|}" class="text-decoration-none">
+                                    <div class="card-img-container" style="overflow: hidden; background-color: #f8f9fa;">
+                                        <img th:if="${gallery.saved_name != null and gallery.saved_name != ''}"
+                                             th:src="@{|/breed/storage/${gallery.saved_name}|}"
+                                             class="w-100 h-100 hover-zoom"
+                                             style="object-fit: cover;">
+                                        <div th:unless="${gallery.saved_name != null and gallery.saved_name != ''}"
+                                             class="w-100 h-100 d-flex align-items-center justify-content-center"
+                                             style="color: #ccc; font-size: 12px;">사진 준비중 🐾</div>
+                                    </div>
+                                    <div class="p-2 border-top" style="background-color: #fcfcfc;">
+                                        <span class="fw-bold d-block text-truncate text-center" style="font-size: 0.8rem; color: #555;" th:text="${gallery.breed_name}">견종명</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <div class="py-2 mt-4">
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <h5 class="fw-bold m-0" style="font-size: 1.1rem; color: #444;">❤️ 오늘의 매칭</h5>
+                    <a href="/match_post/list_all" style="color: #999; text-decoration: none; font-size: 0.8rem;">더보기 ></a>
+                </div>
+
+                <div class="row g-2">
+                    <th:block th:if="${todayMatchList != null and !todayMatchList.isEmpty()}">
+                        <div class="col-6 col-md-4 col-lg-2" th:each="match : ${todayMatchList}">
+                            <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius: 12px;">
+                                <a th:href="@{|/match_post/read?matchno=${match.matchno}|}" class="text-decoration-none">
+                                    <div class="card-img-container" style="overflow: hidden; position: relative; background-color: #f8f9fa;">
+                                        <img th:if="${match.dog_img != null and match.dog_img != ''}"
+                                             th:src="@{|/match_post/storage/${match.dog_img}|}"
+                                             class="w-100 h-100 hover-zoom"
+                                             style="object-fit: cover;">
+                                        <div th:unless="${match.dog_img != null and match.dog_img != ''}"
+                                             class="w-100 h-100 d-flex align-items-center justify-content-center"
+                                             style="color: #ccc; font-size: 12px;">🐶</div>
+                                        <div style="position: absolute; top: 5px; left: 5px;">
+                                            <span class="badge rounded-pill" style="background: rgba(255, 107, 129, 0.9); padding: 3px 7px; font-size: 9px;">모집중</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-2 border-top" style="background-color: #fcfcfc;">
+                                        <span class="fw-bold d-block text-truncate text-center" style="font-size: 0.8rem; color: #333;" th:text="${match.title}">매칭 제목</span>
+										<div class="text-center mt-1">
+										    <small class="text-muted d-block text-truncate" 
+										           style="font-size: 0.7rem; max-width: 100%; margin: 0 auto;">
+										        <i class="bi bi-geo-alt"></i> <span th:text="${match.mplace}">매칭 장소 텍스트가 길어지면 자동으로 잘립니다.</span>
+										    </small>
+										</div>
+                                        <div class="text-center">
+                                            <small class="fw-bold" style="font-size: 0.7rem; color: #ff6b81;">#<span th:text="${match.dmti}">DMTI</span></small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div> <style>
+            body { font-size: 14px; background-color: #fafafa; font-family: 'Pretendard', -apple-system, sans-serif; }
+            
+            /* 이미지 높이 설정 (PC에서는 길게, 모바일은 적당히) */
+            .card-img-container { height: 150px; }
+            @media (min-width: 992px) {
+                .card-img-container { height: 220px; }
+            }
+
+            .hover-zoom { transition: transform 0.4s ease; }
+            .hover-zoom:hover { transform: scale(1.08); }
+            .card { transition: transform 0.2s ease; border: 1px solid rgba(0,0,0,0.05) !important; }
+            .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important; }
+            
+            @media (max-width: 768px) { 
+                .carousel-item div h2 { font-size: 1.2rem !important; } 
+                .carousel-item div p { font-size: 0.75rem !important; }
+                .card-img-container { height: 130px; }
+            }
+        </style>
+    </div>
+</body>
+</html>

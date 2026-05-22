@@ -1,0 +1,40 @@
+-- 기존 테이블 및 시퀀스 삭제 (필요 시)
+-- DROP TABLE market_review CASCADE CONSTRAINTS;
+-- DROP SEQUENCE SEQ_MARKET_REVIEW;
+
+-- 상품 리뷰 테이블
+CREATE TABLE market_review (
+    REVIEW_ID       NUMBER PRIMARY KEY,            -- 리뷰 고유 번호 (PK)
+    PRODUCT_ID      NUMBER NOT NULL,               -- 대상 상품 번호 (FK)
+    MEMBERNO        NUMBER(10,0) NOT NULL,         -- 작성자 회원 번호 (FK)
+    ORDER_ITEM_ID   NUMBER NOT NULL,               -- 주문 상세 번호 (FK) - 구매자 인증용
+    RATING          NUMBER(1) NOT NULL,            -- 별점 (1~5점)
+    REVIEW_CONTENT  CLOB NOT NULL,                 -- 리뷰 내용
+    REVIEW_IMG      VARCHAR2(300),                 -- 리뷰 사진 (파일 경로 또는 저장된 이름)
+    REG_DATE        DATE DEFAULT SYSDATE,          -- 작성 일시
+    -- 외래키 설정
+    CONSTRAINT FK_REVIEW_PRODUCT FOREIGN KEY (PRODUCT_ID) REFERENCES market(PRODUCT_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_REVIEW_MEMBER FOREIGN KEY (MEMBERNO) REFERENCES member(MEMBERNO),
+    CONSTRAINT FK_REVIEW_ORDER_ITEM FOREIGN KEY (ORDER_ITEM_ID) REFERENCES market_order_item(ORDER_ITEM_ID),
+    -- 제약 조건: 별점은 1에서 5 사이만 가능
+    CONSTRAINT CHK_REVIEW_RATING CHECK (RATING BETWEEN 1 AND 5)
+);
+
+-- 리뷰 번호용 시퀀스
+CREATE SEQUENCE SEQ_MARKET_REVIEW 
+    START WITH 1 
+    INCREMENT BY 1 
+    NOCACHE;
+
+-- 테이블 및 컬럼 코멘트
+COMMENT ON TABLE market_review IS '상품 리뷰 정보 (구매자 작성)';
+COMMENT ON COLUMN MARKET_REVIEW.REVIEW_ID IS '리뷰 고유 번호 (PK)';
+COMMENT ON COLUMN MARKET_REVIEW.PRODUCT_ID IS '상품 번호 (MARKET 테이블 참조)';
+COMMENT ON COLUMN MARKET_REVIEW.MEMBERNO IS '작성자 회원번호 (MEMBER 테이블 참조)';
+COMMENT ON COLUMN MARKET_REVIEW.ORDER_ITEM_ID IS '주문 상세 번호 (구매 증빙)';
+COMMENT ON COLUMN MARKET_REVIEW.RATING IS '평점 (1: 매우 불만족 ~ 5: 매우 만족)';
+COMMENT ON COLUMN MARKET_REVIEW.REVIEW_CONTENT IS '리뷰 상세 내용';
+COMMENT ON COLUMN MARKET_REVIEW.REVIEW_IMG IS '첨부 이미지 파일명';
+COMMENT ON COLUMN MARKET_REVIEW.REG_DATE IS '리뷰 작성 일시';
+
+COMMIT;

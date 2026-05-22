@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<div layout:fragment="content">
+    <style>
+        :root {
+            --paws-pink: #ffb6c1;
+            --paws-bg-pink: #fff8f9;
+            --paws-border-pink: #ffeff1;
+        }
+
+        /* 커뮤니티 컨테이너 스타일과 통일 */
+        .msg-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 60px 30px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.03);
+            text-align: center;
+            border: 1px solid #f8f8f8;
+        }
+
+        .msg-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* 핑크색 느낌의 아이콘 컬러 */
+        .icon-pink { color: var(--paws-pink); }
+        .icon-gray { color: #ddd; }
+
+        .msg-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .msg-desc {
+            font-size: 0.95rem;
+            color: #999;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* 커뮤니티 tab-btn 스타일을 응용한 버튼 */
+        .btn-paws {
+            padding: 10px 40px;
+            border-radius: 40px;
+            border: 1.5px solid var(--paws-border-pink);
+            background: var(--paws-bg-pink);
+            color: var(--paws-pink);
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-paws:hover {
+            background: var(--paws-pink);
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <div class="msg-container">
+        <div th:if="${code == 'duplicate_review'}">
+            <div class="msg-icon icon-pink">
+                <i class="bi bi-chat-heart"></i>
+            </div>
+            <h3 class="msg-title">이미 작성된 리뷰</h3>
+            <p class="msg-desc">
+                해당 주문에 대해 이미 소중한 후기를 남겨주셨어요!<br>
+                리뷰는 주문당 1회만 작성 가능합니다. 🐾
+            </p>
+        </div>
+
+        <div th:if="${code == 'create_fail'}">
+            <div class="msg-icon icon-gray">
+                <i class="bi bi-emoji-frown"></i>
+            </div>
+            <h3 class="msg-title">등록에 실패했어요</h3>
+            <p class="msg-desc">
+                리뷰 등록 중 잠시 문제가 발생했습니다.<br>
+                잠시 후 다시 시도해 주세요.
+            </p>
+        </div>
+        
+        <div th:if="${code == 'cancel_fail'}">
+            <div class="msg-icon icon-gray">
+                <i class="bi bi-exclamation-circle"></i>
+            </div>
+            <h3 class="msg-title">취소 실패</h3>
+            <p class="msg-desc">주문 취소 처리 중 오류가 발생했습니다.</p>
+        </div>
+
+        <div class="mt-4">
+            <button type="button" class="btn-paws" onclick="history.back()">
+                이전 페이지로
+            </button>
+        </div>
+    </div>
+</div>
+</html>

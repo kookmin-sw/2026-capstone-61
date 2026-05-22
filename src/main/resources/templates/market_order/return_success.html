@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반품 접수 완료 - Paws Market</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --paws-orange: #ff914d;
+            --paws-orange-light: #fff5ed;
+            --paws-orange-hover: #e87d3a;
+            --paws-dark: #333333;
+            --paws-gray: #777777;
+            --paws-border: #f2f2f2;
+        }
+
+        /* 컨테이너: 중앙 정렬 및 반응형 여백 */
+        .success-container { 
+            max-width: 550px; 
+            margin: 100px auto; 
+            padding: 0 20px; 
+            text-align: center; 
+        }
+        
+        .success-box { 
+            background: #fff; 
+            padding: 70px 40px; 
+            border-radius: 35px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); 
+            border: 1px solid var(--paws-border);
+        }
+
+        /* 아이콘: 박스 아이콘으로 반품 느낌 강조 */
+        .icon-circle { 
+            width: 100px; height: 100px; 
+            background: var(--paws-orange-light); 
+            color: var(--paws-orange); 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 45px; margin: 0 auto 30px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .success-box:hover .icon-circle {
+            transform: scale(1.1) translateY(-5px);
+            background: var(--paws-orange);
+            color: #fff;
+        }
+
+        .success-title { 
+            font-weight: 800; 
+            color: var(--paws-dark); 
+            font-size: 1.8rem; 
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        .success-title span { color: var(--paws-orange); }
+
+        .success-msg { 
+            color: var(--paws-gray); 
+            line-height: 1.8; 
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+
+        /* 안내 사항 박스 */
+        .notice-card {
+            background: #fcfcfc;
+            border: 1px dashed #ddd;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        .notice-card p {
+            font-size: 0.9rem;
+            color: #888;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* 버튼 스타일 */
+        .btn-group-wrap {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-paws {
+            flex: 1;
+            padding: 16px 25px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none !important;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-paws-list {
+            background: var(--paws-orange);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(255, 145, 77, 0.2);
+        }
+
+        .btn-paws-list:hover {
+            background: var(--paws-orange-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 145, 77, 0.3);
+            color: #fff;
+        }
+
+        .btn-paws-home {
+            background: #fff;
+            color: var(--paws-gray);
+            border: 1.5px solid #eee;
+        }
+
+        .btn-paws-home:hover {
+            background: #f9f9f9;
+            border-color: #ddd;
+            color: var(--paws-dark);
+        }
+
+        /* 반응형 처리 */
+        @media (max-width: 576px) {
+            .success-container { margin: 60px auto; }
+            .success-box { padding: 50px 25px; }
+            .success-title { font-size: 1.5rem; }
+            .btn-group-wrap { flex-direction: column; }
+            .btn-paws { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="success-container">
+    <div class="success-box">
+        <div class="icon-circle">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        
+        <h2 class="success-title">반품 신청 <span>접수 완료</span></h2>
+        
+        <p class="success-msg">
+            반품 신청이 정상적으로 처리되었습니다.<br>
+            관리자 확인 후 <strong>빠른 시일 내에</strong><br>
+            추후 절차를 안내해 드리겠습니다.
+        </p>
+
+        <div class="notice-card">
+            <p><i class="bi bi-info-circle"></i> 상품은 수령 당시 상태 그대로 포장 부탁드립니다.</p>
+        </div>
+
+        <div class="btn-group-wrap">
+            <a th:href="@{/market/list.do}" class="btn-paws btn-paws-home">마켓 구경가기</a>
+            <a th:href="@{/market_order/list_by_memberno.do}" class="btn-paws btn-paws-list">주문 내역 확인</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</div>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Paws - 매칭 등록</title>
+
+    <!-- Daum 주소 서비스 (지도 없이 주소 텍스트만 사용) -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_red.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        :root { --main-color: #ff6b81; --bg-color: #f8f9fa; --text-muted: #6c757d; }
+        body { background-color: var(--bg-color); color: #333; }
+        
+        /* list_all.html과 유사한 카드 스타일 컨테이너 */
+        .create-container { 
+            max-width: 720px; 
+            margin: 60px auto; 
+            padding: 40px; 
+            border-radius: 20px; 
+            background: #fff; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        }
+
+        .form-group { margin-bottom: 25px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-weight: 700; 
+            color: #444; 
+            font-size: 0.95rem; 
+        }
+        .required { color: var(--main-color); margin-left: 4px; }
+        
+        /* 입력창 디자인 통일 */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            transition: all 0.2s; 
+            background: #fff; 
+        }
+        input:focus, textarea:focus, select:focus { 
+            outline: none; 
+            border-color: var(--main-color); 
+            box-shadow: 0 0 0 4px rgba(255, 107, 129, 0.1); 
+        }
+
+        /* 반응형 그리드 */
+        .flex-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 576px) { .flex-row { grid-template-columns: 1fr; } }
+
+        /* 버튼 스타일 */
+        .btn-action { 
+            padding: 8px 16px; 
+            border-radius: 10px; 
+            border: 1px solid var(--main-color); 
+            background: #fff; 
+            color: var(--main-color); 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: .2s; 
+            font-size: 13px; 
+        }
+        .btn-action:hover { background: var(--main-color); color: #fff; }
+        
+        .btn-submit { 
+            background: var(--main-color); 
+            color: white; 
+            padding: 18px; 
+            border: none; 
+            width: 100%; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-top: 10px; 
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.3); 
+            transition: transform 0.2s;
+        }
+        .btn-submit:active { transform: scale(0.98); }
+        
+        .detail-hint { font-size: 12.5px; color: var(--text-muted); margin-top: 8px; display: block; line-height: 1.5; }
+        
+        /* 내 강아지 정보 박스 */
+        .my-dog-box { 
+            background: #fffafa; 
+            border: 1.5px dashed #ffccd5; 
+            padding: 18px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            display: none; 
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="create-container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="letter-spacing: -1px;">🐾 새로운 산책 메칭 등록</h2>
+            <p class="text-muted">함께 산책할 멍멍이 친구를 찾아보세요!</p>
+        </div>
+
+        <form id="frm" method="post" action="/match_post/create" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <!-- 필수 Hidden 필드 -->
+            <input type="hidden" name="memberno" th:value="${session.memberno}">
+            <input type="hidden" name="dmti" id="dmti_input">
+            <!-- 지도 삭제에 따른 좌표 기본값 (서울 중심점 등 기본값 유지 또는 서버 처리) -->
+            <input type="hidden" name="lat" value="37.5665">
+            <input type="hidden" name="lng" value="126.9780">
+
+            <div class="form-group">
+                <label>카테고리 선택<span class="required">*</span></label>
+                <select name="cat_no" id="cat_no" required>
+                    <option value="">산책 유형을 선택해 주세요</option>
+                    <option value="1">🐾 일반 산책 매칭</option>
+                    <option value="2">🐾 소형견 친구 찾기</option>
+                    <option value="3">🐾 대형견 친구 찾기</option>
+                    <option value="4">🐾 동네 산책 번개</option>
+                </select>
+            </div>
+
+            <div class="flex-row">
+                <div class="form-group">
+                    <label>산책 일시<span class="required">*</span></label>
+                    <input type="text" name="mdate" id="mdate" placeholder="날짜와 시간 선택" readonly required>
+                </div>
+                <div class="form-group">
+                    <label>모집 마감 일시<span class="required">*</span></label>
+                    <input type="text" name="close_date" id="close_date" placeholder="마감 시간 선택" readonly required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>모집 인원 (본인 포함)<span class="required">*</span></label>
+                <select name="max_member" id="max_member" required>
+                    <option value="2">2명 (단란한 산책)</option>
+                    <option value="3">3명 (복작복작 산책)</option>
+                    <option value="4">4명 (동네 모임)</option>
+                    <option value="5">5명 이상 (대규모 정모)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="mt-3 text-end">
+                    <button type="button" class="btn-action" onclick="fetchMyDogInfo()">
+                        <i class="bi bi-dog"></i> 내 강아지 정보 불러오기
+                    </button>
+                </div>
+                <label>매칭 제목<span class="required">*</span></label>
+                <input type="text" name="title" id="title" required placeholder="예: 한강공원에서 같이 뛰어놀 친구 구해요!">
+            </div>
+
+            <!-- 강아지 정보 표시 영역 -->
+            <div id="dog_info_preview" class="my-dog-box"></div>
+            <div class="form-group">
+                <label>상세 설명<span class="required">*</span></label>
+                <textarea name="content" id="content" rows="6" required placeholder="산책 경로, 우리 강아지의 특징(사회성 등), 준비물 등을 자세히 적어주시면 매칭 확률이 높아져요!"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>반려견 사진 첨부<span class="required">*</span></label>
+                <input type="file" name="files" id="files" multiple accept="image/*" required>
+                <span class="detail-hint">※ 최대 5장까지 업로드 가능합니다. (산책할 강아지 사진을 올려주세요)</span>
+            </div>
+
+            <div class="form-group">
+                <label>만날 장소<span class="required">*</span></label>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <input type="text" id="mplace" name="mplace" placeholder="주소 검색 버튼을 눌러주세요." readonly required>
+                    <button type="button" class="btn-action" style="white-space: nowrap; padding: 0 20px;" onclick="execDaumPostcode()">주소 검색</button>
+                </div>
+                <input type="text" id="mplace_detail" name="mplace_detail" placeholder="상세 장소 (예: 공원 입구 매점 앞 벤치)">
+                <span class="detail-hint">※ 정확한 주소를 입력해야 친구들이 찾아오기 쉬워요!</span>
+            </div>
+
+            <button type="submit" class="btn-submit">등록하기</button>
+        </form>
+    </div>
+
+<script th:inline="javascript">
+    // 공통으로 사용할 귀여운 Swal 설정
+    const PawsAlert = Swal.mixin({
+        confirmButtonColor: '#ff6b81',
+        cancelButtonColor: '#ffccd5',
+        borderRadius: '20px',
+        customClass: {
+            popup: 'rounded-corners',
+            confirmButton: 'cute-btn',
+            cancelButton: 'cute-btn-cancel'
+        }
+    });
+
+    window.onload = function() {
+        const fpConfig = { 
+            locale: "ko", 
+            enableTime: true, 
+            dateFormat: "Y-m-d H:i", 
+            minDate: "today", 
+            time_24hr: true,
+            disableMobile: "true"
+        };
+        flatpickr("#mdate", fpConfig);
+        flatpickr("#close_date", fpConfig);
+    };
+
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var addr = data.address;
+                document.getElementById("mplace").value = addr;
+                document.getElementById("mplace_detail").focus();
+            }
+        }).open();
+    }
+
+    // 3. 내 강아지 정보 API 호출 (귀여운 모달 버전)
+    function fetchMyDogInfo() {
+        fetch('/match_post/get_dog_info')
+        .then(r => r.json())
+        .then(d => {
+            if(d && !d.error) {
+                document.getElementById('dmti_input').value = d.dmti;
+                
+                const contentArea = document.getElementById('content');
+                const dogInfoText = `[반려견 정보]\n- 이름: ${d.name}\n- 견종: ${d.breed} (${d.age}살)\n- 성향(DMTI): ${d.dmti}\n--------------------------\n`;
+                
+                if(!contentArea.value.includes(`[반려견 정보]`)) {
+                    contentArea.value = dogInfoText + contentArea.value;
+                }
+
+                const preview = document.getElementById('dog_info_preview');
+                preview.innerHTML = `<span style="font-size:18px;">🐶</span> <strong>${d.name}</strong>(${d.breed})의 정보가 성공적으로 입력되었습니다!`;
+                preview.style.display = 'block';
+                
+                document.getElementById('title').value = `${d.name}랑 같이 산책할 친구 찾아요!`;
+                
+                PawsAlert.fire({
+                    title: '완료!',
+                    text: `${d.name}의 정보를 쏙 가져왔어요!`,
+                    iconHtml: '🐾',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                PawsAlert.fire({
+                    title: '이런! 멍멍이가 없어요',
+                    text: '매칭을 위해선 강아지 등록이 꼭 필요해요!',
+                    iconHtml: '🐕',
+                    showCancelButton: true,
+                    confirmButtonText: '지금 등록할래!',
+                    cancelButtonText: '나중에 할게'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.href = '/member/mypage'; 
+                    }
+                });
+            }
+        })
+        .catch(err => PawsAlert.fire('오류', '댕댕이 정보를 가져오다 넘어졌어요!', 'error'));
+    }
+
+    // 4. 유효성 검사 (입력 누락 시 귀여운 알림)
+    function validateForm() {
+        const fields = [
+            { id: 'cat_no', name: '산책 유형', msg: '어떤 산책인지 알려주세요!' },
+            { id: 'mdate', name: '산책 시간', msg: '언제 만날지 정해주세요!' },
+            { id: 'close_date', name: '마감 시간', msg: '언제까지 모집할까요?' },
+            { id: 'title', name: '매칭 제목', msg: '멋진 제목을 지어주세요!' },
+            { id: 'content', name: '상세 설명', msg: '강아지 소개를 조금만 더 해주세요!' },
+            { id: 'mplace', name: '만날 장소', msg: '어디서 만날까요?' }
+        ];
+
+        for (let field of fields) {
+            const val = document.getElementById(field.id).value.trim();
+            if (!val) {
+                PawsAlert.fire({
+                    title: '잠깐만요!',
+                    text: field.msg,
+                    iconHtml: '❓',
+                    confirmButtonText: '알겠어!'
+                }).then(() => {
+                    document.getElementById(field.id).focus();
+                });
+                return false;
+            }
+        }
+
+        const mdate = new Date(document.getElementById('mdate').value);
+        const closeDate = new Date(document.getElementById('close_date').value);
+        const now = new Date();
+
+        if (closeDate >= mdate) {
+            PawsAlert.fire({
+                title: '시간 확인!',
+                text: '모집 마감은 산책 전이어야 해요!',
+                iconHtml: '⏰'
+            });
+            return false;
+        }
+
+        const files = document.getElementById('files').files;
+        if (files.length === 0) {
+            PawsAlert.fire({
+                title: '사진 찰칵!',
+                text: '강아지 사진이 있어야 친구들이 좋아해요!',
+                iconHtml: '📸'
+            });
+            return false;
+        }
+
+        return true;
+    }
+</script>
+</div>
+</body>
+</html>

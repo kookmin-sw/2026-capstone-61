@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.chat.ChatDAOInter">
+
+  <!-- 채팅 저장 -->
+  <insert id="create"
+          parameterType="dev.mvc.chat.ChatVO">
+
+    INSERT INTO chat(
+      chatno,
+      memberno,
+      dogno,
+      question,
+      answer,
+      rdate
+    )
+    VALUES(
+      chat_seq.nextval,
+      #{memberno},
+      #{dogno},
+      #{question},
+      #{answer},
+      SYSDATE
+    )
+
+  </insert>
+
+  <!-- 최근 대화 -->
+  <select id="recentList"
+          parameterType="int"
+          resultType="dev.mvc.chat.ChatVO">
+
+    SELECT *
+    FROM (
+      SELECT
+        chatno,
+        memberno,
+        dogno,
+        question,
+        answer,
+        rdate
+      FROM chat
+      WHERE memberno = #{memberno}
+      ORDER BY chatno DESC
+    )
+    WHERE ROWNUM &lt;= 10
+
+  </select>
+
+</mapper>

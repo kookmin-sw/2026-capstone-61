@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.community.CommunityDAOInter">
+
+  <insert id="create" parameterType="dev.mvc.community.CommunityVO">
+    <selectKey keyProperty="communityno" resultType="int" order="BEFORE">
+      SELECT community_seq.nextval FROM dual
+    </selectKey>
+
+    INSERT INTO community(communityno, cat_no, memberno, nickname, cateno, title, content, passwd, word, rdate)
+    VALUES(#{communityno}, #{cat_no}, #{memberno}, #{nickname}, #{cateno}, #{title}, #{content}, #{passwd}, #{word, jdbcType=VARCHAR}, sysdate)
+  </insert>
+<select id="list_by_community_search_paging"
+        resultType="dev.mvc.community.CommunityVO"
+        parameterType="HashMap">
+
+    SELECT communityno, cat_no, memberno,
+           nickname, cateno, title,
+           viewcnt, replycnt, rdate, thumb
+    FROM (
+        SELECT communityno, cat_no, memberno,
+               nickname, cateno, title,
+               viewcnt, replycnt, rdate,
+               thumb,
+               row_number() OVER (ORDER BY communityno DESC) as r
+        FROM (
+            SELECT c.communityno,
+                   c.cat_no,
+                   c.memberno,
+                   c.nickname,
+                   c.cateno,
+                   c.title,
+                   c.viewcnt,
+                   c.replycnt,
+                   c.rdate,
+
+                   (
+                       SELECT fupname
+                       FROM attachfile
+                       WHERE communityno = c.communityno
+                         AND rownum = 1
+                   ) as thumb
+
+            FROM community c
+
+            <where>
+                AND c.cat_no = #{cat_no}
+
+                <if test="cateno > 0">
+                    AND c.cateno = #{cateno}
+                </if>
+
+                <if test="word != null and word != ''">
+                    AND (
+                        c.title LIKE '%' || #{word} || '%'
+                        OR c.content LIKE '%' || #{word} || '%'
+                        OR c.word LIKE '%' || #{word} || '%'
+                    )
+                </if>
+            </where>
+        )
+    )
+    WHERE r &gt;= #{start_num}
+      AND r &lt;= #{end_num}
+
+</select>
+
+<select id="search_count" resultType="int" parameterType="HashMap">
+  SELECT COUNT(*) as cnt
+  FROM community
+  <where>
+    <if test="memberno != null">
+      AND memberno = #{memberno, jdbcType=INTEGER}
+    </if>
+
+    <if test="cat_no != null">
+      AND cat_no = #{cat_no, jdbcType=INTEGER}
+    </if>
+
+    <if test="cateno != null and cateno > 0">
+      AND cateno = #{cateno, jdbcType=INTEGER}
+    </if>
+
+    <if test="word != null and word != ''">
+      AND (title LIKE '%' || #{word} || '%' 
+           OR content LIKE '%' || #{word} || '%' 
+           OR word LIKE '%' || #{word} || '%')
+    </if>
+  </where>
+</select>
+
+  <select id="read" resultType="dev.mvc.community.CommunityVO" parameterType="int">
+    SELECT communityno, cat_no, memberno, nickname, cateno, title, content, viewcnt, recom, replycnt, rdate, word
+    FROM community
+    WHERE communityno = #{communityno}
+  </select>
+
+  <delete id="delete" parameterType="int">
+    DELETE FROM community WHERE communityno = #{communityno}
+  </delete>
+	<update id="update" parameterType="dev.mvc.community.CommunityVO">
+	  UPDATE community
+	  SET title = #{title},
+	      content = #{content},
+	      word = #{word},
+	      cateno = #{cateno}
+	  WHERE communityno = #{communityno}
+	</update>
+	
+  <update id="update_viewcnt" parameterType="int">
+    UPDATE community SET viewcnt = viewcnt + 1 WHERE communityno = #{communityno}
+  </update>
+  
+<update id="updateReplycnt" parameterType="map">
+  UPDATE community
+  SET replycnt = replycnt ${mode} 1
+  WHERE communityno = #{communityno}
+</update>
+</mapper>

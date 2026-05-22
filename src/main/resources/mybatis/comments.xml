@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.comments.CommentsDAOInter">
+
+  <!-- 댓글 생성 -->
+<insert id="create" parameterType="dev.mvc.comments.CommentsVO">
+  INSERT INTO comments(comment_no, communityno, memberno, nickname, content, parent_no, depth, rdate, is_deleted)
+  VALUES(
+    comments_seq.nextval, 
+    #{communityno}, 
+    #{memberno}, 
+    #{nickname}, 
+    #{content}, 
+    <choose>
+      <when test="parent_no == 0">NULL</when>
+      <otherwise>#{parent_no}</otherwise>
+    </choose>,
+    #{depth}, 
+    SYSDATE, 
+    'N'
+  )
+</insert>
+
+
+  <!-- 댓글 1건 조회 -->
+  <select id="read" resultType="dev.mvc.comments.CommentsVO" parameterType="int">
+    SELECT
+      comment_no,
+      communityno,
+      memberno,
+      nickname,
+      content,
+      parent_no,
+      depth,
+      rdate,
+      is_deleted
+    FROM comments
+    WHERE comment_no = #{comment_no}
+  </select>
+
+
+  <!-- 게시글 댓글 목록 (대댓글 포함) -->
+  <select id="list_by_community" resultType="dev.mvc.comments.CommentsVO" parameterType="int">
+    SELECT
+      comment_no,
+      communityno,
+      memberno,
+      nickname,
+      content,
+      parent_no,
+      depth,
+      rdate,
+      is_deleted
+    FROM comments
+    WHERE communityno = #{communityno}
+      AND is_deleted = 'N'
+    ORDER BY NVL(parent_no, comment_no), comment_no
+  </select>
+
+
+  <!-- 댓글 개수 -->
+  <select id="count_by_community" resultType="int" parameterType="int">
+    SELECT COUNT(*)
+    FROM comments
+    WHERE communityno = #{communityno}
+      AND is_deleted = 'N'
+  </select>
+
+
+  <!-- 댓글 수정 -->
+  <update id="update" parameterType="dev.mvc.comments.CommentsVO">
+    UPDATE comments
+    SET content = #{content}
+    WHERE comment_no = #{comment_no}
+  </update>
+
+
+  <!-- 댓글 삭제 (소프트 삭제) -->
+  <update id="delete" parameterType="int">
+    UPDATE comments
+    SET is_deleted = 'Y'
+    WHERE comment_no = #{comment_no}
+  </update>
+
+</mapper>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.market.MarketDAOInter">
+
+    <insert id="insertProduct" parameterType="dev.mvc.market.MarketVO">
+        <selectKey keyProperty="productId" resultType="int" order="BEFORE">
+            SELECT SEQ_MARKET.NEXTVAL FROM DUAL
+        </selectKey>
+        
+        INSERT INTO market (
+            PRODUCT_ID, SELLER_ID, CLASS_NAME, PRODUCT_NAME, 
+            PRICE, DELIVERY_FEE, STOCK, PRODUCT_DESC, PRODUCT_STATUS, REG_DATE
+        ) VALUES (
+            #{productId}, 
+            #{sellerId}, 
+            #{className}, 
+            #{productName}, 
+            #{price}, 
+            #{deliveryFee}, 
+            #{stock}, 
+            #{productDesc, jdbcType=CLOB}, 
+            'ON_SALE', 
+            SYSDATE
+        )
+    </insert>
+
+    <select id="getProductList" resultType="dev.mvc.market.MarketVO">
+        SELECT 
+            m.PRODUCT_ID as productId,
+            m.SELLER_ID as sellerId,
+            m.CLASS_NAME as className,
+            m.PRODUCT_NAME as productName,
+            m.PRICE as price,
+            m.DELIVERY_FEE as deliveryFee,
+            m.STOCK as stock,
+            m.PRODUCT_STATUS as productStatus,
+            m.REG_DATE as regDate,
+            (SELECT file_name FROM product_image 
+             WHERE product_id = m.product_id AND is_main = 'Y' AND ROWNUM = 1) as thumbnailName
+        FROM market m
+        ORDER BY m.PRODUCT_ID DESC
+    </select>
+
+    <select id="getProductListByCategory" resultType="dev.mvc.market.MarketVO" parameterType="String">
+        SELECT 
+            m.PRODUCT_ID as productId,
+            m.SELLER_ID as sellerId,
+            m.CLASS_NAME as className,
+            m.PRODUCT_NAME as productName,
+            m.PRICE as price,
+            m.DELIVERY_FEE as deliveryFee,
+            m.STOCK as stock,
+            m.PRODUCT_STATUS as productStatus,
+            m.REG_DATE as regDate,
+            (SELECT file_name FROM product_image 
+             WHERE product_id = m.product_id AND is_main = 'Y' AND ROWNUM = 1) as thumbnailName
+        FROM market m
+        WHERE m.CLASS_NAME = #{className}
+        ORDER BY m.PRODUCT_ID DESC
+    </select>
+
+    <select id="getProductListSearch" resultType="dev.mvc.market.MarketVO" parameterType="Map">
+        SELECT 
+            m.PRODUCT_ID as productId,
+            m.SELLER_ID as sellerId,
+            m.CLASS_NAME as className,
+            m.PRODUCT_NAME as productName,
+            m.PRICE as price,
+            m.DELIVERY_FEE as deliveryFee,
+            m.STOCK as stock,
+            m.PRODUCT_STATUS as productStatus,
+            m.REG_DATE as regDate,
+            (SELECT file_name FROM product_image 
+             WHERE product_id = m.product_id AND is_main = 'Y' AND ROWNUM = 1) as thumbnailName
+        FROM market m
+        <where>
+            <if test="className != null and className != ''">
+                AND m.CLASS_NAME = #{className}
+            </if>
+            <if test="word != null and word != ''">
+                AND (m.PRODUCT_NAME LIKE '%' || #{word} || '%' OR m.PRODUCT_DESC LIKE '%' || #{word} || '%')
+            </if>
+        </where>
+        ORDER BY m.PRODUCT_ID DESC
+    </select>
+
+    <select id="getProductDetail" resultType="dev.mvc.market.MarketVO" parameterType="int">
+        SELECT 
+            PRODUCT_ID as productId,
+            SELLER_ID as sellerId,
+            CLASS_NAME as className,
+            PRODUCT_NAME as productName,
+            PRICE as price,
+            DELIVERY_FEE as deliveryFee,
+            STOCK as stock,
+            PRODUCT_DESC as productDesc,
+            PRODUCT_STATUS as productStatus,
+            REG_DATE as regDate
+        FROM market
+        WHERE PRODUCT_ID = #{productId}
+    </select>
+
+    <update id="updateProduct" parameterType="dev.mvc.market.MarketVO">
+        UPDATE market 
+        SET CLASS_NAME = #{className},
+            PRODUCT_NAME = #{productName},
+            PRICE = #{price},
+            DELIVERY_FEE = #{deliveryFee},
+            STOCK = #{stock},
+            PRODUCT_DESC = #{productDesc, jdbcType=CLOB}
+        WHERE PRODUCT_ID = #{productId}
+    </update>
+
+    <delete id="deleteProduct" parameterType="int">
+        DELETE FROM market
+        WHERE PRODUCT_ID = #{productId}
+    </delete>
+
+    <insert id="insertOrder" parameterType="dev.mvc.market_order.MarketOrderVO">
+        <selectKey keyProperty="orderId" resultType="int" order="BEFORE">
+            SELECT SEQ_MARKET_ORDER.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO market_order (
+            ORDER_ID, MEMBERNO, USER_ID, TOTAL_PRICE, PAYMENT_METHOD,
+            RECEIVER_NAME, RECEIVER_TEL, ZIPCODE, ADDRESS1, ADDRESS2, ORDER_DATE
+        ) VALUES (
+            #{orderId}, #{memberno}, #{userId}, #{totalPrice}, #{paymentMethod},
+            #{receiverName}, #{receiverTel}, #{zipcode}, #{address1}, #{address2}, SYSDATE
+        )
+    </insert>
+
+    <insert id="insertOrderItem" parameterType="dev.mvc.market_order_item.MarketOrderItemVO">
+        INSERT INTO market_order_item (
+            ORDER_ITEM_ID, ORDER_ID, PRODUCT_ID, QUANTITY, PRICE, TOTAL_PRICE
+        ) VALUES (
+            SEQ_MARKET_ORDER_ITEM.NEXTVAL, #{orderId}, #{productId}, #{quantity}, #{price}, #{totalPrice}
+        )
+    </insert>
+
+    <update id="decreaseStock" parameterType="Map">
+        UPDATE market
+        SET STOCK = STOCK - #{quantity}
+        WHERE PRODUCT_ID = #{productId} 
+          AND STOCK >= #{quantity}
+    </update>
+
+    <update id="updateSoldOut" parameterType="int">
+        UPDATE market
+        SET PRODUCT_STATUS = 'SOLD_OUT'
+        WHERE PRODUCT_ID = #{productId} AND STOCK = 0
+    </update>
+
+</mapper>

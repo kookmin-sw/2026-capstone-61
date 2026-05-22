@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="navbarFragment">
+
+    <!-- chat_mode=Y(iframe 내부)에서는 navbar/플로팅 채팅 숨김 -->
+    <th:block th:with="embedMode=${param.chat_mode != null}">
+
+        <!-- 상단 내비게이션 -->
+        <div class="top_menu"
+             th:if="${!embedMode}"
+             style="padding: 10px 15px;
+                    background: #fff;
+                    border-bottom: 1px solid #eee;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1000;">
+
+            <div class="top_navigation"
+                 style="display:flex;
+                        align-items:center;
+                        justify-content: space-between;">
+
+                <!-- 왼쪽: 로고/홈 -->
+                <div style="display:flex; align-items:center;">
+                    <a href="/"
+                       aria-label="홈버튼"
+                       style="text-decoration:none; font-size:24px;">
+                        🏠
+                    </a>
+                </div>
+
+                <!-- 오른쪽: 채팅 버튼 + 메뉴 버튼 -->
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <!-- [수정] 알림 배지가 포함된 채팅 버튼 (상대 좌표 relative 부여) -->
+                    <button id="chatToggle"
+                            th:if="${session.memberno != null}"
+                            type="button"
+                            style="border:none;
+                                   background:#f0f2ff;
+                                   width: 40px;
+                                   height: 40px;
+                                   border-radius: 12px;
+                                   display:flex;
+                                   align-items:center;
+                                   justify-content:center;
+                                   font-size: 20px;
+                                   cursor:pointer;
+                                   transition: all 0.2s;
+                                   position: relative;"> <!-- 내부 배지 절댓값 배치를 위해 추가 -->
+                        💬
+                        <!-- [추가] 읽지 않은 메시지 수 배지 (기본값은 숨김 처리) -->
+                        <span id="chatBadge" 
+                              style="display: none; 
+                                     position: absolute; 
+                                     top: -4px; 
+                                     right: -4px; 
+                                     background-color: #ff3b30; 
+                                     color: white; 
+                                     font-size: 11px; 
+                                     font-weight: bold; 
+                                     min-width: 18px; 
+                                     height: 18px; 
+                                     border-radius: 9px; 
+                                     padding: 0 5px; 
+                                     align-items: center; 
+                                     justify-content: center;
+                                     border: 2px solid #fff;
+                                     box-shadow: 0 2px 5px rgba(0,0,0,0.2);">0</span>
+                    </button>
+
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasDarkNavbar"
+                            style="border:none;
+                                   background:none;
+                                   font-size:28px;
+                                   color:#ff6b81;
+                                   padding: 0;">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 사이드바 메뉴 (Offcanvas) -->
+            <div class="offcanvas offcanvas-end"
+                 tabindex="-1"
+                 id="offcanvasDarkNavbar"
+                 style="width:280px;">
+                <div class="offcanvas-header" style="background:#ff6b81; color:white;">
+                    <h5 class="offcanvas-title">전체 메뉴</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body" style="background:#fff; display:flex; flex-direction:column;">
+                    <!-- 유저 정보 섹션 -->
+                    <div th:if="${session.memberno != null}"
+                         style="padding:15px; background:#f8f9fa; border-radius:12px; margin-bottom:20px;">
+                        <p style="font-size:14px; margin-bottom:8px; font-weight:bold; color:#555;">반가워요! 멍멍 🐾</p>
+                        <div style="display:flex; gap:8px;">
+                            <a th:href="@{/mypage(memberno=${session.memberno})}" class="btn btn-sm btn-white" style="flex:1; border:1px solid #ddd; background:#fff; font-size:12px;">마이페이지</a>
+                            <a th:href="@{|/member/read?memberno=${session.memberno}|}" class="btn btn-sm btn-white" style="flex:1; border:1px solid #ddd; background:#fff; font-size:12px;">내 정보</a>
+                        </div>
+                    </div>
+
+                    <!-- 메뉴 리스트 -->
+                    <ul class="navbar-nav pe-3">
+                        <li class="nav-item"><a class="nav-link text-dark" href="/breed/list_by_cat_no?cat_no=1">📖 강아지 백과사전</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark" href="/dog_dbti/create.do">🐾 DBTI 검사</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark" href="/match_post/list_all">🤝 산책 매칭</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark" href="/breed/gallery">🖼️ 견종 갤러리</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark" href="/community/list?cat_no=2">💬 커뮤니티</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark" href="/market/list.do?cat_no=3">🛍️ 마켓</a></li>
+                    </ul>
+
+                    <!-- 관리자 메뉴 -->
+                    <div th:if="${session.grade == 'admin'}" class="mt-4">
+                        <p class="text-danger" style="font-weight:bold; font-size:13px; border-bottom:2px solid #ff6b81; padding-bottom:5px; margin-bottom:10px;">🛠️ 관리자 센터</p>
+                        <ul class="navbar-nav" style="font-size:13px;">
+                            <li class="nav-item"><a class="nav-link py-1" href="/member/list">회원 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" href="/category/list_search?now_page=1">📂 카테고리 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" href="/market/list.do">📦 상품 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" th:href="@{/market_order/admin_list.do}">주문/배송 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" href="/market/review_admin">💬 리뷰 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" href="/breed/list_by_cat_no?cat_no=1">🐕 견종 상세 관리</a></li>
+                            <li class="nav-item"><a class="nav-link py-1" href="/community/list?cat_no=1">📝 커뮤니티 관리</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- 로그아웃/로그인 -->
+                    <div style="margin-top:auto; padding-top:20px; border-top:1px dashed #eee;">
+                        <a th:if="${session.memberno != null}" href="/member/logout" class="auth-btn logout">로그아웃</a>
+                        <a th:if="${session.memberno == null}" href="/member/login" class="auth-btn login">로그인 하러가기 🐾</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 채팅 팝업 (모바일 최적화 버전) -->
+        <div id="chatPopupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9998;"></div>
+        
+        <!-- [채팅창] -->
+        <div id="chatPopup"
+             style="display:none;
+                    position:fixed;
+                    bottom:20px;
+                    right:20px;
+                    width:380px;
+                    height:600px;
+                    background:#fff;
+                    border-radius:24px;
+                    overflow:hidden;
+                    box-shadow:0 20px 50px rgba(0,0,0,0.2);
+                    z-index:9999; 
+                    border:1px solid #eee;">
+
+            <div class="chat-header" 
+                 style="height:50px;
+                        background:linear-gradient(135deg,#5f6cff,#7f8cff);
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        padding:0 15px;
+                        color:#fff;">
+                <div id="chatTitle" style="font-size:14px; font-weight:700;">메신저</div>
+                <button id="closeChat" type="button" style="border:none; background:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+
+            <iframe src="/messenger/list.do?chat_mode=Y"
+                    style="width:100%;
+                           height:calc(100% - 50px);
+                           border:none;
+                           background:#fff;">
+            </iframe>
+        </div>
+
+        <style>
+            /* 공통 스타일 */
+            .nav-link:hover { color:#ff6b81 !important; transform:translateX(5px); transition:0.2s; }
+            .auth-btn { display:block; width:100%; padding:12px; text-align:center; text-decoration:none; border-radius:12px; font-size:14px; font-weight:bold; }
+            .auth-btn.logout { background:#f8f9fa; color:#999; }
+            .auth-btn.login { background:#ff6b81; color:#fff; }
+
+            #chatToggle:active { transform: scale(0.9); background: #e0e4ff; }
+
+            /* 모바일 최적화 (768px 이하) */
+            @media (max-width: 768px) {
+                #chatPopup {
+                    bottom: 0 !important;
+                    right: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-height: 100% !important;
+                    border-radius: 0 !important;
+                }
+                
+                .chat-header {
+                    height: 70px !important;
+                    padding-top: env(safe-area-inset-top);
+                }
+            }
+
+            /* 애니메이션 효과 */
+            @keyframes slideUp {
+                from { transform: translateY(100px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            .show-chat { animation: slideUp 0.3s ease forwards; }
+        </style>
+
+		<script>	
+            (function () {
+                const toggleBtn = document.querySelector("#chatToggle");
+                const popup = document.querySelector("#chatPopup");
+                const closeBtn = document.querySelector("#closeChat");
+                const chatTitle = document.querySelector("#chatTitle");
+                const overlay = document.querySelector("#chatPopupOverlay");
+                const badge = document.querySelector("#chatBadge");
+
+                if (!toggleBtn || !popup || !closeBtn) return;
+
+                // 배지 상태를 변경하는 핵심 제어 함수
+                window.updateChatBadge = function(count) {
+                    if (!badge) return;
+                    const num = parseInt(count, 10) || 0;
+                    if (num > 0) {
+                        badge.innerText = num > 99 ? '99+' : num;
+                        badge.style.display = "flex"; 
+                    } else {
+                        badge.style.display = "none"; // 0 이하가 되면 완벽하게 숨김
+                    }
+                };
+
+                const openPopup = () => {
+                    popup.style.display = "block";
+                    popup.classList.add("show-chat");
+                    
+                    // [수정] 단순 오픈 시에는 0으로 강제 리셋하지 않고 대화방 읽음 신호를 유지하도록 수정
+                    
+                    if (window.innerWidth <= 768) {
+                        document.body.style.overflow = "hidden";
+                        overlay.style.display = "none";
+                    } else {
+                        overlay.style.display = "block";
+                        document.body.style.overflow = "";
+                    }
+                };
+
+                const closePopup = () => {
+                    popup.style.display = "none";
+                    popup.classList.remove("show-chat");
+                    overlay.style.display = "none";
+                    document.body.style.overflow = "";
+                };
+
+                toggleBtn.addEventListener("click", () => {
+                    const isHidden = window.getComputedStyle(popup).display === "none";
+                    if (isHidden) { openPopup(); } else { closePopup(); }
+                });
+
+                closeBtn.addEventListener("click", closePopup);
+                if (overlay) overlay.addEventListener("click", closePopup);
+
+                window.addEventListener("keydown", (e) => { 
+                    if (e.key === "Escape") closePopup(); 
+                });
+
+                // 자식 iframe들과 통신하여 수신받는 이벤트 바인딩 파트
+                window.addEventListener("message", (e) => {
+                    try {
+                        if (e && e.data) {
+                            if (e.data.type === "UPDATE_CHAT_TITLE") {
+                                if (chatTitle) chatTitle.innerText = e.data.title || "메신저";
+                            }
+                            
+                            // list.html과 room.html에서 전송한 진짜 실시간 개수가 반영되는 곳
+                            if (e.data.type === "UPDATE_UNREAD_COUNT") {
+                                updateChatBadge(e.data.count);
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Chat script message error:", error);
+                    }
+                });
+
+                // [수정] 최초 로드 시 무작정 '3'을 그리게 하던 더미 코드를 지우고 기본 0(숨김)으로 세팅
+                updateChatBadge(0); 
+
+            })();
+        </script>
+
+    </th:block>
+</div>
+</html>

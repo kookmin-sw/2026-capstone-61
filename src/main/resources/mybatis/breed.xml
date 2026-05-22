@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="dev.mvc.breed.BreedDAOInter">
+
+  <insert id="create" parameterType="dev.mvc.breed.BreedVO">
+    <selectKey keyProperty="breedno" resultType="int" order="BEFORE">
+      SELECT breed_seq.nextval FROM dual
+    </selectKey>
+    
+    INSERT INTO breed(breedno, cat_no, memberno, breed_name, title, content, 
+                     origin, kg, height, size_type, rdate)
+    VALUES(#{breedno}, #{cat_no}, #{memberno}, #{breed_name}, #{title}, #{content}, 
+           #{origin}, #{kg}, #{height}, #{size_type}, sysdate)
+  </insert>
+
+  <select id="list_all" resultType="dev.mvc.breed.BreedVO">
+    SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, 
+           origin, kg, height, size_type, rdate
+    FROM breed
+    ORDER BY breedno DESC
+  </select>
+  
+  <select id="list_by_cat_no" resultType="dev.mvc.breed.BreedVO" parameterType="int">
+    SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, rdate,
+           origin, kg, height, size_type
+    FROM breed 
+    WHERE cat_no = #{cat_no}
+    ORDER BY breedno DESC
+  </select> 
+  
+<select id="read" resultType="dev.mvc.breed.BreedVO" parameterType="int">
+    SELECT breedno, cat_no, memberno, breed_name, title, content, 
+           recom, viewcnt, rdate, origin, kg, height, size_type
+    FROM breed
+    WHERE breedno = #{breedno}
+  </select>
+  
+  <select id="list_by_cat_no_search" resultType="dev.mvc.breed.BreedVO" parameterType="HashMap">
+    SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, rdate,
+           origin, kg, height, size_type
+    FROM breed
+    <choose>
+      <when test="word == null or word == ''">
+        WHERE cat_no=#{cat_no}
+      </when>
+      <otherwise>
+        WHERE cat_no=#{cat_no} AND (UPPER(breed_name) LIKE '%' || UPPER(#{word}) || '%' 
+                                 OR UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                 OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%')
+      </otherwise>
+    </choose>
+    ORDER BY breedno DESC   
+  </select>
+   
+  <select id="list_by_cat_no_search_count" resultType="int" parameterType="HashMap">
+    SELECT COUNT(*) as cnt
+    FROM breed
+    <choose>
+      <when test="word == null or word == ''">
+        WHERE cat_no=#{cat_no}
+      </when>
+      <otherwise>
+        WHERE cat_no=#{cat_no} AND (UPPER(breed_name) LIKE '%' || UPPER(#{word}) || '%' 
+                                 OR UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                 OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%')
+      </otherwise>
+    </choose>
+  </select>    
+
+  <select id="list_by_cat_no_search_paging" resultType="dev.mvc.breed.BreedVO" parameterType="HashMap">
+    SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, rdate, 
+            origin, kg, height, size_type, r
+    FROM (
+           SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, rdate, 
+                  origin, kg, height, size_type, rownum as r
+           FROM (
+                  SELECT breedno, cat_no, memberno, breed_name, title, content, recom, viewcnt, rdate, 
+                         origin, kg, height, size_type
+                  FROM breed
+                  <choose>
+                    <when test="word == null or word == ''">
+                      WHERE cat_no=#{cat_no}
+                    </when>
+                    <otherwise>
+                      WHERE cat_no=#{cat_no} AND (UPPER(breed_name) LIKE '%' || UPPER(#{word}) || '%' 
+                                               OR UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                               OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%')
+                    </otherwise>
+                  </choose>
+                  ORDER BY breedno DESC
+           )
+    )
+    WHERE <![CDATA[ r >= #{start_num} AND r <= #{end_num} ]]>
+  </select>
+
+  <update id="update_text" parameterType="dev.mvc.breed.BreedVO">
+    UPDATE breed
+    SET breed_name=#{breed_name}, title=#{title}, content=#{content}, 
+        origin=#{origin}, kg=#{kg}, height=#{height}, size_type=#{size_type}
+    WHERE breedno = #{breedno}
+  </update>
+
+
+
+  <delete id="delete" parameterType="int">
+    DELETE FROM breed
+    WHERE breedno=#{breedno}
+  </delete>
+
+  <update id="update_viewcnt" parameterType="int">
+    UPDATE breed SET viewcnt = viewcnt + 1 WHERE breedno = #{breedno}
+  </update>
+  
+  <!-- 추천수 -->
+  <update id="recom" parameterType="int">
+    UPDATE breed
+    SET recom = recom + 1
+    WHERE breedno = #{breedno}
+  </update>
+  
+  <!-- 추천수 감소 -->
+  <update id="recom_cancel" parameterType="int">
+    UPDATE breed
+    SET recom = recom - 1
+    WHERE breedno = #{breedno}
+  </update>
+
+  <select id="count_by_cat_no" resultType="int" parameterType="int">
+    SELECT COUNT(*) as cnt FROM breed WHERE cat_no=#{cat_no}
+  </select>
+
+  <select id="count_by_memberno" resultType="int" parameterType="int">
+    SELECT COUNT(*) as cnt FROM breed WHERE memberno=#{memberno}
+  </select>
+  <!-- chatbot에 보내기-->
+<select id="readByName" resultType="dev.mvc.breed.BreedVO" parameterType="String">
+  SELECT breedno, cat_no, breed_name, content, origin, kg, height, size_type
+  FROM breed
+  WHERE breed_name = #{breed_name}
+</select>
+<select id="count_all"
+        resultType="int">
+
+  SELECT COUNT(*)
+  FROM breed
+
+</select>
+</mapper>

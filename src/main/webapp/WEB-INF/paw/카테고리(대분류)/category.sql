@@ -1,0 +1,63 @@
+-- 1. 기존 테이블 및 시퀀스 삭제 (초기화용)
+DROP TABLE category CASCADE CONSTRAINTS;
+DROP SEQUENCE CATEGORY_SEQ;
+
+-- 2. CATEGORY 테이블 생성
+CREATE TABLE category (
+    CAT_NO      NUMBER PRIMARY KEY,                -- 카테고리 고유 번호 (PK)
+    CAT_NAME    VARCHAR2(50) NOT NULL,             -- 메뉴 표시 이름 (UI용: 강아지 사전, 쇼핑 등)
+    CAT_CODE    VARCHAR2(50) NOT NULL UNIQUE,      -- 내부 코드 (개발용: DOG_DICT, SHOP_01 등)
+    CAT_TYPE    VARCHAR2(20) NOT NULL,             -- 처리 유형 (분기 처리용)
+    SEQNO       NUMBER(5) DEFAULT 0 NOT NULL,      -- 출력 순서 (낮은 번호 우선)
+    VISIBLE     CHAR(1) DEFAULT 'Y' NOT NULL,      -- 출력 여부 (Y/N)
+
+    -- 처리 유형 제약 조건: MAP(지도), USER(회원) 추가됨
+    CONSTRAINT CK_CATEGORY_TYPE 
+    CHECK (CAT_TYPE IN ('INFO', 'BOARD', 'SHOP', 'PAGE', 'MAP', 'USER')),
+
+    -- 출력 여부 제약 조건
+    CONSTRAINT CK_CATEGORY_VISIBLE
+    CHECK (VISIBLE IN ('Y', 'N'))
+);
+
+-- 3. 테이블 및 컬럼 코멘트 (유지보수용)
+COMMENT ON TABLE  category IS 'SmartDog 서비스의 전체 메뉴 및 카테고리 분류 테이블';
+
+COMMENT ON COLUMN CATEGORY.CAT_NO IS '카테고리 식별 번호 (PK)';
+COMMENT ON COLUMN CATEGORY.CAT_NAME IS '상단 네비게이션에 표시될 이름 (UI용)';
+COMMENT ON COLUMN CATEGORY.CAT_CODE IS '개발용 내부 코드 (변하지 않는 값)';
+COMMENT ON COLUMN CATEGORY.CAT_TYPE IS '메뉴 기능 유형 (INFO, BOARD, SHOP, PAGE, MAP, USER)';
+COMMENT ON COLUMN CATEGORY.SEQNO IS '메뉴 출력 우선순위 (낮은 번호 우선)';
+COMMENT ON COLUMN CATEGORY.VISIBLE IS '메뉴 화면 노출 여부 (Y/N)';
+
+-- 4. 시퀀스 생성 
+CREATE SEQUENCE CATEGORY_SEQ
+    START WITH 1
+    INCREMENT BY 1
+    MAXVALUE 9999999999
+    CACHE 2
+    NOCYCLE;
+
+-- 5. 기초 데이터 입력 (테스트용)
+-- 강아지 사전(INFO), 공지사항(BOARD), 쇼핑(SHOP), 회원(USER), 지도(MAP)
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '강아지 사전', 'DOG_INFO', 'INFO', 1, 'Y');
+
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '커뮤니티', 'COMMUNITY', 'BOARD', 2, 'Y');
+
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '쇼핑몰', 'DOG_SHOP', 'SHOP', 3, 'Y');
+
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '병원/산책로 지도', 'DOG_MAP', 'MAP', 4, 'Y');
+
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '마이페이지', 'MY_PAGE', 'USER', 5, 'Y');
+
+INSERT INTO category (CAT_NO, CAT_NAME, CAT_CODE, CAT_TYPE, SEQNO, VISIBLE)
+VALUES (CATEGORY_SEQ.NEXTVAL, '회원 관리', 'ADMIN_MEMBER', 'USER', 10, 'Y');
+
+COMMIT;
+
+COMMIT;

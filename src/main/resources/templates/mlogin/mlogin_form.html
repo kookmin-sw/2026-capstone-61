@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+<style>
+body {
+  font-family: 'Pretendard', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #fcefee, #f8f9fa);
+}
+
+/* 전체 */
+.form-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 70px auto 100px auto;
+}
+
+/* 카드 */
+.main-card {
+  width: 90%;
+  max-width: 650px;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+
+/* 제목 */
+.title-center {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #ff6b81;
+}
+
+/* 로그인 카드 */
+.login-card {
+  background: #fff;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 12px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+}
+
+/* 한 줄 */
+.login-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 5px 0;
+}
+
+.login-row span:first-child {
+  color: #888;
+}
+
+.login-row span:last-child {
+  color: #ff6b81;
+  font-weight: 500;
+}
+
+/* 구분선 */
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}
+
+/* 모바일 */
+@media (max-width: 600px) {
+  .login-row {
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+  <div class="form-wrapper">
+    <div class="main-card">
+
+      <!-- 제목 -->
+      <div class="title-center"
+           th:text="@{|${memberVO.mname} 님의 로그인 내역|}">
+      </div>
+
+      <!-- 로그인 내역 반복 -->
+      <div th:each="mloginVO : ${mloginVO}">
+
+        <div class="login-card">
+
+          <div class="login-row">
+            <span>로그인 시간</span>
+            <span th:text="${mloginVO.logindate}"></span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="login-row">
+            <span>IP 주소</span>
+            <span th:text="${mloginVO.ip}"></span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

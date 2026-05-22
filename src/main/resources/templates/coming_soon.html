@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <title>서비스 준비 중 - 댕댕이 월드</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+            <div class="text-center p-5 shadow-sm rounded-4" 
+                 style="background: white; max-width: 550px; border: 1px solid #f0f0f0;">
+                
+                <div class="mb-4">
+                    <span style="font-size: 80px;">🏗️</span>
+                </div>
+                
+                <h2 class="fw-bold mb-3" style="color: #333; letter-spacing: -1px;">
+                    현재 서비스를 <span style="color: #ff6b81;">구현 중</span>입니다
+                </h2>
+                
+                <p class="text-muted mb-4" style="font-size: 1rem; line-height: 1.8;">
+                    이용에 불편을 드려 죄송합니다.<br>
+                    더 완벽하고 귀여운 기능을 제공하기 위해 열심히 작업하고 있어요!<br>
+                    조금만 기다려 주시면 곧 멋진 모습으로 찾아뵙겠습니다. 🐾
+                </p>
+                
+                <hr style="border-top: 1px dashed #ddd; margin: 30px 0;">
+                
+                <div class="d-grid gap-3 d-sm-flex justify-content-center">
+                    <a href="/" class="btn btn-primary btn-lg px-4 border-0" 
+                       style="background: #ff6b81; border-radius: 12px; font-size: 0.95rem; font-weight: 600;">
+                        메인으로 돌아가기
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg px-4" 
+                            style="border-radius: 12px; font-size: 0.95rem; border-color: #ddd; color: #888;">
+                        이전 페이지로
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <small style="color: #ccc;">Coming Soon: Doggy World Project</small>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            /* 메인 레이아웃과 겹치지 않도록 여백 조정 */
+            body { background-color: #fafafa !important; }
+            
+            /* 버튼 호버 효과 */
+            .btn-primary:hover {
+                background: #ff4757 !important;
+                transform: translateY(-2px);
+                transition: all 0.2s;
+            }
+            .btn-outline-secondary:hover {
+                background: #f8f9fa !important;
+                color: #555 !important;
+            }
+        </style>
+    </div>
+</body>
+</html>

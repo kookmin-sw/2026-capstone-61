@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.chat_memory.ChatMemoryDAOInter">
+
+  <!-- ========================================================= -->
+  <!-- 🧠 기억 저장 -->
+  <!-- ========================================================= -->
+  <insert id="create"
+          parameterType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    INSERT INTO chat_memory(
+      memoryno,
+      memberno,
+      dogno,
+      source_chatno,
+      memory_type,
+      memory_text,
+      importance,
+      use_count,
+      last_used,
+      active_yn,
+      rdate
+    )
+
+    VALUES(
+      chat_memory_seq.nextval,
+      #{memberno},
+      #{dogno},
+      #{source_chatno},
+      #{memory_type},
+      #{memory_text},
+      #{importance},
+      #{use_count},
+      #{last_used},
+      #{active_yn},
+      SYSDATE
+    )
+
+  </insert>
+
+
+  <!-- ========================================================= -->
+  <!-- 🔍 기억 상세 조회 -->
+  <!-- ========================================================= -->
+  <select id="read"
+          parameterType="int"
+          resultType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    SELECT
+      memoryno,
+      memberno,
+      dogno,
+      source_chatno,
+      memory_type,
+      memory_text,
+      importance,
+      use_count,
+      last_used,
+      active_yn,
+      rdate
+
+    FROM chat_memory
+
+    WHERE memoryno = #{memoryno}
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 👤 회원별 기억 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_by_memberno"
+          parameterType="int"
+          resultType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    SELECT
+      memoryno,
+      memberno,
+      dogno,
+      source_chatno,
+      memory_type,
+      memory_text,
+      importance,
+      use_count,
+      last_used,
+      active_yn,
+      rdate
+
+    FROM chat_memory
+
+    WHERE memberno = #{memberno}
+
+    ORDER BY memoryno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 🐶 강아지별 기억 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_by_dogno"
+          parameterType="int"
+          resultType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    SELECT
+      memoryno,
+      memberno,
+      dogno,
+      source_chatno,
+      memory_type,
+      memory_text,
+      importance,
+      use_count,
+      last_used,
+      active_yn,
+      rdate
+
+    FROM chat_memory
+
+    WHERE dogno = #{dogno}
+
+    ORDER BY memoryno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 📋 전체 기억 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_all"
+          resultType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    SELECT
+      memoryno,
+      memberno,
+      dogno,
+      source_chatno,
+      memory_type,
+      memory_text,
+      importance,
+      use_count,
+      last_used,
+      active_yn,
+      rdate
+
+    FROM chat_memory
+
+    ORDER BY memoryno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- ✏ 기억 수정 -->
+  <!-- ========================================================= -->
+  <update id="update"
+          parameterType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    UPDATE chat_memory
+
+    SET
+      memory_type = #{memory_type},
+      memory_text = #{memory_text},
+      importance = #{importance},
+      active_yn = #{active_yn}
+
+    WHERE memoryno = #{memoryno}
+
+  </update>
+
+
+  <!-- ========================================================= -->
+  <!-- 📈 사용 횟수 증가 -->
+  <!-- ========================================================= -->
+  <update id="increase_use_count"
+          parameterType="int">
+
+    UPDATE chat_memory
+
+    SET use_count = use_count + 1
+
+    WHERE memoryno = #{memoryno}
+
+  </update>
+
+
+  <!-- ========================================================= -->
+  <!-- 🕒 마지막 사용일 업데이트 -->
+  <!-- ========================================================= -->
+  <update id="update_last_used"
+          parameterType="int">
+
+    UPDATE chat_memory
+
+    SET last_used = SYSDATE
+
+    WHERE memoryno = #{memoryno}
+
+  </update>
+
+
+  <!-- ========================================================= -->
+  <!-- 🔄 활성 여부 변경 -->
+  <!-- ========================================================= -->
+  <update id="update_active_yn"
+          parameterType="dev.mvc.chat_memory.ChatMemoryVO">
+
+    UPDATE chat_memory
+
+    SET active_yn = #{active_yn}
+
+    WHERE memoryno = #{memoryno}
+
+  </update>
+
+
+  <!-- ========================================================= -->
+  <!-- 🗑 기억 삭제 -->
+  <!-- ========================================================= -->
+  <delete id="delete"
+          parameterType="int">
+
+    DELETE FROM chat_memory
+
+    WHERE memoryno = #{memoryno}
+
+  </delete>
+
+</mapper>

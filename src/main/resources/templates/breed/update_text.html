@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Paws | 정보 수정</title>
+  <style>
+    body { background-color: #f8f9fa; font-family: 'Pretendard', sans-serif; }
+
+    .update-card { 
+      background: #fff; border-radius: 25px; padding: 40px; 
+      box-shadow: 0 15px 35px rgba(255, 182, 193, 0.2); 
+      margin: 70px auto 100px auto; max-width: 750px;
+      border: none;
+    }
+
+    .update-title { 
+      color: #ff6b81; font-weight: 800; font-size: 28px; 
+      margin-bottom: 30px; text-align: center;
+    }
+
+    /* 입력 필드 스타일 고도화 */
+    .form-group label {
+      font-weight: 700; color: #555; font-size: 15px;
+      margin-bottom: 8px; display: block; margin-left: 5px;
+    }
+
+    .form-control {
+      border-radius: 15px; border: 1.5px solid #eee;
+      padding: 12px 20px; font-size: 16px; transition: all 0.3s;
+      background-color: #fdfdfd;
+    }
+
+    .form-control:focus {
+      border-color: #ff9a9e; box-shadow: 0 0 0 4px rgba(255, 154, 158, 0.15);
+      background-color: #fff; outline: none;
+    }
+
+    textarea.form-control { resize: none; line-height: 1.6; }
+
+    /* 하단 버튼 스타일 */
+    .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 40px; }
+    
+    .btn-paws { 
+      padding: 12px 45px; border-radius: 30px; border: none; 
+      font-weight: bold; font-size: 16px; transition: 0.3s; cursor: pointer;
+    }
+    
+    .btn-save { 
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4); 
+      color: white; box-shadow: 0 4px 15px rgba(255, 107, 129, 0.2);
+    }
+    
+    .btn-cancel { background: #dfe6e9; color: #2d3436; }
+    
+    .btn-paws:hover { transform: translateY(-3px); opacity: 0.9; }
+
+    /* 행(Row) 간격 조정 */
+    .row.mb-3 > .col { margin-bottom: 15px; }
+
+    @media (max-width: 576px) {
+      .update-card { padding: 25px; margin-top: 40px; }
+      .btn-paws { width: 100%; }
+      .btn-group { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content" class="container">
+  
+  <div class="update-card">
+    <h2 class="update-title">
+      <i class="fas fa-edit me-2"></i>
+      <span th:text="${categoryVO != null ? categoryVO.cat_name : '품종'}">품종</span> 정보 수정
+    </h2>
+
+    <form name='frm' method='post' th:object="${breedVO}" action='/breed/update_text'>
+      <!-- 고유 번호 및 카테고리 번호 유지 -->
+      <input type="hidden" name="breedno" th:value="*{breedno}">
+      <input type="hidden" name="cat_no" th:value="*{cat_no}">
+
+      <div class="form-group mb-3">
+        <label><i class="fas fa-dog me-1" style="color: #ff9a9e;"></i> 견종 이름</label>
+        <input type='text' name='breed_name' th:value="*{breed_name}" required 
+               class="form-control" placeholder="견종 이름을 입력해 주세요.">
+      </div>
+
+      <div class="form-group mb-3">
+        <label><i class="fas fa-quote-left me-1" style="color: #ff9a9e;"></i> 콘텐츠 제목</label>
+        <input type='text' name='title' th:value="*{title}" required 
+               class="form-control" placeholder="리스트에 노출될 짧은 소개 문구를 입력해 주세요.">
+      </div>
+
+      <div class="form-group mb-3">
+        <label><i class="fas fa-align-left me-1" style="color: #ff9a9e;"></i> 상세 설명</label>
+        <textarea name='content' rows="8" th:text="*{content}" required 
+                  class="form-control" placeholder="견종의 특징, 성격, 주의사항 등을 상세히 적어주세요."></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group mb-3">
+          <label><i class="fas fa-map-marker-alt me-1" style="color: #ff9a9e;"></i> 원산지</label>
+          <input type='text' name='origin' th:value="*{origin}" class="form-control" placeholder="예: 영국">
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label><i class="fas fa-ruler-combined me-1" style="color: #ff9a9e;"></i> 크기 구분</label>
+          <select name="size_type" class="form-control">
+            <option value="소형견" th:selected="*{size_type == '소형견'}">소형견</option>
+            <option value="중형견" th:selected="*{size_type == '중형견'}">중형견</option>
+            <option value="대형견" th:selected="*{size_type == '대형견'}">대형견</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 form-group mb-3">
+          <label><i class="fas fa-weight me-1" style="color: #ff9a9e;"></i> 평균 몸무게</label>
+          <input type='text' name='kg' th:value="*{kg}" class="form-control" placeholder="예: 5~10kg">
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label><i class="fas fa-arrows-alt-v me-1" style="color: #ff9a9e;"></i> 평균 체고(키)</label>
+          <input type='text' name='height' th:value="*{height}" class="form-control" placeholder="예: 25~35cm">
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn-paws btn-save">저장</button>
+        <button type="button" onclick="history.back();" class="btn-paws btn-cancel">취소</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+</body>
+</html>

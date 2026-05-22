@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.ai_config.AiConfigDAOInter">
+
+  <!-- =========================================================
+       🧠 Prompt 등록
+  ========================================================== -->
+  <insert id="create"
+          parameterType="dev.mvc.ai_config.AiConfigVO">
+
+    INSERT INTO ai_config(
+      configno,
+      config_key,
+      config_name,
+      config_type,
+      config_val,
+      description,
+      use_yn,
+      rdate
+    )
+
+    VALUES(
+      ai_config_seq.nextval,
+      #{config_key},
+      #{config_name},
+      #{config_type},
+      #{config_val},
+      #{description},
+      #{use_yn},
+      SYSDATE
+    )
+
+  </insert>
+
+
+  <!-- =========================================================
+       🔍 KEY 기반 조회
+  ========================================================== -->
+  <select id="readByKey"
+          parameterType="String"
+          resultType="dev.mvc.ai_config.AiConfigVO">
+
+    SELECT
+      configno,
+      config_key,
+      config_name,
+      config_type,
+      config_val,
+      description,
+      use_yn,
+      rdate
+
+    FROM ai_config
+
+    WHERE config_key = #{config_key}
+
+  </select>
+
+
+  <!-- =========================================================
+       📖 상세 조회
+  ========================================================== -->
+  <select id="read"
+          parameterType="int"
+          resultType="dev.mvc.ai_config.AiConfigVO">
+
+    SELECT
+      configno,
+      config_key,
+      config_name,
+      config_type,
+      config_val,
+      description,
+      use_yn,
+      rdate
+
+    FROM ai_config
+
+    WHERE configno = #{configno}
+
+  </select>
+
+
+  <!-- =========================================================
+       📋 전체 목록
+  ========================================================== -->
+  <select id="list_all"
+          resultType="dev.mvc.ai_config.AiConfigVO">
+
+    SELECT
+      configno,
+      config_key,
+      config_name,
+      config_type,
+      config_val,
+      description,
+      use_yn,
+      rdate
+
+    FROM ai_config
+
+    ORDER BY configno DESC
+
+  </select>
+
+
+  <!-- =========================================================
+       📂 타입별 조회
+  ========================================================== -->
+  <select id="list_by_type"
+          parameterType="String"
+          resultType="dev.mvc.ai_config.AiConfigVO">
+
+    SELECT
+      configno,
+      config_key,
+      config_name,
+      config_type,
+      config_val,
+      description,
+      use_yn,
+      rdate
+
+    FROM ai_config
+
+    WHERE config_type = #{config_type}
+
+    ORDER BY configno DESC
+
+  </select>
+
+
+  <!-- =========================================================
+       ✏ Prompt 수정
+  ========================================================== -->
+  <update id="update"
+          parameterType="dev.mvc.ai_config.AiConfigVO">
+
+    UPDATE ai_config
+
+    SET
+
+      config_key = #{config_key},
+
+      config_name = #{config_name},
+
+      config_type = #{config_type},
+
+      config_val = #{config_val},
+
+      description = #{description},
+
+      use_yn = #{use_yn}
+
+    WHERE configno = #{configno}
+
+  </update>
+
+
+  <!-- =========================================================
+       🔄 사용 여부 변경
+  ========================================================== -->
+  <update id="update_use_yn"
+          parameterType="dev.mvc.ai_config.AiConfigVO">
+
+    UPDATE ai_config
+
+    SET use_yn = #{use_yn}
+
+    WHERE configno = #{configno}
+
+  </update>
+
+
+  <!-- =========================================================
+       ❌ 삭제
+  ========================================================== -->
+  <delete id="delete"
+          parameterType="int">
+
+    DELETE FROM ai_config
+
+    WHERE configno = #{configno}
+
+  </delete>
+
+</mapper>

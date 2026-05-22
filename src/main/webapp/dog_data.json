@@ -1,0 +1,14 @@
+{
+  "breeds": [
+    { "name": "보더 콜리", "desc": "지능 1위! 에너지가 넘치는 양치기 개.", "org": "영국", "kg": "12-20kg", "ht": "46-53cm", "img": "https://images.dog.ceo/breeds/collie-border/n02106166_355.jpg" },
+    { "name": "골든 리트리버", "desc": "온순하고 영리한 천사견.", "org": "영국", "kg": "25-34kg", "ht": "51-61cm", "img": "https://images.dog.ceo/breeds/retriever-golden/n02099601_3004.jpg" },
+    { "name": "푸들", "desc": "털 안 빠지는 똑똑한 반려견.", "org": "프랑스", "kg": "3-20kg", "ht": "25-38cm", "img": "https://images.dog.ceo/breeds/poodle-standard/n02113799_2280.jpg" },
+    { "name": "시바견", "desc": "충성심 강한 일본의 미소 천사.", "org": "일본", "kg": "7-11kg", "ht": "33-43cm", "img": "https://images.dog.ceo/breeds/shiba/shiba-8.jpg" },
+    { "name": "비숑 프리제", "desc": "하이바 컷이 매력적인 인형.", "org": "프랑스", "kg": "5-10kg", "ht": "23-30cm", "img": "https://images.dog.ceo/breeds/bichon-frise/n02110806_4020.jpg" },
+    { "name": "말티즈", "desc": "하얀 털이 매력적인 국민 강아지.", "org": "이탈리아", "kg": "2-3kg", "ht": "20-25cm", "img": "https://images.dog.ceo/breeds/maltese/n02085936_503.jpg" },
+    { "name": "웰시 코기", "desc": "엉덩이가 치명적인 짧은 다리 개.", "org": "영국", "kg": "10-14kg", "ht": "25-30cm", "img": "https://images.dog.ceo/breeds/pembroke/n02113023_12046.jpg" },
+    { "name": "시베리안 허스키", "desc": "카리스마 넘치는 썰매 대장.", "org": "러시아", "kg": "16-27kg", "ht": "50-60cm", "img": "https://images.dog.ceo/breeds/husky/n02110185_10047.jpg" },
+    { "name": "포메라니안", "desc": "작지만 용감한 털뭉치.", "org": "독일", "kg": "1-3kg", "ht": "13-28cm", "img": "https://images.dog.ceo/breeds/pomeranian/n02112018_2545.jpg" },
+    { "name": "저먼 셰퍼드", "desc": "최고의 업무 수행 능력을 가진 군견.", "org": "독일", "kg": "22-40kg", "ht": "55-65cm", "img": "https://images.dog.ceo/breeds/germanshepherd/n02106662_16149.jpg" }
+  ]
+}

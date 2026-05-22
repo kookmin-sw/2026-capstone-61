@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Paws | 카테고리 조회</title>
+<style>
+  body {
+    font-family: 'Pretendard', sans-serif;
+    background-color: #f8f9fa;
+  }
+
+  .read-card {
+    width: 95%;
+    max-width: 750px;
+    background-color: #fff;
+    padding: 45px;
+    border-radius: 30px;
+    box-shadow: 0 15px 40px rgba(255, 182, 193, 0.15);
+    margin: 80px auto 120px auto;
+    position: relative;
+  }
+
+  /* 상단 제목 */
+  .read-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 35px;
+  }
+  
+  .read-title .highlight {
+    color: #ff6b81;
+    border-bottom: 3px solid #ffebee;
+  }
+
+  /* 액션 버튼 그룹 */
+  .action-bar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding-bottom: 25px;
+    border-bottom: 1.5px dashed #eee;
+  }
+
+  .btn-read {
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* 버튼 테마별 색상 */
+  .btn-list { background-color: #f1f2f6; color: #57606f; }
+  .btn-visible-y { background-color: #e3f2fd; color: #1976d2; }
+  .btn-visible-n { background-color: #f5f5f5; color: #9e9e9e; }
+  .btn-seq { background-color: #fff9db; color: #f08c00; }
+  .btn-edit { background: linear-gradient(135deg, #ff9a9e, #fad0c4); color: white; }
+  .btn-delete { background-color: #ffe0e3; color: #ff6b81; }
+
+  .btn-read:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+
+  /* 정보 리스트 스타일 */
+  .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #fffafa;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    transition: 0.2s;
+  }
+
+  .info-item:hover {
+    background-color: #fff5f7;
+  }
+
+  .info-icon {
+    width: 45px;
+    height: 45px;
+    background-color: #fff;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    color: #ff9a9e;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(255, 182, 193, 0.1);
+  }
+
+  .info-content {
+    flex: 1;
+  }
+
+  .info-label {
+    display: block;
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .info-value {
+    display: block;
+    font-size: 17px;
+    color: #333;
+    font-weight: 700;
+  }
+
+  .info-value.highlight {
+    color: #ff6b81;
+  }
+</style>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+  <div class="read-card">
+    <div class="read-title">
+      <span class="highlight" th:text="${categoryVO.cat_name}">카테고리명</span> 상세 정보
+    </div>
+
+    <!-- 상단 액션 버튼들 -->
+    <div class="action-bar">
+      <a class="btn-read btn-list" th:href="@{|/category/list_search?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-list"></i> 목록
+      </a>
+      
+      <!-- 공개 설정 토글 -->
+      <a th:if="${categoryVO.visible == 'Y'}" class="btn-read btn-visible-y" 
+         th:href="@{|/category/update_visible_n/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-eye"></i> 공개 중
+      </a>
+      <a th:unless="${categoryVO.visible == 'Y'}" class="btn-read btn-visible-n" 
+         th:href="@{|/category/update_visible_y/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-eye-slash"></i> 비공개
+      </a>
+
+      <!-- 순서 조정 -->
+      <a class="btn-read btn-seq" th:href="@{|/category/update_seqno_forward/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-arrow-up"></i>
+      </a>
+      <a class="btn-read btn-seq" th:href="@{|/category/update_seqno_backward/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-arrow-down"></i>
+      </a>
+
+      <a class="btn-read btn-edit" th:href="@{|/category/update/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}">
+        <i class="fas fa-edit"></i> 수정
+      </a>
+      
+      <!-- 삭제 (JS 함수 호출) -->
+      <button type="button" class="btn-read btn-delete" th:onclick="|askDeleteCategory(${categoryVO.cat_no})|">
+        <i class="fas fa-trash-alt"></i> 삭제
+      </button>
+    </div>
+
+    <!-- 상세 정보 리스트 -->
+    <div class="info-list">
+      <div class="info-item">
+        <div class="info-icon"><i class="fas fa-hashtag"></i></div>
+        <div class="info-content">
+          <span class="info-label">고유 번호</span>
+          <span class="info-value" th:text="${categoryVO.cat_no}"></span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon"><i class="fas fa-tags"></i></div>
+        <div class="info-content">
+          <span class="info-label">분류 타입</span>
+          <span class="info-value" th:text="${categoryVO.cat_type}"></span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon"><i class="fas fa-signature"></i></div>
+        <div class="info-content">
+          <span class="info-label">카테고리 이름</span>
+          <span class="info-value highlight" th:text="${categoryVO.cat_name}"></span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon"><i class="fas fa-sort-numeric-down"></i></div>
+        <div class="info-content">
+          <span class="info-label">출력 순서</span>
+          <span class="info-value" th:text="${categoryVO.seqno}"></span>
+        </div>
+      </div>
+
+      <div class="info-item">
+        <div class="info-icon">
+          <i th:class="${categoryVO.visible == 'Y' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>
+        </div>
+        <div class="info-content">
+          <span class="info-label">현재 상태</span>
+          <span class="info-value" 
+                th:style="${categoryVO.visible == 'Y' ? 'color: #1976d2;' : 'color: #999;'}"
+                th:text="${categoryVO.visible == 'Y' ? '사용자에게 공개되고 있어요' : '지금은 숨겨져 있어요'}">
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 삭제 폼 (비가시적 제출용) -->
+  <form id="deleteForm" method="post" th:action="@{/category/delete}">
+    <input type="hidden" name="cat_no" th:value="${categoryVO.cat_no}">
+  </form>
+
+  <script th:inline="javascript">
+    // 앞서 구현했던 모달 알림이 있다면 활용, 없다면 confirm 사용
+    function askDeleteCategory(catNo) {
+      if (confirm('정말 삭제하시겠습니까? 관련 데이터가 모두 사라져요! 🐾')) {
+        document.getElementById('deleteForm').submit();
+      }
+    }
+  </script>
+
+</div>
+</body>
+</html>

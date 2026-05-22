@@ -1,0 +1,117 @@
+/* =========================================================
+   🔥 기존 객체 삭제
+========================================================= */
+
+DROP TABLE MATCH_POST CASCADE CONSTRAINTS;
+DROP SEQUENCE MATCH_POST_SEQ;
+
+/* =========================================================
+   🐾 MATCH_POST
+   산책 매칭 게시글
+========================================================= */
+CREATE TABLE MATCH_POST (
+    MATCHNO NUMBER(10) NOT NULL, -- 게시글 번호(PK)
+    MEMBERNO NUMBER(10) NOT NULL, -- 작성자 회원 번호(FK)
+    CAT_NO NUMBER(10) NOT NULL, -- 카테고리 번호(FK)
+    TITLE VARCHAR2(200) NOT NULL, -- 제목
+    CONTENT CLOB NOT NULL, -- 내용
+    MDATE TIMESTAMP NOT NULL, -- 산책 약속 시간
+    MPLACE VARCHAR2(200) NOT NULL, -- 산책 장소
+    MPLACE_DETAIL VARCHAR2(300), -- 상세 장소
+    
+    -- 위도: -90.0 ~ 90.0 (정밀도 보강)
+    LAT NUMBER(15, 10), 
+    -- 경도: -180.0 ~ 180.0 (정밀도 보강)
+    LNG NUMBER(15, 10),
+    
+    DMTI VARCHAR2(20), -- 강아지 DMTI
+    DOG_IMG VARCHAR2(300), -- 강아지 이미지
+    STATUS NUMBER(1) DEFAULT 1 NOT NULL,
+    -- 1 : 모집중
+    -- 2 : 모집마감
+    -- 3 : 산책중(약속시간이 되면자동으로)
+    -- 4 : 산책완료(리뷰 가능)
+    MAX_MEMBER NUMBER(3) DEFAULT 2 NOT NULL,
+    CURRENT_MEMBER NUMBER(3) DEFAULT 0 NOT NULL,
+    VIEWCNT NUMBER(10) DEFAULT 0 NOT NULL,
+    COMMENTCNT NUMBER(10) DEFAULT 0 NOT NULL, -- 댓글 수
+    IS_DELETED CHAR(1) DEFAULT 'N' NOT NULL, -- 삭제 여부
+    CLOSE_DATE TIMESTAMP,
+    RDATE DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT PK_MATCH_POST PRIMARY KEY (MATCHNO),
+    CONSTRAINT FK_MATCH_POST_MEMBERNO FOREIGN KEY (MEMBERNO)
+    REFERENCES MEMBER(MEMBERNO)
+    ON DELETE CASCADE,
+    CONSTRAINT FK_MATCH_POST_CAT_NO FOREIGN KEY (CAT_NO)
+    REFERENCES CATEGORY(CAT_NO)
+);
+
+/* =========================================================
+   🐾 MATCH_POST COMMENT
+========================================================= */
+COMMENT ON TABLE MATCH_POST IS '산책 매칭 게시글';
+COMMENT ON COLUMN MATCH_POST.MATCHNO IS '게시글 번호';
+COMMENT ON COLUMN MATCH_POST.MEMBERNO IS '작성자 회원 번호';
+COMMENT ON COLUMN MATCH_POST.CAT_NO IS '카테고리 번호';
+COMMENT ON COLUMN MATCH_POST.TITLE IS '제목';
+COMMENT ON COLUMN MATCH_POST.CONTENT IS '내용';
+COMMENT ON COLUMN MATCH_POST.MDATE IS '산책 약속 시간';
+COMMENT ON COLUMN MATCH_POST.MPLACE IS '산책 장소';
+COMMENT ON COLUMN MATCH_POST.MPLACE_DETAIL IS '상세 장소';
+COMMENT ON COLUMN MATCH_POST.LAT IS '위도';
+COMMENT ON COLUMN MATCH_POST.LNG IS '경도';
+COMMENT ON COLUMN MATCH_POST.DMTI IS '강아지 DMTI';
+COMMENT ON COLUMN MATCH_POST.DOG_IMG IS '강아지 이미지';
+COMMENT ON COLUMN MATCH_POST.STATUS IS '모집 상태';
+COMMENT ON COLUMN MATCH_POST.MAX_MEMBER IS '최대 모집 인원';
+COMMENT ON COLUMN MATCH_POST.CURRENT_MEMBER IS '현재 모집 인원';
+COMMENT ON COLUMN MATCH_POST.VIEWCNT IS '조회수';
+COMMENT ON COLUMN MATCH_POST.COMMENTCNT IS '댓글 수';
+COMMENT ON COLUMN MATCH_POST.IS_DELETED IS '삭제 여부';
+COMMENT ON COLUMN MATCH_POST.CLOSE_DATE IS '모집 마감 시간';
+COMMENT ON COLUMN MATCH_POST.RDATE IS '작성일';
+
+CREATE SEQUENCE MATCH_POST_SEQ
+START WITH 1
+INCREMENT BY 1
+MAXVALUE 9999999999
+NOCACHE
+NOCYCLE;
+
+/* =========================================================
+   🐾 MATCH_POST 인덱스
+========================================================= */
+CREATE INDEX IDX_MATCH_POST_MEMBERNO ON MATCH_POST(MEMBERNO);
+CREATE INDEX IDX_MATCH_POST_CATNO ON MATCH_POST(CAT_NO);
+CREATE INDEX IDX_MATCH_POST_STATUS ON MATCH_POST(STATUS);
+CREATE INDEX IDX_MATCH_POST_MDATE ON MATCH_POST(MDATE);
+CREATE INDEX IDX_MATCH_POST_LOCATION ON MATCH_POST(LAT, LNG);
+
+
+UPDATE match_apply
+SET apply_status = 4
+WHERE apply_status = 5;
+
+COMMIT;
+SELECT
+    applyno,
+    apply_status,
+    success_yn,
+    accept_date,
+    complete_date
+FROM match_apply
+ORDER BY applyno DESC;
+
+SELECT *
+FROM match_review
+ORDER BY reviewno DESC;
+
+UPDATE match_apply
+SET review_written = 1
+WHERE applyno = 2;
+
+COMMIT;
+SELECT applyno,
+       review_written
+FROM match_apply
+WHERE apply_status = 4;

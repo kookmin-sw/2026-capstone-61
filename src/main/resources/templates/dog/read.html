@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+<meta charset="UTF-8">
+<title>내 강아지 상세 정보</title>
+
+<style>
+  /* 🐾 상세 페이지 컨테이너 */
+  .read-wrapper {
+    max-width: 900px;
+    margin: 130px auto 100px auto; /* 상단 메뉴 여백 */
+    padding: 0 20px;
+  }
+
+  .read-container {
+    background: white;
+    padding: 40px;
+    border-radius: 35px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+    display: flex;
+    gap: 50px;
+    border: 1.5px solid #fff;
+  }
+  
+  /* 🖼️ 왼쪽: 이미지 섹션 */
+  .read-image {
+    flex: 1;
+    text-align: center;
+  }
+  .read-image img {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  }
+
+  /* 📋 오른쪽: 상세 정보 */
+  .read-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .read-info h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 20px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 5px;
+    border-bottom: 1.5px solid #fcfcfc;
+    font-size: 17px;
+  }
+  .info-row span:first-child { color: #aaa; font-weight: 600; }
+  .info-row span:last-child { color: #444; font-weight: 700; }
+
+  /* 🏷️ DMTI 결과 카드 */
+  .dmti-result-box {
+    margin-top: 25px;
+    padding: 25px;
+    background: linear-gradient(135deg, #fff5f6 0%, #fff 100%);
+    border: 2px dashed #ffb6c1;
+    border-radius: 20px;
+    text-align: center;
+  }
+  .dmti-type {
+    font-size: 28px;
+    font-weight: 900;
+    color: #ff6b81;
+    letter-spacing: 1px;
+    display: block;
+    margin: 5px 0;
+  }
+
+  /* 🔘 버튼 그룹: 한 라인 배치 설정 */
+  .button-group {
+    margin-top: 35px;
+    display: flex;
+    flex-wrap: nowrap; /* 무조건 한 줄 유지 */
+    gap: 8px;
+  }
+  
+  .btn-paws {
+    flex: 1; /* 모든 버튼이 공간을 균등하게 배분 */
+    padding: 14px 5px;
+    text-align: center;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: 0.3s;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap; /* 텍스트 한 줄 유지 */
+  }
+  
+  .btn-paws-list { background: #f8f9fa; color: #888; }
+  .btn-paws-edit { background: #ff8e99; color: white; }
+  .btn-paws-delete { background: #fff; color: #ff4d4d; border: 1.5px solid #fff0f0; }
+  
+  /* 검사 버튼은 중요하므로 flex 비중을 조금 더 줌 */
+  .btn-paws-test { 
+    flex: 1.5; 
+    background: #333; 
+    color: white; 
+  }
+  
+  .btn-paws:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+  /* 커스텀 모달 스타일 */
+  .paws-modal-content { border-radius: 25px; border: none; }
+  .paws-modal-btn-delete { background: #ff4d4d; color: #fff; border-radius: 15px; font-weight: 700; border: none; padding: 12px; }
+
+  @media (max-width: 850px) {
+    .read-container { flex-direction: column; padding: 30px; gap: 30px; }
+    .read-wrapper { margin-top: 100px; }
+    .read-image img { max-width: 100%; }
+    .button-group { flex-wrap: wrap; } /* 모달 너비가 좁은 모바일에서는 줄바꿈 허용 */
+    .btn-paws { flex: 1 1 45%; } /* 모바일에서는 2개씩 배치 */
+  }
+</style>
+
+<script th:inline="javascript">
+  function confirmDelete() {
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    deleteModal.show();
+  }
+
+  function executeDelete() {
+    // Thymeleaf 변수를 자바스크립트에서 안전하게 사용
+    const dogno = [[${dogVO.dogno}]];
+    location.href = "/dog/delete.do?dogno=" + dogno;
+  }
+</script>
+</head>
+
+<body>
+<div layout:fragment="content">
+
+  <div class="read-wrapper">
+    <div class="read-container">
+      
+      <!-- 왼쪽 이미지 섹션 -->
+      <div class="read-image">
+        <img th:src="${(dogVO.file1saved != null and dogVO.file1saved != '')} 
+               ? @{|/dog/storage/${dogVO.file1saved}|} 
+               : @{/images/none.jpg}" alt="강아지 프로필">
+        
+        <!-- DMTI 결과가 있는 경우 표시 -->
+        <div th:if="${dogVO.dbti_type != null}" class="dmti-result-box">
+          <p style="margin: 0; font-size: 14px; color: #ff8e99; font-weight: 700;">🐾 DMTI 성향 분석 결과</p>
+          <span class="dmti-type" th:text="${dogVO.dbti_type}">ESFP</span>
+          <p style="margin: 5px 0 0; font-size: 13px; color: #aaa;">우리 아이는 이런 매력이 있어요!</p>
+        </div>
+      </div>
+
+      <!-- 오른쪽 정보 섹션 -->
+      <div class="read-info">
+        <h2 th:text="${dogVO.name}">강아지 이름</h2>
+        
+        <div class="info-row">
+          <span>품종</span>
+          <span th:text="${dogVO.breed}">품종 정보</span>
+        </div>
+        <div class="info-row">
+          <span>나이</span>
+          <span th:text="${dogVO.age} + '살'">0살</span>
+        </div>
+        <div class="info-row">
+          <span>성별</span>
+          <span th:text="${dogVO.gender == 'M' ? '남아 ♂' : '여아 ♀'}">성별</span>
+        </div>
+        <div class="info-row">
+          <span>가족이 된 날</span>
+          <span th:text="${dogVO.rdate.substring(0, 10)}">2026-04-09</span>
+        </div>
+
+        <!-- 한 줄로 배치된 버튼 그룹 -->
+        <div class="button-group">
+          <a th:href="@{/dog/list.do}" class="btn-paws btn-paws-list">목록</a>
+          <a th:href="@{|/dog/update.do?dogno=${dogVO.dogno}|}" class="btn-paws btn-paws-edit">수정</a>
+          <button type="button" onclick="confirmDelete()" class="btn-paws btn-paws-delete">삭제</button>
+          
+          <!-- DMTI 결과가 없을 때만 검사 버튼 표시 -->
+          <a th:if="${dogVO.dbti_type == null}" 
+             th:href="@{|/dog_dmti/select.do?dogNo=${dogVO.dogno}|}" 
+             class="btn-paws btn-paws-test">🐾 DMTI 검사</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 320px;">
+      <div class="modal-content paws-modal-content">
+        <div class="modal-body text-center p-4">
+          <div class="mb-3" style="font-size: 40px;">😢</div>
+          <h5 class="fw-bold">정말 삭제하시겠어요?</h5>
+          <p class="text-muted small">강아지의 소중한 정보와<br>DMTI 결과가 모두 사라집니다.</p>
+          <div class="d-grid gap-2 mt-4">
+            <button type="button" class="paws-modal-btn-delete" onclick="executeDelete()">네, 삭제합니다</button>
+            <button type="button" class="btn-paws btn-paws-list" data-bs-dismiss="modal">아니요, 유지할게요</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

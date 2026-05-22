@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 주문 관리 - Paws Market</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --paws-main: #ff6b81;
+            --paws-orange: #ff914d;
+            --paws-blue: #448aff;
+            --paws-bg: #fff8f9;
+            --paws-dark: #333333;
+        }
+
+        .admin-container { max-width: 1200px; margin: 90px auto; padding: 0 20px; }
+        
+        /* 필터 버튼 스타일 */
+        .admin-filter-bar { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .filter-btn { 
+            padding: 8px 20px; border-radius: 20px; border: 1.5px solid #eee; background: #fff;
+            font-weight: 600; font-size: 0.85rem; transition: 0.3s; cursor: pointer; color: #888;
+        }
+        .filter-btn.active { background: var(--paws-main); color: #fff; border-color: var(--paws-main); box-shadow: 0 4px 12px rgba(255, 107, 129, 0.2); }
+        .btn-cancel-req.active { background: var(--paws-orange); border-color: var(--paws-orange); }
+        .btn-return-req.active { background: var(--paws-blue); border-color: var(--paws-blue); }
+
+        .order-row.hidden { display: none; }
+
+        .admin-card { background: #fff; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f2f2f2; overflow: hidden; }
+        .table thead { background-color: #fafafa; border-bottom: 2.5px solid var(--paws-bg); }
+        .table th { padding: 18px; font-weight: 700; color: #444; font-size: 0.9rem; }
+        .table td { padding: 18px; vertical-align: middle; font-size: 0.9rem; border-bottom: 1px solid #f9f9f9; }
+
+        /* 상태 배지 스타일 */
+        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .status-paid { background: #eefdf3; color: #10b981; }
+        .status-shipped { background: #fffbeb; color: #d97706; }
+        .status-delivered { background: #f0f4ff; color: var(--paws-blue); }
+        .status-request-cancel { background: #fff7ed; color: #f97316; animation: status-pulse 2s infinite; }
+        .status-request-return { background: #eef2ff; color: #6366f1; animation: status-pulse 2s infinite; }
+        .status-done { background: #fef2f2; color: #ef4444; }
+
+        @keyframes status-pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .row-request { background-color: #fffafb !important; }
+
+        /* ---------------- 커스텀 모달 & 토스트 ---------------- */
+        .paws-modal-overlay {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;
+        }
+        .paws-modal {
+            background: #fff; padding: 35px; border-radius: 30px; width: 400px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15); transform: translateY(20px); transition: 0.3s;
+        }
+        .paws-modal.show { transform: translateY(0); }
+        .paws-modal i { font-size: 50px; color: var(--paws-orange); margin-bottom: 20px; display: block; }
+        .paws-modal h5 { font-weight: 800; margin-bottom: 15px; }
+        .paws-modal p { color: #666; margin-bottom: 25px; line-height: 1.6; }
+        .paws-btn-group { display: flex; gap: 10px; }
+        .paws-btn { flex: 1; padding: 12px; border-radius: 15px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+        .paws-btn-confirm { background: var(--paws-main); color: #fff; }
+        .paws-btn-cancel { background: #eee; color: #666; }
+
+        /* 토스트 알림 */
+        .paws-toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--paws-dark); color: #fff; padding: 12px 30px; border-radius: 50px;
+            font-weight: 600; z-index: 10001; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .paws-toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <!-- 상태 변경 확인 모달 -->
+    <div id="statusModal" class="paws-modal-overlay">
+        <div class="paws-modal">
+            <i class="bi bi-question-circle-fill"></i>
+            <h5 id="modalTitle">상태 변경 확인</h5>
+            <p id="modalMsg">주문 상태를 변경하시겠습니까?</p>
+            <div class="paws-btn-group">
+                <button class="paws-btn paws-btn-cancel" onclick="closeModal()">취소</button>
+                <button class="paws-btn paws-btn-confirm" id="confirmBtn">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div id="pawsToast" class="paws-toast">정상적으로 처리되었습니다. 🐾</div>
+
+    <div class="admin-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold m-0" style="color: #333;"><i class="bi bi-gear-fill me-2" style="color: var(--paws-main);"></i>주문 통합 관리</h3>
+            <div>
+                <span class="badge rounded-pill px-3 py-2" style="background: var(--paws-bg); color: var(--paws-main); font-weight: 700;" th:text="|전체 ${orderList.size()}건|"></span>
+            </div>
+        </div>
+
+        <div class="admin-filter-bar">
+            <button class="filter-btn active" onclick="applyFilter('ALL', this)">전체보기</button>
+            <button class="filter-btn btn-cancel-req" onclick="applyFilter('CANCEL_REQC', this)">취소신청</button>
+            <button class="filter-btn btn-return-req" onclick="applyFilter('RETURN_REQC', this)">반품신청</button>
+            <button class="filter-btn" onclick="applyFilter('PAID', this)">결제완료</button>
+            <button class="filter-btn" onclick="applyFilter('SHIPPED', this)">배송중</button>
+            <button class="filter-btn" onclick="applyFilter('DELIVERED', this)">배송완료</button>
+            <button class="filter-btn" onclick="applyFilter('CANCEL_DONE', this)">취소완료</button>
+            <button class="filter-btn" onclick="applyFilter('RETURN_DONE', this)">반품완료</button>
+        </div>
+
+        <div class="admin-card">
+            <div class="table-responsive">
+                <table class="table table-hover text-center m-0">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>주문자 정보</th>
+                            <th>결제 금액</th>
+                            <th>주문 일시</th>
+                            <th>현재 상태</th>
+                            <th>관리 액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orderList}" 
+                            class="order-row" 
+                            th:data-status="${order.order_status}"
+                            th:classappend="${order.order_status.contains('REQC') ? 'row-request' : ''}">
+                            
+                            <td th:text="${order.order_id}" class="text-secondary font-monospace small"></td>
+                            
+                            <td class="text-start ps-4">
+                                <div th:text="${order.receiver_name}" class="fw-bold"></div>
+                                <div th:text="|(${order.user_id})|" class="text-muted small"></div>
+                            </td>
+                            
+                            <td class="fw-bold text-dark" th:text="|${#numbers.formatInteger(order.total_price, 0, 'COMMA')}원|"></td>
+                            
+                            <td th:text="${order.order_date}" class="small text-muted"></td>
+                            
+                            <td>
+                                <span th:if="${order.order_status == 'PAID'}" class="status-badge status-paid">결제완료</span>
+                                <span th:if="${order.order_status == 'SHIPPED'}" class="status-badge status-shipped">배송중</span>
+                                <span th:if="${order.order_status == 'DELIVERED'}" class="status-badge status-delivered">배송완료</span>
+                                <span th:if="${order.order_status == 'CANCEL_REQC'}" class="status-badge status-request-cancel" data-bs-toggle="tooltip" th:title="|사유: ${order.reason}|">취소요청 확인 <i class="bi bi-exclamation-circle-fill"></i></span>
+                                <span th:if="${order.order_status == 'RETURN_REQC'}" class="status-badge status-request-return" data-bs-toggle="tooltip" th:title="|사유: ${order.reason}|">반품요청 확인 <i class="bi bi-box-arrow-in-left"></i></span>
+                                <span th:if="${order.order_status == 'CANCEL_DONE'}" class="status-badge status-done">취소완료</span>
+                                <span th:if="${order.order_status == 'RETURN_DONE'}" class="status-badge status-done">반품완료</span>
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" 
+                                            th:onclick="|location.href='/market_order/read_admin.do?order_id=${order.order_id}'|">상세</button>
+                                    
+                                    <select class="form-select form-select-sm rounded-pill" style="width: 130px; font-size: 0.75rem;"
+                                            th:onchange="handleStatusChange([[${order.order_id}]], this)">
+                                        <option value="PAID" th:selected="${order.order_status == 'PAID'}">결제승인</option>
+                                        <option value="SHIPPED" th:selected="${order.order_status == 'SHIPPED'}">배송시작</option>
+                                        <option value="DELIVERED" th:selected="${order.order_status == 'DELIVERED'}">배송완료</option>
+                                        <option value="CANCEL_DONE" th:selected="${order.order_status == 'CANCEL_DONE'}">취소승인(환불)</option>
+                                        <option value="RETURN_DONE" th:selected="${order.order_status == 'RETURN_DONE'}">반품승인(환불)</option>
+                                    </select>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(orderList)}">
+                            <td colspan="6" class="py-5 text-muted">🐾 처리할 주문 내역이 아직 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let currentOrderData = null;
+
+        // 필터링 기능
+        function applyFilter(status, btn) {
+            document.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+
+            const rows = document.querySelectorAll('.order-row');
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                if (status === 'ALL' || rowStatus === status) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+
+        // 상태 변경 시도 (모달 열기)
+        function handleStatusChange(orderId, selectEl) {
+            const newStatus = selectEl.value;
+            const originalStatus = selectEl.closest('tr').getAttribute('data-status');
+            
+            // 변경사항이 없을 경우 무시
+            if(newStatus === originalStatus) return;
+
+            currentOrderData = { orderId, newStatus, selectEl, originalStatus };
+            
+            const modal = document.getElementById('statusModal');
+            const msg = (newStatus === 'CANCEL_DONE' || newStatus === 'RETURN_DONE') 
+                        ? "❗ 승인 시 결제 취소(환불)가 자동으로 진행됩니다. 계속하시겠습니까?" 
+                        : `주문 상태를 [${selectEl.options[selectEl.selectedIndex].text}]로 변경하시겠습니까?`;
+
+            document.getElementById('modalMsg').innerText = msg;
+            modal.style.display = 'flex';
+            setTimeout(() => modal.querySelector('.paws-modal').classList.add('show'), 10);
+            
+            document.getElementById('confirmBtn').onclick = executeChange;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('statusModal');
+            modal.querySelector('.paws-modal').classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                // 취소 시 셀렉트 박스 원래대로 복구
+                if(currentOrderData) {
+                    currentOrderData.selectEl.value = currentOrderData.originalStatus;
+                }
+            }, 300);
+        }
+
+        // 실제 API 호출
+        function executeChange() {
+            if(!currentOrderData) return;
+
+            fetch('/market_order/update_status.do', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    order_id: currentOrderData.orderId, 
+                    order_status: currentOrderData.newStatus 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.res === "success") {
+                    showToast("정상적으로 변경되었습니다! 🐾");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast("오류가 발생했습니다. 다시 시도해주세요.");
+                    closeModal();
+                }
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('pawsToast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</div>
+</body>
+</html>

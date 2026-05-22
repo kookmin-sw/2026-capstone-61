@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.member.MemberDAOInter">
+
+  <!-- 중복 검사 -->
+  <select id="checkID" resultType="int" parameterType="String">
+    SELECT COUNT(id) as cnt
+    FROM member
+    WHERE id = #{id}
+  </select>
+
+  <select id="checkNickname" resultType="int" parameterType="String">
+    SELECT COUNT(nickname) as cnt
+    FROM member
+    WHERE nickname = #{nickname}
+  </select>
+
+  <!-- 회원 가입 -->
+  <insert id="create" parameterType="dev.mvc.member.MemberVO">
+    INSERT INTO member(memberno, id, passwd, mname, nickname, tel, zipcode, address1, address2, mdate, birth, sex, grade, intro, manner_temp, match_cnt)
+    VALUES(member_seq.nextval, #{id}, #{passwd}, #{mname}, #{nickname}, #{tel}, #{zipcode}, #{address1}, #{address2}, sysdate, #{birth}, #{sex}, 1, #{intro}, 0, 0)
+  </insert>
+
+  <!-- 회원 목록 -->
+  <select id="list" resultType="dev.mvc.member.MemberVO">
+    SELECT memberno, id, mname, nickname, tel, zipcode,
+           address1, mdate, grade, birth, sex,
+           intro, manner_temp, match_cnt,
+           latitude, longitude, location_update
+    FROM member
+    ORDER BY grade ASC, id ASC
+  </select>
+
+  <!-- 회원 상세 조회 -->
+  <select id="read" resultType="dev.mvc.member.MemberVO" parameterType="int">
+    SELECT memberno, id, passwd, mname, nickname,
+           tel, zipcode, address1, address2,
+           mdate, grade, birth, sex,
+           intro, manner_temp, match_cnt,
+           latitude, longitude, location_update,
+           profile, profilesaved, thumbs, sizes
+    FROM member
+    WHERE memberno = #{memberno}
+  </select>
+
+  <!-- 아이디 조회 -->
+  <select id="readById" resultType="dev.mvc.member.MemberVO" parameterType="String">
+    SELECT memberno, id, passwd, mname, nickname,
+           tel, zipcode, address1, address2,
+           mdate, grade, birth, sex,
+           intro, manner_temp, match_cnt,
+           latitude, longitude, location_update,
+           profile, profilesaved, thumbs, sizes
+    FROM member
+    WHERE id = #{id}
+  </select>
+
+  <!-- 회원 수정 -->
+  <update id="update" parameterType="dev.mvc.member.MemberVO">
+    UPDATE member
+    SET mname=#{mname},
+        nickname=#{nickname},
+        tel=#{tel},
+        zipcode=#{zipcode},
+        address1=#{address1},
+        address2=#{address2},
+        passwd=#{passwd},
+        birth=#{birth},
+        sex=#{sex},
+        intro=#{intro}
+    WHERE memberno=#{memberno}
+  </update>
+
+  <!-- 프로필 수정 -->
+  <update id="update_profile" parameterType="dev.mvc.member.MemberVO">
+    UPDATE member
+    SET profile=#{profile},
+        profilesaved=#{profilesaved},
+        thumbs=#{thumbs},
+        sizes=#{sizes}
+    WHERE memberno=#{memberno}
+  </update>
+
+  <!-- 회원 등급 수정 -->
+  <update id="grade_update" parameterType="dev.mvc.member.MemberVO">
+    UPDATE member
+    SET grade=#{grade}
+    WHERE memberno=#{memberno}
+  </update>
+
+  <!-- 회원 탈퇴 -->
+  <update id="delete" parameterType="int">
+    UPDATE member
+    SET grade=3
+    WHERE memberno=#{memberno}
+  </update>
+
+  <!-- 로그인 -->
+  <select id="login" resultType="int" parameterType="HashMap">
+    SELECT COUNT(memberno) as cnt
+    FROM member
+    WHERE id=#{id}
+      AND passwd=#{passwd}
+      AND grade != 3
+  </select>
+
+  <!-- 아이디 찾기 -->
+  <select id="find_id"
+          parameterType="dev.mvc.member.MemberVO"
+          resultType="dev.mvc.member.MemberVO">
+
+    SELECT memberno, id, mname, tel
+    FROM member
+    WHERE mname = #{mname}
+      AND tel = #{tel}
+
+  </select>
+
+  <!-- 비밀번호 찾기 -->
+  <select id="find_passwd"
+          parameterType="dev.mvc.member.MemberVO"
+          resultType="dev.mvc.member.MemberVO">
+
+    SELECT memberno, id, passwd, mname
+    FROM member
+    WHERE id = #{id}
+      AND mname = #{mname}
+      AND tel = #{tel}
+
+  </select>
+  
+  <update id="update_passwd"
+        parameterType="dev.mvc.member.MemberVO">
+
+  UPDATE member
+  SET passwd = #{passwd}
+  WHERE memberno = #{memberno}
+
+</update>
+  <!-- 검색 레코드 수 -->
+  <select id="list_by_search_count"
+          resultType="int"
+          parameterType="HashMap">
+
+    SELECT COUNT(*) as cnt
+    FROM member
+
+    <where>
+      <if test="word != null and word != ''">
+        (
+          UPPER(id) LIKE '%' || UPPER(#{word}) || '%'
+          OR
+          UPPER(mname) LIKE '%' || UPPER(#{word}) || '%'
+        )
+      </if>
+    </where>
+
+  </select>
+
+  <!-- 검색 + 페이징 -->
+  <select id="list_by_search_paging"
+          resultType="dev.mvc.member.MemberVO"
+          parameterType="HashMap">
+
+    SELECT * FROM (
+      SELECT memberno, id, mname, nickname,
+             tel, zipcode, address1, address2,
+             mdate, grade, birth, sex,
+             intro, manner_temp, match_cnt,
+             latitude, longitude, location_update,
+             profile, profilesaved, thumbs, sizes,
+             rownum as r
+      FROM (
+        SELECT memberno, id, mname, nickname,
+               tel, zipcode, address1, address2,
+               mdate, grade, birth, sex,
+               intro, manner_temp, match_cnt,
+               latitude, longitude, location_update,
+               profile, profilesaved, thumbs, sizes
+        FROM member
+
+        <where>
+          <if test="word != null and word != ''">
+            (
+              UPPER(id) LIKE '%' || UPPER(#{word}) || '%'
+              OR
+              UPPER(mname) LIKE '%' || UPPER(#{word}) || '%'
+            )
+          </if>
+        </where>
+
+        ORDER BY mdate DESC
+      )
+    )
+    WHERE <![CDATA[
+  r >= #{start_num}
+  AND r <= #{end_num}
+]]>
+
+  </select>
+
+  <!-- 등급별 검색 레코드 수 -->
+  <select id="grade_list_by_search_count"
+          resultType="int"
+          parameterType="HashMap">
+
+    SELECT COUNT(*) as cnt
+    FROM member
+
+    <where>
+      <if test="word != null and word != ''">
+        grade = #{word}
+      </if>
+    </where>
+
+  </select>
+
+  <!-- 등급별 검색 + 페이징 -->
+  <select id="grade_list_by_search_paging"
+          resultType="dev.mvc.member.MemberVO"
+          parameterType="HashMap">
+
+    SELECT * FROM (
+      SELECT memberno, id, mname, nickname,
+             tel, zipcode, address1, address2,
+             mdate, grade, birth, sex,
+             intro, manner_temp, match_cnt,
+             latitude, longitude, location_update,
+             profile, profilesaved, thumbs, sizes,
+             rownum as r
+      FROM (
+        SELECT memberno, id, mname, nickname,
+               tel, zipcode, address1, address2,
+               mdate, grade, birth, sex,
+               intro, manner_temp, match_cnt,
+               latitude, longitude, location_update,
+               profile, profilesaved, thumbs, sizes
+        FROM member
+
+        <where>
+          <if test="word != null and word != ''">
+            grade = #{word}
+          </if>
+        </where>
+
+        ORDER BY mdate DESC
+      )
+    )
+    WHERE <![CDATA[
+  r >= #{start_num}
+  AND r <= #{end_num}
+]]>
+
+  </select>
+
+  <!-- 매너 온도 증가 -->
+  <update id="increase_manner_temp" parameterType="int">
+    UPDATE member
+    SET manner_temp = manner_temp + 0.5
+    WHERE memberno = #{memberno}
+  </update>
+
+  <!-- 매너 온도 감소 -->
+  <update id="decrease_manner_temp" parameterType="int">
+    UPDATE member
+    SET manner_temp = manner_temp - 0.5
+    WHERE memberno = #{memberno}
+  </update>
+<!-- ===================================================== -->
+<!-- 🌡️ 매너온도 변경 -->
+<!-- ===================================================== -->
+<update id="updateMannerTemp"
+        parameterType="hashmap">
+
+    UPDATE member
+    SET manner_temp = CASE
+
+        WHEN manner_temp + #{delta} > 99
+            THEN 99
+
+        WHEN manner_temp + #{delta} &lt; 0
+            THEN 0
+
+        ELSE manner_temp + #{delta}
+
+    END
+    WHERE memberno = #{memberno}
+
+</update>
+  <!-- 매칭 성공 횟수 증가 -->
+  <update id="increase_match_cnt" parameterType="int">
+    UPDATE member
+    SET match_cnt = match_cnt + 1
+    WHERE memberno = #{memberno}
+  </update>
+
+  <!-- 위치 정보 업데이트 -->
+  <update id="update_location" parameterType="dev.mvc.member.MemberVO">
+    UPDATE member
+    SET latitude = #{latitude},
+        longitude = #{longitude},
+        location_update = SYSDATE
+    WHERE memberno = #{memberno}
+  </update>
+  
+  <!-- 주변 사용자 조회 -->
+  <select id="list_near_member"
+          parameterType="HashMap"
+          resultType="dev.mvc.member.MemberVO">
+
+    SELECT memberno, id, mname, nickname,
+           manner_temp, match_cnt,
+           latitude, longitude,
+           profile, thumbs
+    FROM member
+    WHERE latitude BETWEEN #{min_lat} AND #{max_lat}
+      AND longitude BETWEEN #{min_lon} AND #{max_lon}
+      AND memberno != #{memberno}
+      AND grade = 1
+
+  </select>
+
+</mapper>

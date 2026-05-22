@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 완료 - Paws Market</title>
+    <!-- 부트스트랩 아이콘 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        .success-container { max-width: 700px; margin: 90px auto; text-align: center; padding: 0 20px; }
+        .success-card { background: #fff; padding: 50px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #f8f9fa; }
+        
+        /* 체크 아이콘 애니메이션 */
+        .check-icon { font-size: 85px; color: #ff914d; margin-bottom: 25px; animation: scaleUp 0.5s ease-out; }
+        @keyframes scaleUp {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .order-info-box { background: #fafafa; border-radius: 20px; padding: 30px; margin: 35px 0; text-align: left; border: 1px solid #f0f0f0; }
+        .info-row { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed #e5e5e5; }
+        .info-row:last-child { border-bottom: none; }
+        
+        .info-label { color: #888; font-weight: 700; width: 100px; flex-shrink: 0; font-size: 0.95rem; }
+        .info-value { color: #333; font-weight: 500; flex: 1; word-break: keep-all; font-size: 1rem; }
+        
+        .btn-group-custom { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }
+        .btn-custom { 
+            padding: 16px 45px; 
+            border-radius: 15px; 
+            font-weight: 800; 
+            text-decoration: none !important; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            display: inline-block;
+        }
+        
+        .btn-home { background: #f1f1f1; color: #666; }
+        .btn-history { background: #ff914d; color: #fff; box-shadow: 0 6px 20px rgba(255, 145, 77, 0.25); }
+        
+        .btn-custom:hover { transform: translateY(-5px); opacity: 0.95; }
+        .btn-home:hover { background: #e5e5e5; color: #333; }
+
+        /* 모바일 대응 */
+        @media (max-width: 576px) {
+            .success-card { padding: 30px 20px; }
+            .btn-group-custom { flex-direction: column; }
+            .btn-custom { width: 100%; }
+            .info-label { width: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="success-container">
+    <div class="success-card">
+        <div class="check-icon">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+        <h2 class="fw-bold mb-3" style="color: #333;">주문이 정상 접수되었습니다!</h2>
+        <p class="text-muted mb-0" style="line-height: 1.6;">
+            Paws 마켓을 선택해 주셔서 감사합니다.<br>
+            고객님의 소중한 상품을 정성껏 준비하여 배송해 드릴게요.
+        </p>
+
+        <div class="order-info-box">
+            <div class="info-row">
+                <span class="info-label">주문 번호</span>
+                <span class="info-value fw-bold" style="color: #ff914d;" th:text="${marketOrderVO.order_id}">ORD-20240001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">결제 금액</span>
+                <span class="info-value fw-bold text-dark" th:text="|${#numbers.formatInteger(marketOrderVO.total_price, 0, 'COMMA')}원|">35,000원</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">받는 분</span>
+                <span class="info-value" th:text="${marketOrderVO.receiver_name}">홍길동</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">배송지</span>
+                <span class="info-value">
+                    <span th:text="|(${marketOrderVO.zipcode})|">(06234)</span><br>
+                    <span th:text="|${marketOrderVO.address1} ${marketOrderVO.address2}|">서울특별시 강남구 테헤란로 123, 4층</span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">결제 수단</span>
+                <span class="info-value">
+                    <th:block th:switch="${marketOrderVO.payment_method}">
+                        <span th:case="'CARD'"><i class="bi bi-credit-card me-1"></i> 신용/체크카드</span>
+                        <span th:case="'KAKAO'"><i class="bi bi-chat-fill me-1" style="color:#FEE500;"></i> 카카오페이</span>
+                        <span th:case="'BANK'"><i class="bi bi-bank me-1"></i> 무통장 입금</span>
+                        <span th:case="*" th:text="${marketOrderVO.payment_method}">기타 결제</span>
+                    </th:block>
+                </span>
+            </div>
+        </div>
+
+        <div class="btn-group-custom">
+            <a th:href="@{/}" class="btn-custom btn-home">쇼핑 계속하기</a>
+            <a th:href="@{/market_order/list_by_memberno.do(memberno=${session.memberno})}" class="btn-custom btn-history">주문 내역 보기</a>
+        </div>
+    </div>
+    
+    <p class="mt-4 text-muted small">
+        주문 취소 및 변경은 '주문 내역 보기'에서 [배송 준비 중] 단계까지만 가능합니다.
+    </p>
+</div>
+
+</body>
+</div>
+</html>

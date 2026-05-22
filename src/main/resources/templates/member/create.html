@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paws 회원가입</title>
+
+  <!-- 다음 주소 API -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <style>
+    /* ... 기존 스타일 유지 ... */
+    body { font-family: 'Pretendard', sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+    .form-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh;padding: 50px 20px 100px 20px; 
+  box-sizing: border-box; }
+    .join-card { width: 100%; max-width: 500px; background: #fff; padding: 30px 32px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    .title-center { text-align: center; font-size: 26px; font-weight: 800; color: #ff6b81; margin-bottom: 25px; }
+    .input-group { margin-bottom: 12px; }
+    .form-control { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e3e3e3; background: #fafafa; font-size: 14px; transition: all 0.2s ease; box-sizing: border-box; }
+    .form-control:focus { outline: none; border-color: #ff6b81; background: #fff; box-shadow: 0 0 0 3px rgba(255,107,129,0.1); }
+    .input-inside-wrapper { position: relative; width: 100%; }
+    .input-inside-wrapper .form-control { padding-right: 70px; }
+    .inside-btn { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); border: none; border-radius: 8px; background: #ff6b81; color: white; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .span_warning, .span_info { display: block; min-height: 15px; margin-top: 4px; padding-left: 4px; font-size: 11px; }
+    .span_warning { color: #ff4757; }
+    .span_info { color: #2ed573; }
+    .birth-group { display: flex; gap: 8px; }
+    .birth-box { position: relative; flex: 1; }
+    .birth-input { padding-right: 35px !important; text-align: center; }
+    .birth-label { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-size: 13px; color: #999; }
+    .gender-selection { display: flex; gap: 20px; padding: 5px 10px; justify-content: flex-start; align-items: center; }
+    .gender-item { display: flex; align-items: center; cursor: pointer; font-size: 14px; font-weight: 600; color: #555; }
+    .gender-item input[type="radio"] { appearance: none; width: 18px; height: 18px; border: 2px solid #ddd; border-radius: 4px; margin-right: 8px; position: relative; cursor: pointer; transition: 0.2s; }
+    .gender-item input[type="radio"]:checked { background-color: #ff6b81; border-color: #ff6b81; }
+    .gender-item input[type="radio"]:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; }
+    .checkbox-area { display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 15px; font-size: 13px; color: #666; }
+    .login_btn { display: flex; gap: 10px; margin-top: 20px; }
+    .btn { flex: 1; border: none; border-radius: 12px; padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .btn-primary { background: #ff6b81; color: white; }
+    .btn-secondary { background: #f1f3f5; color: #555; }
+    .text-links { margin-top: 18px; text-align: center; font-size: 13px; color: #777; }
+
+    /* =========================================================
+       커스텀 모달 스타일
+    ========================================================= */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: none; justify-content: center;
+      align-items: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; padding: 24px; border-radius: 20px;
+      width: 90%; max-width: 320px; text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-text { font-size: 15px; color: #333; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
+    .modal-btn {
+      width: 100%; padding: 12px; border-radius: 12px;
+      border: none; background: #ff6b81; color: white;
+      font-weight: 700; cursor: pointer;
+    }
+  </style>
+
+<script>
+
+  /* =========================================================
+     중복 확인 상태
+  ========================================================= */
+  let isIdChecked = false;
+  let isNicknameChecked = false;
+
+  /* =========================================================
+     모달 표시 함수
+  ========================================================= */
+  function showModal(msg, focusId = null) {
+
+    const modal =
+        document.getElementById('customModal');
+
+    const modalText =
+        document.getElementById('modalText');
+
+    modalText.innerHTML = msg;
+
+    modal.style.display = 'flex';
+
+    document.getElementById('modalConfirm').onclick =
+        function() {
+
+      modal.style.display = 'none';
+
+      if (focusId) {
+
+        const el =
+            document.getElementById(focusId);
+
+        if (el) {
+          el.focus();
+        }
+      }
+    };
+  }
+
+  /* =========================================================
+     메시지 출력
+  ========================================================= */
+  function showMessage(id, msg, success=false) {
+
+    const target =
+        document.getElementById(id);
+
+    target.innerHTML = msg;
+
+    target.className =
+        success
+        ? 'span_info'
+        : 'span_warning';
+  }
+
+  /* =========================================================
+     아이디 중복 확인
+  ========================================================= */
+  function checkID() {
+
+    const id =
+        document.getElementById('id');
+
+    const regex =
+        /^[a-zA-Z0-9]+$/;
+
+    if (id.value.trim().length < 4) {
+
+      showMessage(
+          'id_msg',
+          '아이디는 4자 이상 입력해주세요.');
+
+      return;
+    }
+
+    if (!regex.test(id.value)) {
+
+      showMessage(
+          'id_msg',
+          '영문 + 숫자만 가능합니다.');
+
+      return;
+    }
+
+    fetch('./checkID?id='
+        + encodeURIComponent(id.value))
+
+      .then(res => res.json())
+
+      .then(data => {
+
+        if (data.cnt > 0) {
+
+          showMessage(
+              'id_msg',
+              '이미 사용 중인 아이디입니다.');
+
+          isIdChecked = false;
+
+        } else {
+
+          showMessage(
+              'id_msg',
+              '사용 가능한 아이디입니다.',
+              true);
+
+          isIdChecked = true;
+        }
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        showMessage(
+            'id_msg',
+            '중복 확인 중 오류 발생');
+
+        isIdChecked = false;
+      });
+  }
+
+  /* =========================================================
+     닉네임 중복 확인
+  ========================================================= */
+  function checkNickname() {
+
+    const nickname =
+        document.getElementById('nickname');
+
+    const regex =
+        /^[가-힣a-zA-Z0-9]+$/;
+
+    if (nickname.value.trim().length < 2) {
+
+      showMessage(
+          'nickname_msg',
+          '닉네임은 2자 이상 입력해주세요.');
+
+      return;
+    }
+
+    if (!regex.test(nickname.value)) {
+
+      showMessage(
+          'nickname_msg',
+          '한글, 영문, 숫자만 가능합니다.');
+
+      return;
+    }
+
+    fetch('./checkNickname?nickname='
+        + encodeURIComponent(nickname.value))
+
+      .then(res => res.json())
+
+      .then(data => {
+
+        if (data.cnt > 0) {
+
+          showMessage(
+              'nickname_msg',
+              '이미 사용 중인 닉네임입니다.');
+
+          isNicknameChecked = false;
+
+        } else {
+
+          showMessage(
+              'nickname_msg',
+              '사용 가능한 닉네임입니다.',
+              true);
+
+          isNicknameChecked = true;
+        }
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        showMessage(
+            'nickname_msg',
+            '중복 확인 중 오류 발생');
+
+        isNicknameChecked = false;
+      });
+  }
+
+  /* =========================================================
+     비밀번호 보기
+  ========================================================= */
+  function togglePassword(inputId) {
+
+    const target =
+        document.getElementById(inputId);
+
+    target.type =
+        target.type === 'password'
+        ? 'text'
+        : 'password';
+  }
+
+  /* =========================================================
+     다음 주소 API
+  ========================================================= */
+  function execDaumPostcode() {
+
+    new daum.Postcode({
+
+      oncomplete: function(data) {
+
+        let addr =
+            data.userSelectedType === 'R'
+            ? data.roadAddress
+            : data.jibunAddress;
+
+        document.getElementById('zipcode').value =
+            data.zonecode;
+
+        document.getElementById('address1').value =
+            addr;
+
+        document.getElementById('address2').focus();
+      }
+
+    }).open();
+  }
+
+  /* =========================================================
+     회원가입 전송
+  ========================================================= */
+  function send() {
+
+    const f =
+        document.getElementById('frm');
+
+    /* =====================================================
+       비밀번호 정규식
+    ===================================================== */
+    const passwdRegex =
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/;
+
+    /* =====================================================
+       이름 검사
+    ===================================================== */
+    if (!f.mname.value.trim()) {
+
+      showModal(
+          "🐾 <b>이름</b>을 입력해주세요.",
+          "mname");
+
+      return;
+    }
+
+    /* =====================================================
+       닉네임 중복 확인
+    ===================================================== */
+    if (!isNicknameChecked) {
+
+      showModal(
+          "🐾 <b>닉네임 중복 확인</b>을 해주세요.",
+          "nickname");
+
+      return;
+    }
+
+    /* =====================================================
+       생년월일 검사
+    ===================================================== */
+    if (!f.year.value
+        || !f.month.value
+        || !f.day.value) {
+
+      showModal(
+          "🐾 <b>생년월일</b>을 정확히 입력해주세요.",
+          "year");
+
+      return;
+    }
+
+    /* =====================================================
+       성별 검사
+    ===================================================== */
+    const sex =
+        document.querySelector(
+            'input[name="sex"]:checked');
+
+    if (!sex) {
+
+      showModal(
+          "🐾 <b>성별</b>을 선택해주세요.");
+
+      return;
+    }
+
+    /* =====================================================
+       아이디 중복 확인
+    ===================================================== */
+    if (!isIdChecked) {
+
+      showModal(
+          "🐾 <b>아이디 중복 확인</b>을 해주세요.",
+          "id");
+
+      return;
+    }
+
+    /* =====================================================
+       비밀번호 입력 검사
+    ===================================================== */
+    if (!f.passwd.value.trim()) {
+
+      showModal(
+          "🐾 <b>비밀번호</b>를 입력해주세요.",
+          "passwd");
+
+      return;
+    }
+
+    /* =====================================================
+       비밀번호 형식 검사
+    ===================================================== */
+    if (!passwdRegex.test(f.passwd.value)) {
+
+      showModal(
+          "🐾 비밀번호는<br><br>" +
+          "영문 + 숫자 + 특수문자를 포함한<br>" +
+          "<b>8자 이상</b>이어야 합니다.",
+          "passwd");
+
+      return;
+    }
+
+    /* =====================================================
+       비밀번호 일치 검사
+    ===================================================== */
+    if (f.passwd.value !== f.passwd2.value) {
+
+      showModal(
+          "🐾 비밀번호가 <b>일치하지 않습니다.</b>",
+          "passwd2");
+
+      return;
+    }
+
+    /* =====================================================
+       주소 검사
+    ===================================================== */
+    if (!f.zipcode.value) {
+
+      showModal(
+          "🐾 <b>주소 검색</b>을 진행해주세요.");
+
+      return;
+    }
+
+    /* =====================================================
+       전화번호 검사
+    ===================================================== */
+    if (!f.tel.value.trim()) {
+
+      showModal(
+          "🐾 <b>전화번호</b>를 입력해주세요.",
+          "tel");
+
+      return;
+    }
+
+    /* =====================================================
+       약관 동의 검사
+    ===================================================== */
+    if (!document.getElementById('agree').checked) {
+
+      showModal(
+          "🐾 <b>이용약관 동의</b>가 필요합니다.");
+
+      return;
+    }
+
+    /* =====================================================
+       생년월일 조합
+    ===================================================== */
+    const birth =
+        `${f.year.value}-${f.month.value.padStart(2, '0')}-${f.day.value.padStart(2, '0')}`;
+
+    document.getElementById('birth').value =
+        birth;
+
+    /* =====================================================
+       최종 제출
+    ===================================================== */
+    f.submit();
+  }
+
+</script>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="form-wrapper">
+    <div class="join-card">
+      <div class="title-center">🐾 Paws 회원가입</div>
+
+      <form id="frm" method="post" action="/member/create">
+        <!-- 기존 폼 내용 동일 -->
+        <div class="input-group">
+          <input type="text" id="mname" name="mname" class="form-control" placeholder="이름">
+        </div>
+
+        <div class="input-group">
+          <div class="input-inside-wrapper">
+            <input type="text" id="nickname" name="nickname" class="form-control" placeholder="닉네임">
+            <button type="button" class="inside-btn" onclick="checkNickname()">확인</button>
+          </div>
+          <span id="nickname_msg" class="span_warning"></span>
+        </div>
+
+        <div class="input-group">
+          <div class="birth-group">
+            <div class="birth-box"><input type="number" id="year" class="form-control birth-input" placeholder="1999"><span class="birth-label">년</span></div>
+            <div class="birth-box"><input type="number" id="month" class="form-control birth-input" placeholder="01"><span class="birth-label">월</span></div>
+            <div class="birth-box"><input type="number" id="day" class="form-control birth-input" placeholder="01"><span class="birth-label">일</span></div>
+          </div>
+          <input type="hidden" id="birth" name="birth">
+        </div>
+
+        <div class="input-group">
+          <div class="gender-selection">
+            <label class="gender-item"><input type="radio" name="sex" value="남자"> 남자</label>
+            <label class="gender-item"><input type="radio" name="sex" value="여자"> 여자</label>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-inside-wrapper">
+            <input type="text" id="id" name="id" class="form-control" placeholder="아이디">
+            <button type="button" class="inside-btn" onclick="checkID()">확인</button>
+          </div>
+          <span id="id_msg" class="span_warning"></span>
+        </div>
+
+        <div class="input-group">
+          <div class="input-inside-wrapper">
+            <input type="password" id="passwd" name="passwd" class="form-control" placeholder="비밀번호">
+            <button type="button" class="inside-btn" onclick="togglePassword('passwd')">보기</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-inside-wrapper">
+            <input type="password" id="passwd2" class="form-control" placeholder="비밀번호 확인">
+            <button type="button" class="inside-btn" onclick="togglePassword('passwd2')">보기</button>
+          </div>
+          <span id="passwd2_msg" class="span_warning"></span>
+        </div>
+
+        <div class="input-group">
+          <input type="text" id="zipcode" name="zipcode" class="form-control" placeholder="우편번호 검색" readonly onclick="execDaumPostcode()" style="cursor:pointer;">
+        </div>
+        <div class="input-group">
+          <input type="text" id="address1" name="address1" class="form-control" placeholder="주소" readonly onclick="execDaumPostcode()" style="cursor:pointer;">
+        </div>
+        <div class="input-group">
+          <input type="text" id="address2" name="address2" class="form-control" placeholder="상세주소">
+        </div>
+
+        <div class="input-group">
+          <input type="tel" id="tel" name="tel" class="form-control" placeholder="전화번호 (- 제외)" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+
+        <div class="checkbox-area">
+          <input type="checkbox" id="agree">
+          <label for="agree">이용약관 및 개인정보 처리방침 동의</label>
+        </div>
+
+        <div class="login_btn">
+          <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+          <button type="button" class="btn btn-primary" onclick="send()">가입하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 커스텀 모달 구조 -->
+  <div id="customModal" class="modal-overlay">
+    <div class="modal-content">
+      <div id="modalText" class="modal-text">메시지 내용</div>
+      <button id="modalConfirm" class="modal-btn">확인</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paws Market - 리뷰 상세 보기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --paws-orange: #ff914d;
+            --paws-orange-light: #fff5ed;
+            --paws-dark: #222222;
+            --paws-gray: #777777;
+            --paws-border: #f2f2f2;
+        }
+
+        /* ---------------- 기본 컨테이너 ---------------- */
+        .container-box { 
+            max-width: 800px; 
+            margin: 60px auto 100px auto; 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.04); 
+            border: 1px solid var(--paws-border);
+        }
+        
+        .page-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid var(--paws-dark); 
+            padding-bottom: 20px; 
+            margin-bottom: 30px; 
+        }
+        .page-title { 
+            font-size: 22px; 
+            font-weight: 900; 
+            color: var(--paws-dark); 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .page-title i { color: var(--paws-orange); }
+        
+        .btn-back-link { 
+            font-size: 14px; 
+            color: var(--paws-gray); 
+            text-decoration: none !important; 
+            font-weight: 700; 
+            padding: 8px 16px; 
+            background: #f8f8f8; 
+            border-radius: 12px; 
+            transition: 0.3s; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+
+        /* ---------------- 상세 리뷰 내용 ---------------- */
+        .user-info-area { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            padding: 15px 25px;
+            background: var(--paws-orange-light);
+            border-radius: 15px;
+        }
+        
+        .user-and-stars { display: flex; align-items: center; gap: 20px; }
+        .user-id { font-size: 16px; font-weight: 800; color: var(--paws-dark); display: flex; align-items: center; gap: 8px; }
+        .review-stars { color: #ffc107; font-size: 1.2rem; }
+        .review-date { color: var(--paws-gray); font-size: 14px; }
+
+        .image-area { text-align: center; margin: 20px 0 40px 0; }
+        .image-area img { max-width: 100%; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+        .content-area { 
+            font-size: 17px; 
+            color: #333; 
+            line-height: 1.9; 
+            white-space: pre-wrap; 
+            margin: 30px 0; 
+            min-height: 150px;
+        }
+
+        /* ---------------- 버튼 그룹 ---------------- */
+        .bottom-action-group { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 50px; 
+            padding-top: 30px;
+            border-top: 1px solid var(--paws-border);
+        }
+
+        .btn-paws {
+            padding: 12px 28px;
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            transition: 0.3s;
+            text-decoration: none !important;
+        }
+
+        .btn-list { background: var(--paws-dark); color: #fff; }
+        .btn-del { background: #fff; color: #ff4d4d; border: 1.5px solid #ff4d4d; }
+
+        /* ---------------- 커스텀 모달 스타일 ---------------- */
+        #pawsModal { 
+            display: none; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            align-items: center; 
+            justify-content: center; 
+            backdrop-filter: blur(4px); 
+        }
+        .p-modal-content { 
+            background: #fff; 
+            padding: 35px; 
+            border-radius: 30px; 
+            width: 380px; 
+            text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); 
+            animation: pModalShow 0.3s ease; 
+        }
+        @keyframes pModalShow { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .p-modal-icon { font-size: 50px; color: var(--paws-orange); margin-bottom: 15px; }
+        .p-modal-text { font-weight: 700; color: #333; margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5; }
+        
+        .p-modal-btns { display: flex; gap: 10px; }
+        .p-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; }
+        .p-btn-confirm { background: #ff4d4d; color: white; }
+        .p-btn-cancel { background: #eee; color: #666; }
+
+        /* 📱 모바일 최적화 */
+        @media (max-width: 600px) {
+            .container-box { margin: 30px 15px; padding: 25px 20px; }
+            .bottom-action-group { flex-direction: column; gap: 12px; }
+            .btn-paws { width: 100%; justify-content: center; }
+            .p-modal-content { width: 85%; }
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- 커스텀 알림 모달 -->
+    <div id="pawsModal">
+        <div class="p-modal-content">
+            <div class="p-modal-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+            <div class="p-modal-text">정말로 이 리뷰를 삭제하시겠습니까?<br><span style="font-size:0.9rem; font-weight:400; color:#888;">삭제 후에는 복구할 수 없어요!</span></div>
+            <div class="p-modal-btns">
+                <button class="p-btn p-btn-cancel" onclick="closePawsModal()">취소</button>
+                <button class="p-btn p-btn-confirm" onclick="confirmDelete()">삭제하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-box">
+        <div class="page-header">
+            <h4 class="page-title"><i class="bi bi-chat-heart-fill"></i> 후기 상세보기</h4>
+            <a href="javascript:history.back();" class="btn-back-link"><i class="bi bi-arrow-left"></i> 목록으로</a>
+        </div>
+
+        <div class="review-detail-box">
+            <div class="user-info-area">
+                <div class="user-and-stars">
+                    <div class="user-id">
+                        <i class="bi bi-person-fill"></i>
+                        <span th:text="${marketReviewVO.id}">작성자ID</span>
+                    </div>
+                    <div class="review-stars">
+                        <span th:text="${'★'.repeat(marketReviewVO.rating) + '☆'.repeat(5 - marketReviewVO.rating)}"></span>
+                    </div>
+                </div>
+                <div class="review-date">
+                    <i class="bi bi-calendar3"></i> 
+                    <span th:text="${#strings.substring(marketReviewVO.reg_date, 0, 10)}"></span>
+                </div>
+            </div>
+
+            <div class="image-area" th:if="${marketReviewVO.review_img != null and marketReviewVO.review_img != ''}">
+                <img th:src="@{|/market_review/storage/${marketReviewVO.review_img}|}" alt="리뷰 이미지">
+            </div>
+
+            <div class="content-area" th:text="${marketReviewVO.review_content}">후기 내용</div>
+        </div>
+
+        <div class="bottom-action-group">
+            <a href="javascript:history.back();" class="btn-paws btn-list"><i class="bi bi-list-ul"></i> 전체 목록 보기</a>
+            <button type="button" class="btn-paws btn-del" onclick="openPawsModal()"><i class="bi bi-trash3"></i> 삭제하기</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // 모달 열기
+        function openPawsModal() {
+            document.getElementById('pawsModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 모달 닫기
+        function closePawsModal() {
+            document.getElementById('pawsModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 실제 삭제 로직 실행
+        function confirmDelete() {
+            const f = document.createElement('form');
+            f.method = 'post';
+            f.action = '/market_review/delete.do';
+            
+            const i1 = document.createElement('input');
+            i1.type = 'hidden'; i1.name = 'review_id'; 
+            i1.value = /*[[${marketReviewVO.review_id}]]*/ 0;
+            
+            const i2 = document.createElement('input');
+            i2.type = 'hidden'; i2.name = 'product_id'; 
+            i2.value = /*[[${marketReviewVO.product_id}]]*/ 0;
+            
+            f.appendChild(i1);
+            f.appendChild(i2);
+            document.body.appendChild(f);
+            f.submit();
+        }
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

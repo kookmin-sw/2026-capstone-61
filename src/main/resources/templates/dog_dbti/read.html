@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* 1. 레이아웃 및 배경 */
+        .result-container { 
+            max-width: 850px; 
+            margin: 80px auto 120px; /* 상단 마진 충분히 확보 */
+            padding: 0 20px; 
+        }
+        
+        #capture-area { 
+            background-color: #fff; 
+            padding: 40px; 
+            border-radius: 40px; 
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+        }
+
+        /* 2. 상단 프로필 카드 (그라데이션 & 입체감) */
+        .profile-card { 
+            background: linear-gradient(135deg, #ff6b81, #ff9a9e); 
+            border-radius: 30px; 
+            color: white; 
+            padding: 40px; 
+            box-shadow: 0 12px 0 #e05263; /* 푸딩 입체감 */
+            margin-bottom: 45px;
+            position: relative;
+        }
+        
+        .dog-profile-wrap { display: flex; align-items: center; gap: 40px; }
+        .dog-img-box { 
+            width: 180px; height: 180px; border-radius: 50%; overflow: hidden; 
+            border: 6px solid white; box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
+            background: white; flex-shrink: 0;
+        }
+        .dog-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .dog-info-box { text-align: left; }
+        .dog-info-box p { font-size: 1.15rem; margin: 10px 0; font-weight: 500; }
+        .dog-info-box span.label { opacity: 0.85; font-weight: normal; display: inline-block; width: 70px; }
+        .dog-info-box span.val { font-weight: 900; font-size: 1.3rem; }
+        .dbti-highlight { 
+            font-size: 2.8rem; font-weight: 900; letter-spacing: 3px; 
+            text-shadow: 2px 4px 6px rgba(0,0,0,0.1); color: #fff; 
+            display: block; margin-top: 5px;
+        }
+
+        /* 3. 수치 차트 슬림화 및 색상 최적화 */
+        .stat-card {
+            background: #fdfdfd;
+            border-radius: 30px;
+            padding: 30px;
+            border: 1px solid #f0f0f0;
+            margin-bottom: 30px;
+        }
+        .stat-label { display: flex; justify-content: space-between; font-weight: 800; margin-bottom: 8px; font-size: 0.95rem; }
+        .progress { 
+            height: 24px; border-radius: 50px; background-color: #eee; 
+            margin-bottom: 20px; overflow: hidden; border: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); 
+        }
+        .progress-bar { 
+            font-weight: 900; line-height: 24px; font-size: 0.85rem; 
+            transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
+        /* 4. 설명 박스 (푸딩 스타일) */
+        .desc-box { 
+            background: white; border-radius: 25px; padding: 30px; 
+            border: 1px solid #eee; box-shadow: 0 8px 20px rgba(0,0,0,0.03); 
+            position: relative; overflow: hidden;
+        }
+        .desc-box::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 8px; background: #ff6b81;
+        }
+        .ai-box {
+            background: #f4fbf9; border-color: #e0f2ee;
+        }
+        .ai-box::before { background: #10a37f; }
+
+        /* 5. 푸딩 버튼 시리즈 */
+        .btn-pudding {
+            border-radius: 50px; font-weight: 800; padding: 15px 35px;
+            transition: all 0.1s; position: relative; border: none; cursor: pointer;
+        }
+        /* 사진 저장 버튼 (다크 푸딩) */
+        .btn-save {
+            background: #333; color: white; box-shadow: 0 6px 0 #000;
+        }
+        .btn-save:active { transform: translateY(4px); box-shadow: 0 2px 0 #000; }
+        
+        /* 다시 검사 버튼 (코랄 푸딩) */
+        .btn-retry {
+            background: #ff6b81; color: white; box-shadow: 0 6px 0 #e05263;
+        }
+        .btn-retry:active { transform: translateY(4px); box-shadow: 0 2px 0 #e05263; }
+        .btn-retry:hover { color: white; }
+    </style>
+</head>
+
+<div layout:fragment="content">
+    <div class="result-container">
+        
+        <div id="capture-area">
+            <div class="text-center mb-5">
+                
+                <h3 class="fw-bold" style="color: #333; letter-spacing: -1px;">우리 아이 성향 리포트 🐾</h3>
+            </div>
+
+            <!-- 프로필 카드 영역 -->
+            <div class="profile-card">
+                <div class="dog-profile-wrap" th:if="${dogVO != null}">
+                    <div class="dog-img-box">
+                        <img th:src="${(dogVO.thumb1 != null and dogVO.thumb1 != '') ? '/dog/storage/' + dogVO.thumb1 : '/images/default_dog.png'}" alt="dog profile">
+                    </div>
+                    <div class="dog-info-box">
+                        <p><span class="label">이름</span> <span class="val" th:text="${dogVO.name}">이름</span></p>
+                        <p><span class="label">품종</span> <span class="val" th:text="${dogVO.breed}">견종</span></p>
+                        <p><span class="label">나이</span> <span class="val" th:text="${dogVO.age} + '살'">나이</span></p>
+                        <span class="dbti-highlight" th:text="${dogDbtiVO.dbtiType}">ENFA</span>
+                        <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 15px;" th:text="'검사일: ' + ${dogDbtiVO.updateDate}">2026-04-09</p>
+                    </div>
+                </div>
+                
+                <!-- 강아지 정보가 없을 경우 대비 -->
+                <div th:unless="${dogVO != null}" class="text-center py-3">
+                    <h2 class="dbti-highlight" th:text="${dogDbtiVO.dbtiType}">ENFA</h2>
+                    <p style="opacity: 0.8;" th:text="'검사 완료일: ' + ${dogDbtiVO.updateDate}">2026-04-09</p>
+                </div>
+            </div>
+
+            <!-- 상세 수치 차트 -->
+            <div class="stat-card">
+                <h5 class="fw-bold mb-4 text-center"><i class="bi bi-bar-chart-fill me-2"></i>상세 성향 분석</h5>
+
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span style="color: #ff4757;">외향(E) [[${dogDbtiVO.ePer}]]%</span>
+                        <span class="text-muted">내향(I) [[${100 - dogDbtiVO.ePer}]]%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" role="progressbar" th:style="'width:' + ${dogDbtiVO.ePer} + '%'">E</div>
+                        <div class="progress-bar bg-secondary" role="progressbar" th:style="'width:' + ${100 - dogDbtiVO.ePer} + '%'" style="opacity:0.3;">I</div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span style="color: #ffa502;">사교적(S) [[${dogDbtiVO.sPer}]]%</span>
+                        <span class="text-muted">독립적(N) [[${100 - dogDbtiVO.sPer}]]%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" role="progressbar" th:style="'width:' + ${dogDbtiVO.sPer} + '%'">S</div>
+                        <div class="progress-bar bg-dark" role="progressbar" th:style="'width:' + ${100 - dogDbtiVO.sPer} + '%'" style="opacity:0.3;">N</div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span style="color: #2e86de;">애정표현(A) [[${dogDbtiVO.aPer}]]%</span>
+                        <span class="text-muted">이성적(T) [[${100 - dogDbtiVO.aPer}]]%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" role="progressbar" th:style="'width:' + ${dogDbtiVO.aPer} + '%'">A</div>
+                        <div class="progress-bar bg-secondary" role="progressbar" th:style="'width:' + ${100 - dogDbtiVO.aPer} + '%'" style="opacity:0.3;">T</div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <span style="color: #2ed573;">복종/계획(O) [[${dogDbtiVO.oPer}]]%</span>
+                        <span class="text-muted">자기주관(U) [[${100 - dogDbtiVO.oPer}]]%</span>
+                    </div>
+                    <div class="progress" style="margin-bottom: 0;">
+                        <div class="progress-bar bg-success" role="progressbar" th:style="'width:' + ${dogDbtiVO.oPer} + '%'">O</div>
+                        <div class="progress-bar bg-primary" role="progressbar" th:style="'width:' + ${100 - dogDbtiVO.oPer} + '%'" style="opacity:0.3;">U</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 타입 설명 -->
+            <div class="desc-box mb-4">
+                <h5 class="fw-bold"><span th:text="${dogDbtiVO.dbtiType}" style="color: #ff6b81;">ENFA</span> 타입은 어떤가요?</h5>
+                <div class="mt-3" style="line-height: 1.8;">
+                    <p class="fw-bold text-dark" style="font-size: 1.15rem; color: #ff6b81 !important;">
+                        "[[${dogDbtiVO.energyLabel}]], [[${dogDbtiVO.socialLabel}]], [[${dogDbtiVO.affectionLabel}]], [[${dogDbtiVO.obedienceLabel}]]"
+                    </p>
+                    <div class="text-muted mb-0" style="font-size: 0.95rem;">
+                        이 타입의 강아지는 성격이 아주 뚜렷한 매력쟁이입니다! 
+                        <br>
+                        <span th:if="${dogDbtiVO.ePer >= 70}">🏃 활동량이 매우 높으므로 에너지를 발산할 수 있는 야외 활동이 필수적입니다.</span>
+                        <span th:if="${dogDbtiVO.ePer < 40}">🏠 조용하고 편안한 집안 환경에서 쉬는 것을 선호하는 내향적인 친구예요.</span>
+                        <br>
+                        <span th:if="${dogDbtiVO.oPer < 40}">🧐 주관이 뚜렷하므로 훈련 시 강압적인 방법보다 놀이 중심의 교육이 효과적입니다.</span>
+                        <span th:if="${dogDbtiVO.aPer >= 70}">💕 보호자와의 교감을 매우 중요하게 생각하므로 스킨십을 자주 해주세요.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 피드백 -->
+            <div class="desc-box ai-box" th:if="${chatGptFeedback != null}">
+                <h5 class="fw-bold" style="color: #10a37f;"><i class="bi bi-robot me-2"></i>AI 행동 전문가의 맞춤 솔루션</h5>
+                <div class="mt-3 text-dark" style="line-height: 1.8; font-size: 0.95rem;" th:utext="${chatGptFeedback}">
+                    (AI 분석 내용 로딩 중...)
+                </div>
+            </div>
+        </div> 
+
+        <!-- 하단 액션 버튼 -->
+        <div class="text-center mt-5 d-flex justify-content-center gap-3">
+            <button type="button" class="btn-pudding btn-save px-5" onclick="saveAsImage()">
+                📸 리포트 사진 저장
+            </button>
+            <a th:href="@{/dog_dbti/create.do(dogno=${dogDbtiVO.dogno})}" class="btn-pudding btn-retry px-5 text-decoration-none">
+                다시 검사하기
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function saveAsImage() {
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = "⏳ 생성 중...";
+            btn.disabled = true;
+
+            const captureDiv = document.getElementById("capture-area");
+
+            // 캡처 시 둥근 모서리가 잘 유지되도록 배경색 지정 및 scale 상향
+            html2canvas(captureDiv, {
+                scale: 2, 
+                backgroundColor: "#ffffff",
+                borderRadius: 40,
+                useCORS: true // 외부 이미지(카카오 등) 허용 설정
+            }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const link = document.createElement("a");
+                link.download = `Paws_DBTI_Report_${new Date().getTime()}.png`; 
+                link.href = imgData;
+                link.click();
+
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }).catch(error => {
+                alert("이미지 저장 중 오류가 발생했습니다.");
+                console.error("Capture Error:", error);
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</div>
+</html>

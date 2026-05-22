@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.ai_actionlog.AiActionLogDAOInter">
+
+  <!-- ========================================================= -->
+  <!-- 🧠 실행 로그 저장 -->
+  <!-- ========================================================= -->
+  <insert id="create"
+          parameterType="dev.mvc.ai_actionlog.AiActionLogVO">
+
+    INSERT INTO ai_action_log(
+      logno,
+      memberno,
+      dogno,
+      chatno,
+      action_type,
+      input_data,
+      output_data,
+      ai_model,
+      success_yn,
+      error_message,
+      response_time,
+      token_usage,
+      rdate
+    )
+    VALUES(
+      ai_action_log_seq.nextval,
+
+		#{memberno, jdbcType=NUMERIC},
+		#{dogno, jdbcType=NUMERIC},
+		#{chatno, jdbcType=NUMERIC},
+
+      #{actionType, jdbcType=VARCHAR},
+
+      #{inputData, jdbcType=CLOB},
+      #{outputData, jdbcType=CLOB},
+
+      #{aiModel, jdbcType=VARCHAR},
+
+      #{successYn, jdbcType=CHAR},
+
+      #{errorMessage, jdbcType=VARCHAR},
+
+      #{responseTime},
+
+      #{tokenUsage},
+
+      sysdate
+    )
+
+  </insert>
+
+
+  <!-- ========================================================= -->
+  <!-- 🔍 로그 상세 조회 -->
+  <!-- ========================================================= -->
+  <select id="read"
+          parameterType="int"
+          resultType="dev.mvc.ai_actionlog.AiActionLogVO">
+
+    SELECT
+      logno,
+      memberno,
+      dogno,
+      chatno,
+
+      action_type AS actionType,
+
+      input_data AS inputData,
+      output_data AS outputData,
+
+      ai_model AS aiModel,
+
+      success_yn AS successYn,
+
+      error_message AS errorMessage,
+
+      response_time AS responseTime,
+
+      token_usage AS tokenUsage,
+
+      rdate
+
+    FROM ai_action_log
+
+    WHERE logno = #{logno}
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 📋 전체 로그 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_all"
+          resultType="dev.mvc.ai_actionlog.AiActionLogVO">
+
+    SELECT
+      logno,
+      memberno,
+      dogno,
+      chatno,
+
+      action_type AS actionType,
+
+      input_data AS inputData,
+      output_data AS outputData,
+
+      ai_model AS aiModel,
+
+      success_yn AS successYn,
+
+      error_message AS errorMessage,
+
+      response_time AS responseTime,
+
+      token_usage AS tokenUsage,
+
+      rdate
+
+    FROM ai_action_log
+
+    ORDER BY logno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 👤 회원별 로그 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_by_memberno"
+          parameterType="int"
+          resultType="dev.mvc.ai_actionlog.AiActionLogVO">
+
+    SELECT
+      logno,
+      memberno,
+      dogno,
+      chatno,
+
+      action_type AS actionType,
+
+      input_data AS inputData,
+      output_data AS outputData,
+
+      ai_model AS aiModel,
+
+      success_yn AS successYn,
+
+      error_message AS errorMessage,
+
+      response_time AS responseTime,
+
+      token_usage AS tokenUsage,
+
+      rdate
+
+    FROM ai_action_log
+
+    WHERE memberno = #{memberno}
+
+    ORDER BY logno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 🐾 실행 타입별 조회 -->
+  <!-- ========================================================= -->
+  <select id="list_by_action_type"
+          parameterType="String"
+          resultType="dev.mvc.ai_actionlog.AiActionLogVO">
+
+    SELECT
+      logno,
+      memberno,
+      dogno,
+      chatno,
+
+      action_type AS actionType,
+
+      input_data AS inputData,
+      output_data AS outputData,
+
+      ai_model AS aiModel,
+
+      success_yn AS successYn,
+
+      error_message AS errorMessage,
+
+      response_time AS responseTime,
+
+      token_usage AS tokenUsage,
+
+      rdate
+
+    FROM ai_action_log
+
+    WHERE action_type = #{actionType}
+
+    ORDER BY logno DESC
+
+  </select>
+
+
+  <!-- ========================================================= -->
+  <!-- 🗑 로그 삭제 -->
+  <!-- ========================================================= -->
+  <delete id="delete"
+          parameterType="int">
+
+    DELETE FROM ai_action_log
+
+    WHERE logno = #{logno}
+
+  </delete>
+
+</mapper>

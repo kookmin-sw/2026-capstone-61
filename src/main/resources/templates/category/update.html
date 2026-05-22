@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Paws | 카테고리 수정</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /* 메인 카드 박스 */
+    .update-card {
+      width: 95%;
+      max-width: 650px;
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 30px;
+      box-shadow: 0 15px 35px rgba(255, 182, 193, 0.2);
+      margin: 70px auto 100px auto;
+      border: none;
+    }
+
+    /* 제목 영역 */
+    .update-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .update-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .update-subtitle {
+      font-size: 15px;
+      color: #ff6b81;
+      font-weight: 600;
+      background: #fff5f7;
+      padding: 5px 15px;
+      border-radius: 15px;
+      display: inline-block;
+    }
+
+    /* 입력 폼 스타일 */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #555;
+      margin-left: 8px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-control-cute {
+      width: 100%;
+      padding: 12px 20px;
+      font-size: 15px;
+      border-radius: 15px;
+      border: 1.5px solid #eee;
+      background-color: #fdfdfd;
+      transition: all 0.3s;
+    }
+
+    .form-control-cute:focus {
+      border-color: #ff9a9e;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 154, 158, 0.1);
+      outline: none;
+    }
+
+    /* 에러 알림 */
+    .error-msg {
+      font-size: 13px;
+      color: #ff4757;
+      margin-top: 6px;
+      margin-left: 10px;
+      font-weight: 500;
+    }
+
+    /* 하단 버튼 그룹 */
+    .btn-paws-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 40px;
+    }
+
+    .btn-paws {
+      padding: 12px 35px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-update {
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      color: white;
+      box-shadow: 0 5px 15px rgba(255, 107, 129, 0.2);
+    }
+
+    .btn-cancel {
+      background-color: #f1f2f6;
+      color: #57606f;
+    }
+
+    .btn-paws:hover {
+      transform: translateY(-3px);
+      opacity: 0.9;
+    }
+
+    /* 목록 바로가기 버튼 */
+    .list-shortcut {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      color: #bbb;
+      font-size: 20px;
+      transition: 0.2s;
+    }
+
+    .list-shortcut:hover {
+      color: #ff6b81;
+    }
+
+    @media (max-width: 576px) {
+      .update-card { padding: 30px 20px; }
+      .btn-paws-group { flex-direction: column; }
+      .btn-paws { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content" class="container">
+
+  <div class="update-card" style="position: relative;">
+    
+    <!-- 목록 바로가기 (아이콘) -->
+    <a th:href="@{|/category/list_search?word=${word}&now_page=${now_page}|}" 
+       class="list-shortcut" title="목록으로 돌아가기">
+      <i class="fas fa-times-circle"></i>
+    </a>
+
+    <div class="update-header">
+      <div class="update-title">카테고리 정보 수정</div>
+      <div class="update-subtitle">
+        <i class="fas fa-paw me-1"></i>
+        <span th:text="${categoryVO.cat_type}">분류</span> 
+        <i class="fas fa-chevron-right mx-1" style="font-size: 10px;"></i>
+        <span th:text="${categoryVO.cat_name}">항목</span>
+      </div>
+    </div>
+
+    <form name="frm" th:object="${categoryVO}" method="post" action="/category/update">
+      <!-- 히든 필드 -->
+      <input type="hidden" th:field="*{cat_no}">
+      <input type="hidden" name="word" th:value="${word}">
+      <input type="hidden" name="now_page" th:value="${now_page}">
+
+      <!-- 분류 타입 -->
+      <div class="form-group">
+        <label><i class="fas fa-tags me-1" style="color: #ff9a9e;"></i> 분류 타입 (대분류)</label>
+        <input type="text" th:field="*{cat_type}" class="form-control-cute" placeholder="예: INFO, BOARD">
+        <div th:if="${#fields.hasErrors('cat_type')}" class="error-msg">
+          <i class="fas fa-exclamation-circle me-1"></i>
+          <span th:each="err : ${#fields.errors('cat_type')}" th:text="${err}"></span>
+        </div>
+      </div>
+
+      <!-- 카테고리명 -->
+      <div class="form-group">
+        <label><i class="fas fa-edit me-1" style="color: #ff9a9e;"></i> 카테고리명 (소분류)</label>
+        <input type="text" th:field="*{cat_name}" class="form-control-cute" placeholder="표시될 이름을 입력하세요.">
+        <div th:if="${#fields.hasErrors('cat_name')}" class="error-msg">
+          <i class="fas fa-exclamation-circle me-1"></i>
+          <span th:each="err : ${#fields.errors('cat_name')}" th:text="${err}"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- 출력 순서 -->
+        <div class="col-md-6 form-group">
+          <label><i class="fas fa-sort-numeric-down me-1" style="color: #ff9a9e;"></i> 출력 순서</label>
+          <input type="number" th:field="*{seqno}" class="form-control-cute">
+        </div>
+
+        <!-- 출력 모드 -->
+        <div class="col-md-6 form-group">
+          <label><i class="fas fa-eye me-1" style="color: #ff9a9e;"></i> 공개 상태 (Y/N)</label>
+          <input type="text" th:field="*{visible}" class="form-control-cute" maxlength="1" placeholder="Y 또는 N">
+          <div th:if="${#fields.hasErrors('visible')}" class="error-msg">
+             <span th:each="err : ${#fields.errors('visible')}" th:text="${err}"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 버튼 -->
+      <div class="btn-paws-group">
+        <button type="submit" class="btn-paws btn-update">
+          <i class="fas fa-check-circle"></i>완료
+        </button>
+        <button type="button" class="btn-paws btn-cancel"
+                th:attr="onclick=|location.href='/category/read/${categoryVO.cat_no}?word=${word}&now_page=${now_page}'|">
+          하기
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+</body>
+</html>

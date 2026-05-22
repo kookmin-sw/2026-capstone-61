@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일 뷰포트 최적화 (가로 스크롤 방지 및 기본 배율 설정) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" /> 
+    <meta name="referrer" content="no-referrer" />
+    <title>강아지 백과사전</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <link href="/css/style.css" rel="Stylesheet" type="text/css">
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐶</text></svg>">
+
+    <style>
+        .hidden { display: none; }
+        
+        /* --- 하단 메뉴 레이아웃 최적화 --- */
+        .content_bottom {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #fff;
+            border-top: 1px solid #eee;
+            z-index: 999;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .navigation a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #555;
+            flex: 1;
+        }
+
+        .bottom_icon_alt {
+            font-size: 20px; 
+            margin-bottom: -2px; 
+        }
+
+        .navigation span {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        /* --- 챗봇 플로팅 버튼 --- */
+        #chat-btn {
+            position: fixed; 
+            bottom: 75px; /* 하단 네비게이션바를 가리지 않도록 소폭 조정 */
+            right: 20px; 
+            width: 56px; 
+            height: 56px; 
+            background-color: #fff; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(255, 128, 128, 0.4); 
+            z-index: 10000; 
+            transition: all 0.3s ease;
+            animation: pulse-orange 2s infinite;
+            -webkit-tap-highlight-color: transparent; /* 모바일 터치 음영 제거 */
+        }
+        
+        @keyframes pulse-orange {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 128, 128, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 128, 128, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 128, 128, 0); }
+        }
+
+        /* --- 챗봇 창 모바일 반응형 수정 --- */
+        #chat-window {
+            position: fixed; 
+            bottom: 145px; 
+            right: 20px; 
+            width: 330px;           /* 가로 폭 살짝 확대 */
+            max-width: calc(100% - 40px); /* 화면을 벗어나지 않도록 방지 */
+            height: 500px; 
+            max-height: calc(100vh - 180px); /* 모바일 세로 화면 높이에 맞춤 */
+            background: #fff; 
+            border-radius: 25px; 
+            display: none; 
+            flex-direction: column; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+            z-index: 10000; 
+            overflow: hidden; 
+            font-family: 'Malgun Gothic', sans-serif;
+            border: 4px solid #fff5e6;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, rgb(128, 255, 255), rgb(255, 128, 192)); 
+            color: white; 
+            padding: 15px; 
+            font-weight: bold; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+
+        #chat-content {
+            flex: 1; 
+            padding: 15px; 
+            overflow-y: auto; 
+            background: #fffaf5; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+            -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+        }
+
+        .chat-bubble {
+            padding: 10px 14px; 
+            border-radius: 18px; 
+            max-width: 85%; 
+            font-size: 14px; 
+            line-height: 1.5;
+            word-break: break-all; /* 긴 텍스트 자동 줄바꿈 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .bot-bubble { background: #fdf2e9; color: #5a3e2b; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .user-bubble { background: rgb(255, 128, 192); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        /* --- 입력 폼 및 전송 버튼 모바일 최적화 --- */
+        .chat-input-area { 
+            padding: 10px 12px; /* 좌우 패딩을 아주 미세하게 줄여 공간 확보 */
+            background: white; 
+            border-top: 2px solid #fff5e6; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-sizing: border-box;
+        }
+
+        /* 🔥 모바일 찌그러짐 방지 핵심 수정 */
+        #user-input { 
+            flex: 1; 
+            min-width: 0; /* 중요: Flex 요소 내부에서 가로폭이 유연하게 좁혀지도록 기본 제한을 해제 */
+            border: 2px solid #eee; 
+            border-radius: 20px; 
+            padding: 8px 12px; 
+            outline: none; 
+            font-size: 14px; 
+            -webkit-appearance: none; /* iOS 기본 스타일 초기화 */
+            box-sizing: border-box;
+        }
+
+        #send-btn { 
+            background: rgb(255, 128, 192); /* 전송 버튼 색감 부여로 시인성 개선 */
+            border: none; 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            color: #fff; 
+            cursor: pointer; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0; /* 중요: 부모가 좁아져도 전송 버튼 형태가 절대 찌그러지거나 숨겨지지 않도록 방지 */
+            padding: 0;
+            transition: background 0.2s;
+        }
+        
+        #send-btn:active {
+            background: rgb(235, 108, 172);
+        }
+
+        #send-btn i {
+            font-size: 16px;
+            display: inline-block;
+            line-height: 1;
+            /* 부트스트랩 아이콘 미세 중앙 정렬 팁 */
+            transform: translate(1px, -1px); 
+        }
+        /* ================================
+   📱 모바일 최적화 추가
+================================ */
+@media screen and (max-width: 480px) {
+
+    /* 챗봇 창을 모바일 화면에 맞춤 */
+    #chat-window {
+        width: calc(100vw - 20px);
+        right: 10px;
+        left: 10px;
+        bottom: 80px;
+        height: 75vh;
+        max-height: 75vh;
+        border-radius: 20px;
+    }
+
+    /* 입력 영역 */
+    .chat-input-area {
+        width: 100%;
+        padding: 10px;
+        gap: 6px;
+        box-sizing: border-box;
+    }
+
+    /* 입력창 */
+    #user-input {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        font-size: 16px; /* iOS 확대 방지 */
+    }
+
+    /* 전송 버튼 */
+    #send-btn {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        min-height: 42px;
+        flex-shrink: 0;
+    }
+
+    /* 플로팅 버튼 위치 */
+    #chat-btn {
+        bottom: 70px;
+        right: 15px;
+    }
+}
+    </style>
+</head>
+
+<body>
+    <div class='container_top'>
+        <nav th:replace="~{navbar::navbarFragment}"></nav>
+    </div>
+    
+    <div class='content_body'>
+        <th:block layout:fragment="content"></th:block>
+    </div>
+
+    <div class='content_bottom'>
+        <div class='bottom_menu'>
+            <div class="navigation">
+                <a th:href="@{/breed/list_by_cat_no(cat_no=1)}">
+                    <span class="bottom_icon_alt">📖</span>
+                    <span>사전</span>
+                </a>
+
+                <a href="/breed/gallery">
+                    <span class="bottom_icon_alt">🖼️</span>
+                    <span>갤러리</span>
+                </a>
+
+                <a th:href="@{/community/list(cat_no=2)}">
+                    <span class="bottom_icon_alt">💬</span>
+                    <span>커뮤니티</span>
+                </a>
+                
+                <a th:if="${session.memberno != null}" th:href="@{/mypage(memberno=${session.memberno})}">
+                    <span class="bottom_icon_alt">👤</span>
+                    <span>마이페이지</span>
+                </a>
+                <a th:if="${session.memberno == null}" th:href="@{/member/login}">
+                    <span class="bottom_icon_alt">🔑</span>
+                    <span>로그인</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 챗봇 버튼 -->
+    <div id="chat-btn">
+        <span style="font-size: 30px; line-height: 1;">🐶</span>
+    </div>
+
+    <!-- 챗봇 창 -->
+    <div id="chat-window">
+        <div class="chat-header">
+            <span style="font-size: 16px;">🐾댕댕상담소🐾</span>
+            <span id="chat-close" style="cursor: pointer; font-size: 20px; padding: 5px;">✕</span>
+        </div>
+        
+        <div id="chat-content">
+            <div class="chat-bubble bot-bubble">
+                안녕하세요! 멍멍! 🐾<br>궁금한 점이 있으신가요?
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="질문을 입력하세요...">
+            <button id="send-btn">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        (function() {
+            const chatBtn = document.getElementById('chat-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatClose = document.getElementById('chat-close');
+            const chatContent = document.getElementById('chat-content');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+
+            chatBtn.onclick = () => {
+                const isHidden = chatWindow.style.display === 'none' || chatWindow.style.display === '';
+                chatWindow.style.display = isHidden ? 'flex' : 'none';
+                
+                // 창이 열릴 때 자동 스크롤 하단 고정 및 모바일 자동 포커스
+                if(isHidden) {
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                    setTimeout(() => userInput.focus(), 100);
+                }
+            };
+            chatClose.onclick = () => chatWindow.style.display = 'none';
+
+            function appendMessage(type, text, isLoginNeeded = false) {
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble ' + (type === 'user' ? 'user-bubble' : 'bot-bubble');
+                bubble.innerText = text;
+
+                if (isLoginNeeded) {
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'login-move-btn';
+                    loginBtn.style.cssText = "width:100%; margin-top:10px; border-radius:10px; border:none; background:#80ffff; padding:5px;";
+                    loginBtn.innerText = '로그인하러 가기';
+                    loginBtn.onclick = () => { location.href = '/member/login'; };
+                    bubble.appendChild(loginBtn);
+                }
+
+                chatContent.appendChild(bubble);
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }
+
+            async function sendMessage() {
+                const text = userInput.value.trim();
+                if (!text) return;
+
+                appendMessage('user', text);
+                userInput.value = '';
+
+                const loadingMsg = document.createElement('div');
+                loadingMsg.id = "ai-loading";
+                loadingMsg.style.cssText = "font-size: 12px; color: #999; margin-left: 10px;";
+                loadingMsg.innerText = "생각 중... ✨";
+                chatContent.appendChild(loadingMsg);
+                chatContent.scrollTop = chatContent.scrollHeight;
+
+                try {
+                    const response = await fetch('/chat/ask', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: text })
+                    });
+                    const data = await response.json();
+                    document.getElementById("ai-loading")?.remove();
+
+                    if (data.status === "LOGIN_REQUIRED") {
+                        appendMessage('bot', data.answer, true);
+                    } else {
+                        appendMessage('bot', data.answer || "잘 모르겠어요 멍멍!");
+                    }
+                } catch (err) {
+                    document.getElementById("ai-loading")?.remove();
+                    appendMessage('bot', "연결이 불안정해요!");
+                }
+            }
+
+            sendBtn.onclick = sendMessage;
+            userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+        })();
+        // =========================================================
+// 📍 로그인 사용자 위치 자동 저장
+// =========================================================
+
+const memberno =
+    /*[[${session.memberno}]]*/ null;
+
+console.log("memberno:", memberno);
+
+if (memberno && navigator.geolocation) {
+
+navigator.geolocation.getCurrentPosition(
+
+    function(pos) {
+
+        const latitude =
+            pos.coords.latitude;
+
+        const longitude =
+            pos.coords.longitude;
+
+        console.log(
+            "정확도:",
+            pos.coords.accuracy
+        );
+
+        fetch("/member/update_location", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+            },
+
+            body:
+                "latitude=" + latitude +
+                "&longitude=" + longitude
+        });
+
+    },
+
+    function(err) {
+
+        console.log(err);
+
+    },
+
+    {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+    }
+
+);
+
+}
+    </script>
+</body>
+</html>

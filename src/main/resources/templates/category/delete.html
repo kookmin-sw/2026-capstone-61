@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Paws | 카테고리 삭제</title>
+  <style>
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    .delete-card {
+      background: #fff;
+      border-radius: 25px;
+      padding: 50px 40px;
+      box-shadow: 0 15px 35px rgba(255, 182, 193, 0.2);
+      margin: 100px auto;
+      max-width: 600px;
+      text-align: center;
+      border: none;
+    }
+
+    .warning-icon {
+      font-size: 60px;
+      color: #ff6b81;
+      margin-bottom: 20px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .title-line {
+      font-size: 24px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .category-path {
+      font-size: 16px;
+      color: #ff6b81;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
+    .msg-box {
+      background-color: #fff5f7;
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid #ffccd2;
+      margin-bottom: 40px;
+    }
+
+    .msg-warning {
+      font-size: 17px;
+      font-weight: 600;
+      color: #e84118;
+      margin-bottom: 15px;
+    }
+
+    .target-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d3436;
+      border-bottom: 2px solid #ffccd2;
+      padding-bottom: 5px;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .btn-paws {
+      padding: 12px 40px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      transition: 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-delete {
+      background: #ff6b81;
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 129, 0.3);
+    }
+
+    .btn-cancel {
+      background: #dfe6e9;
+      color: #2d3436;
+    }
+
+    .btn-paws:hover {
+      transform: translateY(-3px);
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content" class="container">
+
+  <div class="delete-card">
+    <!-- 경고 아이콘 -->
+    <div class="warning-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+
+    <div class="title-line">카테고리를 삭제하시겠습니까?</div>
+    
+    <div class="category-path">
+      <span th:text="${categoryVO.cat_type}">분류</span> 
+      <i class="fas fa-chevron-right mx-2" style="font-size: 12px;"></i> 
+      <span th:text="${categoryVO.cat_name}">카테고리명</span>
+    </div>
+
+    <div class="msg-box">
+      <div class="msg-warning">
+        <i class="fas fa-info-circle me-2"></i>삭제 시 내부 품종 데이터도 모두 삭제될 수 있습니다.
+      </div>
+      <div style="font-size: 15px; color: #636e72; margin-bottom: 8px;">삭제 대상 카테고리:</div>
+      <div class="target-name" th:text="${categoryVO.cat_name}"></div>
+    </div>
+
+    <form name="frm" th:object="${categoryVO}" method="post" action="/category/delete">
+      <input type="hidden" name="cat_no" th:value="${categoryVO.cat_no}">
+      <input type="hidden" name="now_page" th:value="${now_page}">
+      <input type="hidden" name="word" th:value="${word}">
+
+      <div class="btn-group">
+        <button type="submit" class="btn-paws btn-delete shadow-sm">네, 삭제합니다</button>
+        <button type="button" class="btn-paws btn-cancel" 
+                th:attr="onclick=|location.href='/category/read/${categoryVO.cat_no}?word=${word}&now_page=${now_page}'|">
+          취소
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+</body>
+</html>

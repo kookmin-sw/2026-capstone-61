@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Paws AI 상담소</title>
+
+<!-- =========================================================
+     🌈 Pretendard Font
+========================================================= -->
+<link rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+
+<style>
+
+/* =========================================================
+   🌈 기본 설정
+========================================================= */
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  padding:0;
+  font-family:'Pretendard', sans-serif;
+}
+
+/* =========================================================
+   🐾 챗봇 실행 버튼
+========================================================= */
+
+#chat-btn{
+  position:fixed;
+  bottom:30px;
+  right:30px;
+
+  width:68px;
+  height:68px;
+
+  border-radius:50%;
+  background:linear-gradient(135deg,#ff9d00,#ff7b00);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+
+  box-shadow:0 10px 25px rgba(0,0,0,0.18);
+
+  z-index:99999;
+
+  transition:0.25s;
+}
+
+#chat-btn:hover{
+  transform:scale(1.08);
+}
+
+#chat-btn span{
+  font-size:32px;
+}
+
+/* =========================================================
+   💬 채팅창
+========================================================= */
+
+#chat-window{
+
+  position:fixed;
+
+  right:30px;
+  bottom:110px;
+
+  width:420px;
+  height:760px;
+
+  background:#fff;
+
+  border-radius:28px;
+
+  overflow:hidden;
+
+  display:none;
+  flex-direction:column;
+
+  box-shadow:0 20px 50px rgba(0,0,0,0.18);
+
+  z-index:99998;
+}
+
+/* =========================================================
+   🧡 헤더
+========================================================= */
+
+.chat-header{
+
+  padding:22px;
+
+  background:linear-gradient(135deg,#ff9d00,#ff7b00);
+
+  color:#fff;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header-left{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+
+.ai-icon{
+
+  width:45px;
+  height:45px;
+
+  border-radius:50%;
+
+  background:rgba(255,255,255,0.2);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:24px;
+}
+
+.header-title{
+  font-size:18px;
+  font-weight:700;
+}
+
+.header-sub{
+  font-size:12px;
+  opacity:0.85;
+  margin-top:3px;
+}
+
+/* =========================================================
+   🐶 현재 반려견 정보
+========================================================= */
+
+.current-dog{
+
+  padding:16px 18px;
+
+  display:flex;
+  gap:14px;
+  align-items:center;
+
+  border-bottom:1px solid #f0f0f0;
+
+  background:#fffaf2;
+}
+
+.current-dog img{
+
+  width:60px;
+  height:60px;
+
+  border-radius:18px;
+
+  object-fit:cover;
+
+  border:2px solid #ffe0ad;
+}
+
+.dog-name{
+  font-size:16px;
+  font-weight:700;
+  color:#222;
+}
+
+.dog-info{
+  font-size:13px;
+  color:#777;
+  margin-top:5px;
+}
+
+/* =========================================================
+   🧠 기억 정보
+========================================================= */
+
+.memory-wrap{
+
+  padding:14px 16px;
+
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+
+  background:#fafafa;
+
+  border-bottom:1px solid #f0f0f0;
+}
+
+.memory-chip{
+
+  padding:7px 12px;
+
+  border-radius:999px;
+
+  background:#fff;
+
+  border:1px solid #eee;
+
+  font-size:12px;
+
+  color:#555;
+
+  box-shadow:0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* =========================================================
+   ⚡ 빠른 질문
+========================================================= */
+
+.quick-question-wrap{
+
+  padding:14px;
+
+  display:flex;
+  gap:8px;
+
+  overflow-x:auto;
+
+  background:#fff;
+}
+
+.quick-question-wrap button{
+
+  border:none;
+
+  padding:10px 14px;
+
+  border-radius:999px;
+
+  background:#fff5e7;
+
+  color:#ff8a00;
+
+  font-size:13px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  white-space:nowrap;
+
+  transition:0.2s;
+}
+
+.quick-question-wrap button:hover{
+  background:#ffe7bf;
+}
+
+/* =========================================================
+   💬 채팅 영역
+========================================================= */
+
+.chat-content{
+
+  flex:1;
+
+  overflow-y:auto;
+
+  padding:18px;
+
+  background:#f7f7f7;
+
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+/* =========================================================
+   💬 말풍선
+========================================================= */
+
+.msg{
+
+  max-width:82%;
+
+  padding:14px 18px;
+
+  border-radius:22px;
+
+  line-height:1.65;
+
+  font-size:14px;
+
+  word-break:break-word;
+}
+
+.user-msg{
+
+  align-self:flex-end;
+
+  background:linear-gradient(135deg,#ff9d00,#ff7b00);
+
+  color:#fff;
+
+  border-bottom-right-radius:6px;
+}
+
+.bot-msg{
+
+  align-self:flex-start;
+
+  background:#fff;
+
+  color:#333;
+
+  border-bottom-left-radius:6px;
+
+  border:1px solid #f0f0f0;
+
+  box-shadow:0 3px 10px rgba(0,0,0,0.03);
+
+  white-space:pre-wrap;
+}
+
+/* =========================================================
+   🤖 AI 상태
+========================================================= */
+
+.ai-status{
+
+  align-self:flex-start;
+
+  background:#fff;
+
+  border:1px solid #eee;
+
+  padding:12px 16px;
+
+  border-radius:18px;
+
+  font-size:13px;
+
+  color:#666;
+}
+
+/* =========================================================
+   🐾 매칭 카드
+========================================================= */
+
+.match-card{
+
+  width:100%;
+
+  background:#fff;
+
+  border-radius:20px;
+
+  padding:14px;
+
+  display:flex;
+  gap:14px;
+
+  border:1px solid #f1f1f1;
+
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+
+  animation:fadeIn 0.3s ease;
+}
+
+.match-card img{
+
+  width:92px;
+  height:92px;
+
+  border-radius:18px;
+
+  object-fit:cover;
+}
+
+.match-info{
+  flex:1;
+}
+
+.match-name{
+  font-size:17px;
+  font-weight:700;
+  color:#222;
+}
+
+.match-score{
+
+  margin-top:6px;
+
+  font-size:14px;
+  font-weight:700;
+
+  color:#ff7b00;
+}
+
+.match-dbti{
+
+  margin-top:6px;
+
+  display:inline-block;
+
+  padding:5px 10px;
+
+  border-radius:999px;
+
+  background:#fff3df;
+
+  font-size:12px;
+  font-weight:700;
+
+  color:#ff8a00;
+}
+
+.match-reason{
+
+  margin-top:10px;
+
+  font-size:13px;
+
+  color:#666;
+
+  line-height:1.5;
+}
+
+.match-btn{
+
+  margin-top:12px;
+
+  border:none;
+
+  background:linear-gradient(135deg,#ff9d00,#ff7b00);
+
+  color:#fff;
+
+  padding:10px 14px;
+
+  border-radius:12px;
+
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+/* =========================================================
+   🛒 마켓 카드
+========================================================= */
+
+.market-card{
+
+  width:100%;
+
+  background:#fff;
+
+  border-radius:18px;
+
+  padding:14px;
+
+  display:flex;
+  gap:14px;
+
+  border:1px solid #f1f1f1;
+}
+
+.market-card img{
+
+  width:82px;
+  height:82px;
+
+  border-radius:14px;
+
+  object-fit:cover;
+}
+
+.market-title{
+  font-size:15px;
+  font-weight:700;
+}
+
+.market-desc{
+  margin-top:8px;
+  font-size:13px;
+  color:#666;
+}
+
+.market-btn{
+
+  margin-top:10px;
+
+  border:none;
+
+  background:#ff9d00;
+
+  color:#fff;
+
+  padding:9px 13px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+}
+
+/* =========================================================
+   ✍ 입력 영역
+========================================================= */
+
+.chat-input-box{
+
+  padding:16px;
+
+  background:#fff;
+
+  border-top:1px solid #f0f0f0;
+
+  display:flex;
+  gap:12px;
+}
+
+#user-input{
+
+  flex:1;
+
+  border:none;
+
+  background:#f7f7f7;
+
+  border-radius:16px;
+
+  padding:14px;
+
+  outline:none;
+
+  font-size:14px;
+}
+
+#send-btn{
+
+  border:none;
+
+  width:52px;
+  height:52px;
+
+  border-radius:16px;
+
+  background:linear-gradient(135deg,#ff9d00,#ff7b00);
+
+  color:#fff;
+
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+/* =========================================================
+   ✨ 애니메이션
+========================================================= */
+
+@keyframes fadeIn{
+
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* =========================================================
+   📱 반응형
+========================================================= */
+
+@media(max-width:768px){
+
+  #chat-window{
+
+    width:100%;
+    height:100%;
+
+    right:0;
+    bottom:0;
+
+    border-radius:0;
+  }
+
+  #chat-btn{
+    right:20px;
+    bottom:20px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+     🐶 챗봇 버튼
+========================================================= -->
+
+<div id="chat-btn">
+  <span>🐶</span>
+</div>
+
+<!-- =========================================================
+     💬 챗봇 창
+========================================================= -->
+
+<div id="chat-window">
+
+  <!-- =======================================================
+       🧡 헤더
+  ======================================================== -->
+
+  <div class="chat-header">
+
+    <div class="header-left">
+
+      <div class="ai-icon">
+        🐾
+      </div>
+
+      <div>
+
+        <div class="header-title">
+          Paws AI 상담소
+        </div>
+
+        <div class="header-sub">
+          우리 아이 데이터를 분석하고 있어요
+        </div>
+
+      </div>
+
+    </div>
+
+    <div style="cursor:pointer;font-size:20px;"
+         onclick="closeChat()">
+      ✕
+    </div>
+
+  </div>
+
+  <!-- =======================================================
+       🐶 현재 반려견
+  ======================================================== -->
+
+  <div class="current-dog">
+
+    <img src="/dog/storage/default.jpg">
+
+    <div>
+
+      <div class="dog-name">
+        몽이
+      </div>
+
+      <div class="dog-info">
+        말티즈 · ESFP · 3살
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =======================================================
+       🧠 기억 정보
+  ======================================================== -->
+
+  <div class="memory-wrap">
+
+    <div class="memory-chip">
+      🧠 낯가림 있음
+    </div>
+
+    <div class="memory-chip">
+      🧠 산책 좋아함
+    </div>
+
+    <div class="memory-chip">
+      🧠 처음엔 조심스러움
+    </div>
+
+  </div>
+
+  <!-- =======================================================
+       ⚡ 빠른 질문
+  ======================================================== -->
+
+  <div class="quick-question-wrap">
+
+    <button onclick="quickQuestion('친구 추천해줘')">
+      🐾 친구 추천
+    </button>
+
+    <button onclick="quickQuestion('사료 추천해줘')">
+      🍖 사료 추천
+    </button>
+
+    <button onclick="quickQuestion('DBTI 분석해줘')">
+      🧠 DBTI 분석
+    </button>
+
+    <button onclick="quickQuestion('사회화 상담해줘')">
+      💬 사회화 상담
+    </button>
+
+  </div>
+
+  <!-- =======================================================
+       💬 채팅 영역
+  ======================================================== -->
+
+  <div id="chat-content"
+       class="chat-content">
+
+    <div class="msg bot-msg">
+      안녕하세요 🐾<br>
+      몽이 데이터를 기반으로 상담을 도와드릴게요!
+    </div>
+
+  </div>
+
+  <!-- =======================================================
+       ✍ 입력 영역
+  ======================================================== -->
+
+  <div class="chat-input-box">
+
+    <input type="text"
+           id="user-input"
+           placeholder="몽이에 대해 궁금한 점을 물어보세요">
+
+    <button id="send-btn">
+      ➤
+    </button>
+
+  </div>
+
+</div>
+
+<!-- =========================================================
+     🚀 SCRIPT
+========================================================= -->
+
+<script th:inline="javascript">
+
+/* =========================================================
+   🌈 요소 가져오기
+========================================================= */
+
+const chatBtn =
+  document.getElementById('chat-btn');
+
+const chatWindow =
+  document.getElementById('chat-window');
+
+const chatContent =
+  document.getElementById('chat-content');
+
+const userInput =
+  document.getElementById('user-input');
+
+const sendBtn =
+  document.getElementById('send-btn');
+
+/* =========================================================
+   🐶 챗봇 열기
+========================================================= */
+
+chatBtn.addEventListener('click', () => {
+
+  const isHidden =
+    chatWindow.style.display === 'none'
+    || chatWindow.style.display === '';
+
+  chatWindow.style.display =
+    isHidden ? 'flex' : 'none';
+});
+
+/* =========================================================
+   ❌ 닫기
+========================================================= */
+
+function closeChat(){
+
+  chatWindow.style.display='none';
+}
+
+/* =========================================================
+   ⚡ 빠른 질문
+========================================================= */
+
+function quickQuestion(text){
+
+  userInput.value = text;
+
+  sendMsg();
+}
+
+/* =========================================================
+   💬 메시지 전송
+========================================================= */
+
+function sendMsg(){
+
+  const text =
+    userInput.value.trim();
+
+  if(!text){
+    return;
+  }
+
+  appendMsg('user', text);
+
+  userInput.value='';
+
+  appendTyping();
+
+  sendBtn.disabled = true;
+
+  /* =======================================================
+     🚀 서버 요청
+  ======================================================== */
+
+  fetch('/chat/ask', {
+
+    method:'POST',
+
+    headers:{
+      'Content-Type':'application/json'
+    },
+
+    body:JSON.stringify({
+
+      memberno:1,
+      dogno:1,
+      question:text
+    })
+
+  })
+
+  .then(res => res.json())
+
+  .then(data => {
+
+    removeTyping();
+
+    appendMsg('bot', data.answer);
+
+    /* =====================================================
+       🐾 추천 카드
+    ====================================================== */
+
+    if(data.matchList){
+
+      data.matchList.forEach(match => {
+
+        appendMatchCard(match);
+      });
+    }
+
+    /* =====================================================
+       🛒 상품 추천
+    ====================================================== */
+
+    if(data.marketList){
+
+      data.marketList.forEach(item => {
+
+        appendMarketCard(item);
+      });
+    }
+
+    sendBtn.disabled = false;
+  })
+
+  .catch(err => {
+
+    removeTyping();
+
+    appendMsg(
+      'bot',
+      '서버 연결에 실패했어요🥺'
+    );
+
+    sendBtn.disabled = false;
+  });
+}
+
+/* =========================================================
+   💬 말풍선 추가
+========================================================= */
+
+function appendMsg(type, text){
+
+  const div =
+    document.createElement('div');
+
+  div.className =
+    `msg ${type}-msg`;
+
+  div.innerHTML =
+    text.replace(/\n/g,'<br>');
+
+  chatContent.appendChild(div);
+
+  scrollBottom();
+}
+
+/* =========================================================
+   🤖 로딩
+========================================================= */
+
+function appendTyping(){
+
+  const div =
+    document.createElement('div');
+
+  div.className='ai-status';
+
+  div.id='typing';
+
+  div.innerHTML =
+    '🐶 몽이 데이터를 분석 중이에요...';
+
+  chatContent.appendChild(div);
+
+  scrollBottom();
+}
+
+function removeTyping(){
+
+  const typing =
+    document.getElementById('typing');
+
+  if(typing){
+    typing.remove();
+  }
+}
+
+/* =========================================================
+   🐾 추천 카드
+========================================================= */
+
+function appendMatchCard(match){
+
+  const div =
+    document.createElement('div');
+
+  div.className='match-card';
+
+  div.innerHTML=`
+
+    <img src="${match.thumb1}">
+
+    <div class="match-info">
+
+      <div class="match-name">
+        ${match.name}
+      </div>
+
+      <div class="match-score">
+        궁합도 ${match.score}%
+      </div>
+
+      <div class="match-dbti">
+        ${match.dbti}
+      </div>
+
+      <div class="match-reason">
+        ${match.reason}
+      </div>
+
+      <button class="match-btn"
+              onclick="location.href='/dog/read/${match.dogno}'">
+        프로필 보기
+      </button>
+
+    </div>
+  `;
+
+  chatContent.appendChild(div);
+
+  scrollBottom();
+}
+
+/* =========================================================
+   🛒 상품 카드
+========================================================= */
+
+function appendMarketCard(item){
+
+  const div =
+    document.createElement('div');
+
+  div.className='market-card';
+
+  div.innerHTML=`
+
+    <img src="${item.thumb1}">
+
+    <div>
+
+      <div class="market-title">
+        ${item.title}
+      </div>
+
+      <div class="market-desc">
+        ${item.desc}
+      </div>
+
+      <button class="market-btn"
+              onclick="location.href='/market/read/${item.marketno}'">
+        상품 보기 🛒
+      </button>
+
+    </div>
+  `;
+
+  chatContent.appendChild(div);
+
+  scrollBottom();
+}
+
+/* =========================================================
+   ⬇ 스크롤
+========================================================= */
+
+function scrollBottom(){
+
+  chatContent.scrollTop =
+    chatContent.scrollHeight;
+}
+
+/* =========================================================
+   ⌨ 엔터 전송
+========================================================= */
+
+sendBtn.addEventListener('click', sendMsg);
+
+userInput.addEventListener('keypress', e => {
+
+  if(e.key === 'Enter'){
+    sendMsg();
+  }
+});
+
+</script>
+
+</body>
+</html>

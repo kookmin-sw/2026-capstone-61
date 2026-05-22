@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반품 신청 - Paws Market</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --paws-orange: #ff914d;
+            --paws-orange-light: #fff5ed;
+            --paws-orange-hover: #e87d3a;
+            --paws-dark: #333333;
+            --paws-gray: #888888;
+            --paws-border: #f2f2f2;
+        }
+
+        .return-container { 
+            max-width: 650px; 
+            margin: 60px auto 100px auto; 
+            padding: 0 20px; 
+        }
+        
+        .return-section {
+            background: #fff; 
+            padding: 45px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.04);
+            border: 1px solid var(--paws-border);
+        }
+
+        .return-header { text-align: center; margin-bottom: 35px; }
+        .return-header h2 { color: var(--paws-dark); font-weight: 800; font-size: 1.8rem; }
+        .return-header h2 span { color: var(--paws-orange); }
+        
+        /* 반품 정책 박스 */
+        .policy-box { 
+            background-color: var(--paws-orange-light); 
+            border-radius: 20px; 
+            padding: 25px; 
+            margin-bottom: 30px; 
+        }
+        .policy-title { font-weight: 800; color: var(--paws-orange); margin-bottom: 12px; font-size: 1rem; }
+        .policy-list { font-size: 0.9rem; color: #666; margin: 0; padding-left: 20px; line-height: 1.7; }
+        .policy-list li strong { color: var(--paws-dark); }
+
+        .order-info-summary { 
+            background: #fcfcfc;
+            border: 1px solid var(--paws-border);
+            padding: 20px; 
+            border-radius: 15px;
+            margin-bottom: 30px; 
+        }
+        .label-paws { font-size: 0.8rem; color: var(--paws-gray); font-weight: 700; margin-bottom: 8px; display: block; text-transform: uppercase; }
+
+        /* 입력 폼 스타일 */
+        .form-label { font-weight: 700; color: var(--paws-dark); margin-bottom: 12px; display: block; }
+        .form-select, .form-control { 
+            border-radius: 15px; 
+            border: 1.5px solid var(--paws-border); 
+            padding: 15px; 
+            font-size: 0.95rem; 
+            transition: 0.3s;
+            background: #fff;
+        }
+        .form-select:focus, .form-control:focus { 
+            border-color: var(--paws-orange); 
+            box-shadow: 0 0 0 4px rgba(255, 145, 77, 0.1); 
+            outline: none;
+        }
+
+        /* 버튼 스타일 */
+        .btn-return-submit { 
+            background: var(--paws-orange); 
+            color: white; 
+            border: none; 
+            border-radius: 15px; 
+            padding: 18px; 
+            width: 100%; 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            margin-top: 10px; 
+            transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(255, 145, 77, 0.2);
+        }
+        .btn-return-submit:hover { 
+            background: var(--paws-orange-hover); 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(255, 145, 77, 0.3);
+        }
+        
+        .btn-back { 
+            display: inline-block; 
+            margin-top: 20px; 
+            color: var(--paws-gray); 
+            text-decoration: none !important; 
+            font-size: 0.95rem; 
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .btn-back:hover { color: var(--paws-dark); }
+
+        /* 커스텀 모달 (통일된 UI) */
+        #pawsModal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .p-modal-content { background: #fff; padding: 35px; border-radius: 25px; width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); animation: pModalShow 0.3s ease; }
+        @keyframes pModalShow { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .p-modal-icon { font-size: 45px; color: var(--paws-orange); margin-bottom: 15px; }
+        .p-modal-text { font-weight: 700; color: #333; margin-bottom: 25px; white-space: pre-line; line-height: 1.6; }
+        .p-modal-btns { display: flex; gap: 12px; }
+        .p-btn { flex: 1; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; border: none; font-size: 15px; transition: 0.2s; }
+        .p-btn-confirm { background: var(--paws-orange); color: #fff; }
+        .p-btn-cancel { background: #f1f1f1; color: #666; }
+
+        @media (max-width: 576px) {
+            .return-container { margin: 30px auto; }
+            .return-section { padding: 30px 20px; }
+            .return-header h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 커스텀 모달 -->
+<div id="pawsModal">
+    <div class="p-modal-content">
+        <div class="p-modal-icon" id="modalIcon"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <div class="p-modal-text" id="modalMessage">알림</div>
+        <div class="p-modal-btns" id="modalButtons"></div>
+    </div>
+</div>
+
+<div class="return-container">
+    <div class="return-section">
+        <div class="return-header">
+            <h2>📦 상품 <span>반품 신청</span></h2>
+            <p class="text-muted small">포즈마켓은 고객님의 원활한 처리를 위해 최선을 다합니다.</p>
+        </div>
+
+        <div class="policy-box">
+            <div class="policy-title"><i class="bi bi-info-circle-fill me-1"></i> 신청 전 꼭 읽어주세요!</div>
+            <ul class="policy-list">
+                <li><strong>7일 이내 신청:</strong> 수령일로부터 7일 이내 가능합니다.</li>
+                <li><strong>상품 상태 유지:</strong> 택 제거, 오염 시 반품이 거부될 수 있습니다.</li>
+                <li><strong>모든 구성품 동봉:</strong> 박스 및 사은품을 반드시 함께 보내주세요.</li>
+            </ul>
+        </div>
+
+        <div class="order-info-summary">
+            <span class="label-paws">반품 신청 상품</span>
+            <div class="fw-bold text-dark mb-1" th:text="${orderVO.product_name}">상품명</div>
+            <div class="small text-muted" th:text="|주문일: ${orderVO.order_date} / 번호: ${orderVO.order_id}|"></div>
+        </div>
+
+        <form id="returnForm" method="post" th:action="@{/market_order/return_proc.do}">
+            <input type="hidden" name="order_id" th:value="${orderVO.order_id}">
+            
+            <div class="mb-4">
+                <label class="form-label">반품 사유 <span style="color:var(--paws-orange)">*</span></label>
+                <select name="reason" id="returnReason" class="form-select" required>
+                    <option value="" disabled selected>사유를 선택해주세요</option>
+                    <option value="단순 변심">단순 변심 (색상, 사이즈 불만족 등)</option>
+                    <option value="상품 불량">상품 불량 및 파손</option>
+                    <option value="오배송">다른 상품이 배송되었습니다</option>
+                    <option value="기타">기타 직접 입력</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">상세 내용 <span style="color:var(--paws-orange)">*</span></label>
+                <textarea name="reason_detail" id="reasonDetail" class="form-control" rows="5" 
+                          placeholder="더 상세한 내용을 적어주시면 빠른 처리에 도움이 됩니다. 불량일 경우 상태를 꼭 기재해주세요!"></textarea>
+            </div>
+
+            <div class="text-center">
+                <p class="text-muted mb-4" style="font-size: 0.85rem;">
+                    접수 후 관리자 확인을 거쳐 반품 수거 절차가 진행됩니다.
+                </p>
+                <button type="button" class="btn-return-submit" onclick="handleReturnSubmit()">반품 신청 완료</button>
+                <a href="javascript:history.back();" class="btn-back">이전 단계로 돌아가기</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+/* 모달 제어 시스템 */
+function openPawsModal(msg, confirmCallback) {
+    const modal = document.getElementById('pawsModal');
+    document.getElementById('modalMessage').innerText = msg;
+    const btnContainer = document.getElementById('modalButtons');
+    btnContainer.innerHTML = '';
+
+    if (confirmCallback) {
+        // Yes/No 타입
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'p-btn p-btn-cancel';
+        cancelBtn.innerText = '취소';
+        cancelBtn.onclick = () => modal.style.display = 'none';
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'p-btn p-btn-confirm';
+        confirmBtn.innerText = '신청하기';
+        confirmBtn.onclick = () => {
+            modal.style.display = 'none';
+            confirmCallback();
+        };
+        btnContainer.appendChild(cancelBtn);
+        btnContainer.appendChild(confirmBtn);
+    } else {
+        // 확인만 있는 타입
+        const okBtn = document.createElement('button');
+        okBtn.className = 'p-btn p-btn-confirm';
+        okBtn.innerText = '확인';
+        okBtn.onclick = () => modal.style.display = 'none';
+        btnContainer.appendChild(okBtn);
+    }
+    modal.style.display = 'flex';
+}
+
+/* 폼 제출 및 유효성 검사 */
+function handleReturnSubmit() {
+    const reason = document.getElementById('returnReason').value;
+    const detail = document.getElementById('reasonDetail').value.trim();
+
+    // 1. 필수값 체크
+    if(!reason) {
+        openPawsModal("반품 사유를 선택해주세요! 🐾");
+        return;
+    }
+    if(!detail) {
+        openPawsModal("상세 사유를 입력해주세요! 🐾");
+        return;
+    }
+
+    // 2. 7일 경과 날짜 체크
+    const orderDateStr = /*[[${orderVO.order_date}]]*/ '';
+    const orderDate = new Date(orderDateStr);
+    const now = new Date();
+    const diffDays = Math.ceil(Math.abs(now - orderDate) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 7) {
+        openPawsModal("죄송합니다.\n수령 후 7일이 경과한 상품은 고객센터를 통해 문의해주세요. 🐾");
+        return;
+    }
+
+    // 3. 최종 확인
+    openPawsModal("입력하신 내용으로 반품을 신청하시겠습니까?\n상품 상태에 따라 처리가 거절될 수 있습니다.", function() {
+        document.getElementById('returnForm').submit();
+    });
+}
+</script>
+
+</body>
+</div>
+</html>

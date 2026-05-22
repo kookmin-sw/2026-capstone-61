@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.market_review.MarketReviewDAOInter">
+
+<insert id="create" parameterType="dev.mvc.market_review.MarketReviewVO">
+    INSERT INTO market_review (
+        REVIEW_ID, PRODUCT_ID, MEMBERNO, ORDER_ITEM_ID, 
+        RATING, REVIEW_CONTENT, REVIEW_IMG, REG_DATE
+    ) VALUES (
+        SEQ_MARKET_REVIEW.NEXTVAL, #{product_id}, #{memberno}, #{order_item_id},
+        #{rating}, #{review_content}, #{review_img, jdbcType=VARCHAR}, SYSDATE
+    )
+</insert>
+<select id="list_by_product"
+        resultType="dev.mvc.market_review.MarketReviewVO"
+        parameterType="int">
+
+    SELECT 
+        r.REVIEW_ID,
+        r.PRODUCT_ID,
+        r.MEMBERNO,
+        r.ORDER_ITEM_ID,
+        r.RATING,
+        r.REVIEW_CONTENT,
+        r.REVIEW_IMG,
+        r.REG_DATE,
+        m.MNAME,
+        m.ID
+
+    FROM market_review r
+
+    INNER JOIN member m
+        ON r.MEMBERNO = m.MEMBERNO
+
+    WHERE r.PRODUCT_ID = #{value}
+
+    ORDER BY r.REVIEW_ID DESC
+
+</select>
+
+<select id="list_by_member"
+        resultType="dev.mvc.market_review.MarketReviewVO"
+        parameterType="int">
+
+    SELECT 
+        r.REVIEW_ID,
+        r.PRODUCT_ID,
+        r.MEMBERNO,
+        r.RATING,
+        r.REVIEW_CONTENT,
+        r.REVIEW_IMG,
+        r.REG_DATE,
+        p.PRODUCT_NAME
+
+    FROM market_review r
+
+    INNER JOIN market p
+        ON r.PRODUCT_ID = p.PRODUCT_ID
+
+    WHERE r.MEMBERNO = #{value}
+
+    ORDER BY r.REVIEW_ID DESC
+
+</select>
+
+<select id="read"
+        resultType="dev.mvc.market_review.MarketReviewVO"
+        parameterType="int">
+
+    SELECT 
+        REVIEW_ID,
+        PRODUCT_ID,
+        MEMBERNO,
+        ORDER_ITEM_ID,
+        RATING,
+        REVIEW_CONTENT,
+        REVIEW_IMG,
+        REG_DATE
+
+    FROM market_review
+
+    WHERE REVIEW_ID = #{value}
+
+</select>
+
+    <update id="update" parameterType="dev.mvc.market_review.MarketReviewVO">
+        UPDATE market_review
+        SET 
+            RATING = #{rating},
+            REVIEW_CONTENT = #{review_content},
+            REVIEW_IMG = #{review_img}
+        WHERE REVIEW_ID = #{review_id}
+    </update>
+<delete id="delete"
+        parameterType="int">
+
+    DELETE FROM market_review
+
+    WHERE REVIEW_ID = #{value}
+
+</delete>
+<select id="check_duplicate"
+        resultType="int"
+        parameterType="int">
+
+    SELECT COUNT(*)
+
+    FROM market_review
+
+    WHERE ORDER_ITEM_ID = #{value}
+
+</select>
+
+</mapper>

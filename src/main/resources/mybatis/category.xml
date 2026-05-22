@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.mvc.category.CategoryDAOInter">
+  
+  <insert id="create" parameterType="dev.mvc.category.CategoryVO">
+    INSERT INTO category(cat_no, cat_code, cat_name, cat_type, seqno, visible)
+    VALUES(category_seq.nextval, #{cat_code}, #{cat_name}, #{cat_type}, #{seqno}, #{visible})
+  </insert>
+  
+  <select id="list_all" resultType="dev.mvc.category.CategoryVO">
+    SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible
+    FROM category
+    ORDER BY seqno ASC
+  </select>
+
+  <select id="read" resultType="dev.mvc.category.CategoryVO" parameterType="int">
+    SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible
+    FROM category
+    WHERE cat_no = #{cat_no}
+  </select>
+  
+  <update id="update" parameterType="dev.mvc.category.CategoryVO">
+    UPDATE category
+    SET cat_code=#{cat_code}, 
+        cat_name=#{cat_name}, 
+        cat_type=#{cat_type}, 
+        seqno=#{seqno}, 
+        visible=#{visible}
+    WHERE cat_no=#{cat_no}
+  </update>
+
+  <delete id="delete" parameterType="int">
+    DELETE FROM category WHERE cat_no=#{cat_no}
+  </delete>
+
+  <update id="update_seqno_forward" parameterType="int">
+    UPDATE category SET seqno = seqno - 1 WHERE cat_no = #{cat_no}
+  </update>
+
+  <update id="update_seqno_backward" parameterType="int">
+    UPDATE category SET seqno = seqno + 1 WHERE cat_no = #{cat_no}
+  </update>
+
+  <update id="update_visible_y" parameterType="int">
+    UPDATE category SET visible='Y' WHERE cat_no=#{cat_no}
+  </update>
+  
+  <update id="update_visible_n" parameterType="int">
+    UPDATE category SET visible='N' WHERE cat_no=#{cat_no}
+  </update>
+  
+  <select id="list_all_visible" resultType="dev.mvc.category.CategoryVO">
+    SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible
+    FROM category
+    WHERE visible='Y'
+    ORDER BY seqno ASC
+  </select>
+  
+  <select id="count_by_cat_no" resultType="int" parameterType="int">
+    SELECT COUNT(*) FROM contents WHERE cat_no = #{cat_no}
+  </select>
+
+  <select id="list_search" resultType="dev.mvc.category.CategoryVO" parameterType="String">
+    SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible
+    FROM category
+    <if test="word != null and word != ''">
+      WHERE UPPER(cat_name) LIKE '%' || UPPER(#{word}) || '%' 
+         OR UPPER(cat_type) LIKE '%' || UPPER(#{word}) || '%'  
+         OR UPPER(cat_code) LIKE '%' || UPPER(#{word}) || '%'  
+    </if>
+    ORDER BY seqno ASC
+  </select>
+  
+  <select id="list_search_paging" resultType="dev.mvc.category.CategoryVO" parameterType="Map">
+    SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible, r
+    FROM (
+        SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible, rownum as r
+        FROM (
+            SELECT cat_no, cat_code, cat_name, cat_type, seqno, visible
+            FROM category
+            <if test="word != null and word != ''">
+              WHERE UPPER(cat_name) LIKE '%' || UPPER(#{word}) || '%' 
+                 OR UPPER(cat_type) LIKE '%' || UPPER(#{word}) || '%'  
+                 OR UPPER(cat_code) LIKE '%' || UPPER(#{word}) || '%'
+            </if>
+            ORDER BY seqno ASC
+        )
+    )
+    WHERE r &gt;= #{start_num} AND r &lt;= #{end_num}
+  </select>
+
+  <select id="list_search_count" resultType="int" parameterType="String">
+    SELECT COUNT(*) as cnt
+    FROM category
+    <if test="word != null and word != ''">
+      WHERE UPPER(cat_name) LIKE '%' || UPPER(#{word}) || '%' 
+         OR UPPER(cat_type) LIKE '%' || UPPER(#{word}) || '%'  
+         OR UPPER(cat_code) LIKE '%' || UPPER(#{word}) || '%'
+    </if>
+  </select>
+
+
+<select id="list_by_type" resultType="dev.mvc.category.CategoryVO" parameterType="String">
+    SELECT cat_no, cat_code, cat_type, cat_name, seqno, visible
+    FROM category
+    WHERE cat_type = #{cat_type} AND visible = 'Y'
+    ORDER BY seqno ASC
+</select>
+<!-- category.xml -->
+<select id="gen_type" resultType="String">
+    SELECT DISTINCT cat_type
+    FROM category
+    ORDER BY cat_type ASC
+</select>
+</mapper>

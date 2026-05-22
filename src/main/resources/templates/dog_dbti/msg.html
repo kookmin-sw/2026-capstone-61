@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>알림</title>
+    <style>
+        body { background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: 'Pretendard', sans-serif; }
+        .loading-text { color: #ff6b81; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="loading-text">잠시만 기다려주세요...</div>
+
+    <script th:inline="javascript">
+        window.onload = function() {
+            /*<![CDATA[*/
+            // 컨트롤러에서 보낸 메시지와 이동할 URL을 받음
+            let msg = [[${msg}]];
+            let url = [[${url}]];
+            
+            // 1. 메시지가 있으면 알림창(alert) 띄우기
+            if (msg != null && msg !== "") {
+                alert(msg);
+            }
+            
+            // 2. 이동할 URL이 있으면 해당 주소로 이동, 없으면 뒤로가기
+            if (url != null && url !== "") {
+                location.href = url;
+            } else {
+                // 특정 URL이 지정되지 않은 경우 이전 페이지로 이동
+                history.back();
+            }
+            /*]]>*/
+        };
+    </script>
+</body>
+</html>

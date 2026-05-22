@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 상세 - Paws Market</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --paws-orange: #ff914d;
+            --paws-orange-light: #fff5ed;
+            --paws-orange-hover: #e87d3a;
+            --paws-dark: #333333;
+            --paws-gray: #888888;
+            --paws-border: #f2f2f2;
+        }
+
+        .read-container {
+            max-width: 800px; /* 상세 페이지는 조금 더 넓게 */
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            margin: 60px auto 100px auto;
+        }
+
+        /* 헤더 영역 */
+        .header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--paws-border);
+        }
+        .header-box h2 { font-size: 1.6rem; font-weight: 800; color: var(--paws-dark); margin: 0; }
+        .header-box h2 span { color: var(--paws-orange); }
+        
+        .status-badge {
+            background: var(--paws-orange);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(255, 145, 77, 0.2);
+        }
+
+        /* 섹션 공통 스타일 */
+        .read-section { margin-bottom: 40px; }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--paws-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i { color: var(--paws-orange); font-size: 1.2rem; }
+
+        /* 상품 리스트 스타일 */
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .product-img {
+            width: 70px; height: 70px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-right: 20px;
+            border: 1px solid var(--paws-border);
+        }
+        .product-info-name { font-weight: 700; color: var(--paws-dark); font-size: 1.05rem; margin-bottom: 5px; }
+        .product-info-detail { font-size: 0.9rem; color: var(--paws-gray); }
+
+        /* 정보 박스 커스텀 */
+        .info-box {
+            background: #fdfdfd;
+            border: 1.5px solid var(--paws-border);
+            border-radius: 20px;
+            padding: 25px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+        .info-row.total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--paws-border);
+            color: var(--paws-dark);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+        .price-text { color: var(--paws-orange); font-size: 1.25rem; }
+
+        /* 배송지 정보 테이블 */
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table th { color: var(--paws-gray); font-weight: 600; width: 110px; text-align: left; padding: 10px 0; font-size: 0.95rem; }
+        .info-table td { color: var(--paws-dark); font-weight: 500; padding: 10px 0; font-size: 0.95rem; }
+
+        /* 버튼 그룹 */
+        .btn-wrap { display: flex; justify-content: center; gap: 15px; margin-top: 50px; }
+        .btn-paws { 
+            padding: 15px 40px; 
+            border-radius: 15px; 
+            font-weight: 700; 
+            text-decoration: none !important; 
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-paws-list { background: #f1f1f1; color: #666; flex: 1; }
+        .btn-paws-cancel { background: white; border: 1.5px solid #ffeded; color: #ff6b6b; flex: 1; }
+        
+        .btn-paws-list:hover { background: #e5e5e5; }
+        .btn-paws-cancel:hover { background: #fff5f5; border-color: #ffbaba; }
+
+        /* 커스텀 모달 스타일 */
+        #pawsModal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .p-modal-content { background: #fff; padding: 35px; border-radius: 25px; width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); animation: pModalShow 0.3s ease; }
+        @keyframes pModalShow { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .p-modal-icon { font-size: 45px; color: var(--paws-orange); margin-bottom: 15px; }
+        .p-modal-text { font-weight: 700; color: #333; margin-bottom: 25px; white-space: pre-line; line-height: 1.6; }
+        .p-modal-btns { display: flex; gap: 12px; }
+        .p-btn { flex: 1; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; border: none; font-size: 15px; transition: 0.2s; }
+        .p-btn-confirm { background: var(--paws-orange); color: #fff; }
+        .p-btn-cancel { background: #f1f1f1; color: #666; }
+
+        /* 반응형 모바일 */
+        @media (max-width: 768px) {
+            .read-container { width: 92%; padding: 25px; margin: 30px auto 80px auto; }
+            .header-box { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .btn-wrap { flex-direction: column-reverse; }
+            .btn-paws { width: 100%; }
+            .product-img { width: 60px; height: 60px; margin-right: 15px; }
+            .info-table th { width: 90px; font-size: 0.9rem; }
+            .info-table td { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+
+<!-- 커스텀 모달 -->
+<div id="pawsModal">
+    <div class="p-modal-content">
+        <div class="p-modal-icon"><i class="bi bi-question-circle-fill"></i></div>
+        <div class="p-modal-text" id="modalMessage">주문을 취소하시겠습니까?</div>
+        <div class="p-modal-btns" id="modalButtons"></div>
+    </div>
+</div>
+
+<div class="read-container">
+    <div class="header-box">
+        <h2>주문 <span>상세 내역</span></h2>
+        <span class="status-badge" th:text="${orderVO.order_status}">결제완료</span>
+    </div>
+
+    <!-- 상품 목록 -->
+    <div class="read-section">
+        <div class="section-title"><i class="bi bi-box-seam-fill"></i> 주문 상품 목록</div>
+        <div th:each="itemVO : ${item_list}" class="product-item">
+            <img th:if="${itemVO.file_name != null}" th:src="@{|/product/storage/${itemVO.file_name}|}" class="product-img">
+            <img th:unless="${itemVO.file_name != null}" th:src="@{/images/no_image.png}" class="product-img">
+            
+            <div style="flex: 1;">
+                <div class="product-info-name" th:text="${itemVO.product_name}">상품명</div>
+                <div class="product-info-detail" th:text="|${itemVO.quantity}개 / ${#numbers.formatInteger(itemVO.price, 0, 'COMMA')}원|"></div>
+            </div>
+            <div class="fw-bold" style="color:var(--paws-dark); font-size: 1.1rem;" th:text="|${#numbers.formatInteger(itemVO.total_price, 0, 'COMMA')}원|"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 결제 정보 -->
+        <div class="col-lg-6">
+            <div class="read-section">
+                <div class="section-title"><i class="bi bi-credit-card-fill"></i> 결제 정보</div>
+                <div class="info-box">
+                    <div class="info-row">
+                        <span>결제 수단</span>
+                        <span class="fw-bold" th:text="${orderVO.payment_method}">CARD</span>
+                    </div>
+                    <div class="info-row">
+                        <span>상품 합계</span>
+                        <span th:text="|${#numbers.formatInteger(orderVO.total_price - 3000, 0, 'COMMA')}원|">0원</span>
+                    </div>
+                    <div class="info-row">
+                        <span>배송비</span>
+                        <span>+ 3,000원</span>
+                    </div>
+                    <div class="info-row total">
+                        <span>최종 결제 금액</span>
+                        <span class="price-text" th:text="|${#numbers.formatInteger(orderVO.total_price, 0, 'COMMA')}원|">0원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 배송지 정보 -->
+        <div class="col-lg-6">
+            <div class="read-section">
+                <div class="section-title"><i class="bi bi-geo-alt-fill"></i> 배송지 정보</div>
+                <div class="info-box" style="background: white;">
+                    <table class="info-table">
+                        <tr>
+                            <th>받는 분</th>
+                            <td th:text="${orderVO.receiver_name}">이름</td>
+                        </tr>
+                        <tr>
+                            <th>연락처</th>
+                            <td th:text="${orderVO.receiver_tel}">010-0000-0000</td>
+                        </tr>
+                        <tr>
+                            <th>주소</th>
+                            <td th:text="|(${orderVO.zipcode}) ${orderVO.address1} ${orderVO.address2}|">주소</td>
+                        </tr>
+                        <tr>
+                            <th>주문일시</th>
+                            <td th:text="${orderVO.order_date}">2026-04-27</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="btn-wrap">
+        <a th:href="@{/market_order/list_by_memberno.do}" class="btn-paws btn-paws-list">목록으로</a>
+        
+        <!-- 주문 취소 버튼: 커스텀 모달 연결 -->
+        <th:block th:if="${orderVO.order_status == 'PAID' or orderVO.order_status == '결제완료'}">
+            <button type="button" 
+                    class="btn-paws btn-paws-cancel"
+                    th:data-id="${orderVO.order_id}"
+                    onclick="confirmCancel(this.getAttribute('data-id'))">
+                주문 취소하기
+            </button>
+        </th:block>
+    </div>
+</div>
+
+<script th:inline="javascript">
+/* 취소 확인 모달 */
+function confirmCancel(orderId) {
+    const modal = document.getElementById('pawsModal');
+    const btnContainer = document.getElementById('modalButtons');
+    btnContainer.innerHTML = '';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'p-btn p-btn-cancel';
+    cancelBtn.innerText = '아니오';
+    cancelBtn.onclick = () => modal.style.display = 'none';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'p-btn p-btn-confirm';
+    confirmBtn.innerText = '네, 취소합니다';
+    confirmBtn.onclick = () => {
+        location.href = '/market_order/cancel.do?order_id=' + orderId;
+    };
+
+    btnContainer.appendChild(cancelBtn);
+    btnContainer.appendChild(confirmBtn);
+    modal.style.display = 'flex';
+}
+</script>
+
+</body>
+</div>
+</html>

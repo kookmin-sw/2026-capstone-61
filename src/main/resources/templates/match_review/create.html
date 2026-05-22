@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div layout:fragment="content">
+
+  <style>
+
+    /* =========================================================
+       🌸 전체 컨테이너
+       ========================================================= */
+    .review-container {
+      width: 60%;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    /* =========================================================
+       🐶 제목
+       ========================================================= */
+    .review-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 35px;
+      color: #ff6b81;
+    }
+
+    /* =========================================================
+       📦 카드
+       ========================================================= */
+    .review-card {
+      background: #fff7f9;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid #ffe1e7;
+    }
+
+    .review-card h3 {
+      margin-bottom: 20px;
+      color: #ff6b81;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       📝 입력
+       ========================================================= */
+    .form-label {
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: block;
+      color: #555;
+    }
+
+    .form-control {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      padding: 12px;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #ff6b81;
+      box-shadow: 0 0 0 4px rgba(255,107,129,0.15);
+    }
+
+    textarea.form-control {
+      resize: none;
+    }
+
+    .score-select {
+      width: 220px;
+    }
+
+    /* =========================================================
+       🎀 버튼
+       ========================================================= */
+    .btn-area {
+      text-align: center;
+      margin-top: 35px;
+    }
+
+    .btn-custom {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.25s;
+      margin: 0 8px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #ff6b81, #ff8fa3);
+      color: white;
+      box-shadow: 0 6px 15px rgba(255,107,129,0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+      background: #f1f3f5;
+      color: #555;
+    }
+
+    .btn-cancel:hover {
+      background: #e9ecef;
+    }
+
+    /* =========================================================
+       📱 반응형
+       ========================================================= */
+    @media (max-width:768px){
+
+      .review-container{
+        width:92%;
+        padding:25px;
+      }
+
+      .review-title{
+        font-size:26px;
+      }
+
+      .score-select{
+        width:100%;
+      }
+
+    }
+
+  </style>
+
+  <!-- =========================================================
+       🐾 리뷰 작성 컨테이너
+       ========================================================= -->
+  <div class="review-container">
+
+    <!-- 제목 -->
+    <div class="review-title">
+      🐾 산책 매칭 리뷰 작성
+    </div>
+
+    <!-- 메뉴 -->
+    <aside class="aside_right mb-4">
+
+      <a href="javascript:location.reload();">
+        새로고침
+      </a>
+
+      <span class='menu_divide'>│</span>
+
+      <a href="/match_post/list_all">
+        목록
+      </a>
+
+    </aside>
+
+    <!-- =========================================================
+         리뷰 작성 폼
+         ========================================================= -->
+    <form name="frm"
+          method="post"
+          action="/match_review/create.do">
+
+      <!-- hidden -->
+      <input type="hidden"
+             name="matchno"
+             th:value="${matchno}">
+
+      <input type="hidden"
+             name="target_no"
+             th:value="${target_no}">
+
+      <!-- =====================================================
+           🐶 반려견 리뷰
+           ===================================================== -->
+      <div class="review-card">
+
+        <h3>
+          🐶 반려견 리뷰
+        </h3>
+
+        <!-- 평점 -->
+        <div class="mb-4">
+
+          <label class="form-label">
+            반려견 평점
+          </label>
+
+          <select name="dog_score"
+                  class="form-control score-select">
+
+            <option value="5">5 ★★★★★</option>
+            <option value="4.5">4.5 ★★★★☆</option>
+            <option value="4">4 ★★★★</option>
+            <option value="3.5">3.5 ★★★☆</option>
+            <option value="3">3 ★★★</option>
+            <option value="2">2 ★★</option>
+            <option value="1">1 ★</option>
+
+          </select>
+
+        </div>
+
+        <!-- 후기 -->
+        <div>
+
+          <label class="form-label">
+            반려견 후기
+          </label>
+
+          <textarea name="dog_comment"
+                    class="form-control"
+                    rows="4"
+                    required
+                    placeholder="강아지의 성격, 산책 매너 등을 작성해주세요."></textarea>
+
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           👤 보호자 리뷰
+           ===================================================== -->
+      <div class="review-card">
+
+        <h3>
+          👤 보호자 매너 리뷰
+        </h3>
+
+        <!-- 평점 -->
+        <div class="mb-4">
+
+          <label class="form-label">
+            보호자 매너 평점
+          </label>
+
+          <select name="owner_score"
+                  class="form-control score-select">
+
+            <option value="5">5 ★★★★★</option>
+            <option value="4.5">4.5 ★★★★☆</option>
+            <option value="4">4 ★★★★</option>
+            <option value="3.5">3.5 ★★★☆</option>
+            <option value="3">3 ★★★</option>
+            <option value="2">2 ★★</option>
+            <option value="1">1 ★</option>
+
+          </select>
+
+        </div>
+
+        <!-- 후기 -->
+        <div>
+
+          <label class="form-label">
+            보호자 후기
+          </label>
+
+          <textarea name="owner_comment"
+                    class="form-control"
+                    rows="4"
+                    required
+                    placeholder="약속 시간, 매너, 대화 등을 작성해주세요."></textarea>
+
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           📝 종합 리뷰
+           ===================================================== -->
+      <div class="review-card">
+
+        <h3>
+          📝 종합 후기
+        </h3>
+
+        <textarea name="content"
+                  class="form-control"
+                  rows="5"
+                  required
+                  placeholder="전체적인 산책 경험을 자유롭게 작성해주세요."></textarea>
+
+      </div>
+
+      <!-- =====================================================
+           🎀 버튼
+           ===================================================== -->
+      <div class="btn-area">
+
+        <!-- 등록 -->
+        <button type="submit"
+                class="btn-custom btn-submit">
+
+          리뷰 등록
+
+        </button>
+
+        <!-- 취소 -->
+        <button type="button"
+                onclick="history.back();"
+                class="btn-custom btn-cancel">
+
+          취소
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+</html>

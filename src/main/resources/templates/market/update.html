@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paws Market - 상품 수정</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #f4f7f6; color: #444; line-height: 1.6; }
+        
+        .container { 
+            max-width: 850px; 
+            margin: 45px auto 80px auto; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05); 
+        }
+        
+        h2 { text-align: center; margin-bottom: 30px; color: #ff914d; font-size: 26px; letter-spacing: -1px; }
+        
+        .form-section { margin-bottom: 20px; }
+        label { display: block; font-weight: 700; margin-bottom: 8px; color: #333; font-size: 14px; }
+        
+        input[type="text"], input[type="number"], select, textarea { 
+            width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 15px; outline: none; transition: all 0.3s; 
+        }
+        input:focus, select:focus, textarea:focus { border-color: #ff914d; background-color: #fff9f5; }
+        
+        .grid-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        textarea { height: 220px; resize: vertical; }
+
+        /* 이미지 관리 영역 */
+        .image-management {
+            background: #fafafa; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 20px;
+        }
+        .image-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+        .image-item { width: 100px; text-align: center; }
+        .image-item img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; border: 1px solid #ddd; }
+        .del-check { margin-top: 5px; font-size: 12px; color: #ff4d4d; }
+
+        /* 파일 업로드 박스 */
+        .file-upload-box {
+            border: 2px dashed #ff914d; padding: 20px; text-align: center; background: #fffcf9; border-radius: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .file-upload-box:hover { background: #fff5ed; }
+        .file-upload-box p { font-size: 13px; color: #666; margin-top: 8px; }
+        
+        #preview-container { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
+        .preview-wrapper { width: 70px; height: 70px; }
+        .preview-img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #ff914d; }
+
+        /* 버튼 그룹 & 크기 축소 */
+        .btn-group { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
+        .btn { 
+            padding: 10px 35px; /* 크기 축소 */
+            border-radius: 10px; 
+            font-size: 15px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            border: none; 
+            transition: 0.3s; 
+            text-decoration: none; 
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-submit { background-color: #ff914d; color: #fff; box-shadow: 0 4px 10px rgba(255, 145, 77, 0.2); }
+        .btn-submit:hover { background-color: #e8803d; transform: translateY(-2px); }
+        .btn-cancel { background-color: #eee; color: #666; }
+        
+        input[readonly] { background-color: #f9f9f9; color: #999; border-color: #f0f0f0; cursor: not-allowed; }
+
+        /* --- 반응형 미디어 쿼리 --- */
+        @media (max-width: 600px) {
+            .container { margin: 40px 10px; padding: 20px; }
+            h2 { font-size: 22px; }
+            .btn-group { flex-direction: column; } /* 모바일에서 버튼 세로 배치 */
+            .btn { width: 100%; padding: 12px 0; }
+            .image-item { width: calc(33.33% - 8px); } /* 이미지 3열 배치 */
+            .image-item img { height: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🐾 Paws 상품 정보 수정</h2>
+    
+    <form name="frm" method="POST" th:action="@{/market/update.do}" enctype="multipart/form-data">
+        <input type="hidden" name="productId" th:value="${marketVO.productId}">
+        
+        <div class="form-section">
+            <label>판매자 아이디</label>
+            <input type="text" name="sellerId" th:value="${marketVO.sellerId}" readonly>
+        </div>
+
+        <div class="grid-row">
+            <div class="form-section">
+                <label>카테고리</label>
+                <select name="className" required>
+                    <option value="사료" th:selected="${marketVO.className == '사료'}">건강한 사료</option>
+                    <option value="간식" th:selected="${marketVO.className == '간식'}">맛있는 간식</option>
+                    <option value="장난감" th:selected="${marketVO.className == '장난감'}">즐거운 장난감</option>
+                    <option value="의류" th:selected="${marketVO.className == '의류'}">예쁜 의류/액세서리</option>
+                    <option value="위생" th:selected="${marketVO.className == '위생'}">깔끔한 배변/위생</option>
+                </select>
+            </div>
+            <div class="form-section">
+                <label>상품명</label>
+                <input type="text" name="productName" th:value="${marketVO.productName}" required>
+            </div>
+        </div>
+
+        <div class="grid-row">
+            <div class="form-section">
+                <label>가격 (원)</label>
+                <input type="number" name="price" th:value="${marketVO.price}" min="0" required>
+            </div>
+            <div class="form-section">
+                <label>배송비 (원)</label>
+                <input type="number" name="deliveryFee" th:value="${marketVO.deliveryFee}">
+            </div>
+            <div class="form-section">
+                <label>재고 수량 (개)</label>
+                <input type="number" name="stock" th:value="${marketVO.stock}" min="0">
+            </div>
+        </div>
+
+        <div class="image-management" th:if="${not #lists.isEmpty(fileList)}">
+            <label>현재 등록된 이미지 (삭제 체크)</label>
+            <div class="image-list">
+                <div class="image-item" th:each="file : ${fileList}">
+                    <img th:src="@{|/product/storage/${file.file_name}|}" alt="상품 이미지">
+                    <div class="del-check">
+                        <input type="checkbox" name="deleteFiles" th:value="${file.file_id}" id="|file_${file.file_id}|">
+                        <label th:for="|file_${file.file_id}|" style="font-weight:normal;">삭제</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <label>이미지 추가</label>
+            <div class="file-upload-box" onclick="document.getElementById('filesMF').click();">
+                <i class="bi bi-camera-fill" style="color: #ff914d;"></i>
+                <p>클릭하여 이미지를 선택하세요</p>
+                <input type="file" id="filesMF" name="filesMF" accept="image/*" multiple 
+                       style="display:none;" onchange="previewImages(this)">
+            </div>
+            <div id="preview-container"></div>
+        </div>
+
+        <div class="form-section">
+            <label>상품 상세 설명</label>
+            <textarea name="productDesc" th:text="${marketVO.productDesc}" placeholder="설명을 입력하세요."></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" class="btn btn-submit">수정</button>
+            <a th:href="@{/market/read.do(productId=${marketVO.productId})}" class="btn btn-cancel">취소</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    function previewImages(input) {
+        const container = document.getElementById('preview-container');
+        container.innerHTML = ""; 
+        if (input.files) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preview-wrapper';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-img';
+                    wrapper.appendChild(img);
+                    container.appendChild(wrapper);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+</script>
+
+</body>
+</div>
+</html>

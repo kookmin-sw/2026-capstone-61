@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+
+<div layout:fragment="content">
+<head>
+  <style>
+    /* 전체 컨테이너 및 레이아웃 슬림화 */
+    .apply-container { max-width: 850px; margin: 60px auto; } 
+    .nav-pills .nav-link { color: #636e72; font-weight: bold; border-radius: 20px; margin: 0 3px; padding: 8px 16px; font-size: 14px; }
+    .nav-pills .nav-link.active { background-color: #ff6b81 !important; color: white !important; }
+    
+    /* 카드 디자인 수정: 양 사이드 여백(margin) 추가 및 높이(padding) 축소 */
+/* ==========================================
+   [수정안] 모든 탭의 카드 구조 격리 및 통일
+   ========================================== */
+
+/* 1. 모든 카드의 공통 외형 (마진, 패딩, 높이 밸런스 통일) */
+.card-link { 
+    cursor: pointer; 
+    transition: 0.3s; 
+    border: 1px solid #f1f2f6; 
+    border-radius: 15px; 
+    margin: 0 20px 10px 20px !important; /* 전체 카드 좌우 여백 강제 일치 */
+    padding: 14px 20px !important;       /* 상하 패딩을 균일하게 맞추어 높이 통일 */
+    background: #fff; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+    display: block !important;           /* 내부 flex 중첩 충돌 방지를 위해 블록화 */
+    box-sizing: border-box;
+    width: calc(100% - 40px);            /* 부모 너비에 맞춰 꽉 차게 설정 */
+}
+
+.card-link:hover { 
+    border-color: #ff6b81; 
+    transform: translateY(-2px); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.06); 
+}
+
+/* 2. 내 모집글 전용 스타일 (위치 유지 및 왼쪽 시그니처 라인) */
+.card-mypost { 
+    border-left: 5px solid #ff6b81 !important; 
+}
+
+/* 3. 카드 내부의 d-flex 레이아웃을 일관되게 정렬 */
+.card-link > .d-flex {
+    width: 100%;
+    height: 100%;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important; /* 버튼과 텍스트가 항상 수직 중앙 정렬 */
+}
+
+/* 4. 왼쪽 텍스트 구역 너비 보장 (제목이 길어져도 버튼을 밀어내지 않음) */
+.card-link > .d-flex > div:first-child {
+    flex: 1;
+    min-width: 0;
+    padding-right: 15px; /* 우측 버튼/텍스트 영역과의 안전 거리 확보 */
+}
+
+/* 5. 우측 버튼 및 상태 구역 정렬 고정 */
+.card-link > .d-flex > div.text-end,
+.card-link > .d-flex > .d-flex,
+.card-link > .d-flex > button {
+    flex-shrink: 0 !important; /* 버튼이나 상태 스탬프가 찌그러지지 않도록 보호 */
+    display: flex;
+    align-items: center;
+}
+
+/* 6. 제목이 극단적으로 길어질 경우 레이아웃 깨짐 방지 (...) */
+.card-link h6 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px !important;
+}
+    .card-waiting { border-left: 5px solid #fcc419 !important; background-color: #fffdf5; } 
+    .card-matched { border-left: 5px solid #40c057 !important; } 
+    .card-mypost { border-left: 5px solid #ff6b81 !important; } 
+    
+    /* 섹션 타이틀 간격 축소 */
+    .section-title { font-size: 13px; font-weight: 800; color: #b2bec3; margin: 20px 0 10px 25px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .waiting-dot { width: 7px; height: 7px; background-color: #fcc419; border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1.5s infinite; }
+    @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+
+    /* 모달 및 상세 요소 슬림화 */
+    .modal-content { border-radius: 20px; border: none; }
+    .modal-header { background: #fff5f6; border-bottom: none; padding: 15px 20px; }
+    .detail-section { margin-bottom: 12px; } 
+    .detail-label { font-size: 12px; color: #ff6b81; font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .detail-value { font-size: 14px; color: #2d3436; background: #f8f9fa; padding: 10px 15px; border-radius: 12px; line-height: 1.5; }
+    
+    .status-stamp { border: 3px solid; padding: 4px 15px; border-radius: 10px; font-weight: 900; transform: rotate(-8deg); display: inline-block; margin-bottom: 15px; font-size: 16px; }
+    .dog-tag { background: #ff6b81; color: white; padding: 2px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; }
+    
+    /* 버튼 사이즈 조정 */
+    .btn-review { background-color: #ff6b81; color: white; border: none; font-size: 13px; }
+    .btn-review:hover { background-color: #ee5253; color: white; }
+
+    /* 리뷰 카드 슬림화 */
+    .review-card { border-radius: 12px; border: 1px solid #f1f2f6; padding: 12px 18px; margin: 0 20px 10px 20px; background: #fff; }
+    .star-rating { color: #fcc419; font-size: 12px; }
+    .review-content-text { font-size: 13px; margin-bottom: 8px !important; }
+    .mini-review-box { padding: 6px 10px !important; border-radius: 8px !important; font-size: 12px !important; }
+
+    .filter-btn { color: #b2bec3; border: none !important; font-size: 13px; }
+    .btn-check:checked + .filter-btn { background-color: #fff !important; color: #ff6b81 !important; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+  </style>
+</head>
+
+<div class="apply-container">
+  <h4 class="fw-bold mb-4 text-center">🐾 매칭 통합 관리</h4>
+
+  <!-- 탭 메뉴 -->
+  <ul class="nav nav-pills justify-content-center mb-4" id="pills-tab" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#my-posts">내 모집글</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#sent">보낸 신청</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#received">받은 요청</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#matched-tab">매칭 현황</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#review-list-tab">전체 리뷰</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- [1] 내 모집글 관리 -->
+    <div class="tab-pane fade show active" id="my-posts">
+      <div th:if="${#lists.isEmpty(myPosts)}" class="text-center py-4 text-muted small">작성한 모집글이 없습니다.</div>
+      <div th:each="post : ${myPosts}" class="card-link card-mypost" th:onclick="|location.href='/match_post/read?matchno=${post.matchno}'|">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge mb-1" style="font-size: 10px;" th:classappend="${post.status == 1} ? 'bg-primary' : (${post.status == 2} ? 'bg-secondary' : (${post.status == 3} ? 'bg-warning text-dark' : 'bg-success'))"
+                  th:text="${post.status == 1} ? '모집중' : (${post.status == 2} ? '모집마감' : (${post.status == 3} ? '산책중' : '산책완료'))"></span>
+            <h6 class="fw-bold mb-1" th:text="${post.title}"></h6>
+            <p class="text-muted mb-0" style="font-size: 12px;"><i class="bi bi-calendar-event"></i> 일시: <span th:text="${post.mdate}"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- [2] 내가 보낸 신청 (매칭 완료된 내역도 보이도록 수정) -->
+    <div class="tab-pane fade" id="sent">
+      <div th:if="${#lists.isEmpty(list)}" class="text-center py-4 text-muted small">보낸 신청 내역이 없습니다.</div>
+      <div th:each="vo : ${list}" 
+           th:classappend="${vo.apply_status == 1} ? 'card-waiting' : (${vo.apply_status == 2} ? 'card-matched' : '')" 
+           class="card-link" 
+           th:onclick="openDetail([[${vo.title}]], [[${vo.mdate}]], [[${vo.msg}]], [[${vo.apply_status}]], [[${vo.nickname}]], '방장', [[${vo.dbti_type}]])">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+           <span class="badge mb-1"
+      style="font-size: 10px;"
+
+      th:classappend="
+        ${vo.apply_status == 1} ? 'bg-warning text-dark' :
+        (${vo.apply_status == 2} ? 'bg-success' :
+        (${vo.apply_status == 3} ? 'bg-primary' :
+        (${vo.apply_status == 4} ? 'bg-secondary' :
+        'bg-danger')))
+      "
+
+      th:text="
+        ${vo.apply_status == 1} ? '신규 요청' :
+        (${vo.apply_status == 2} ? '매칭 완료' :
+        (${vo.apply_status == 3} ? '산책중' :
+        (${vo.apply_status == 4} ? '산책완료' :
+        '매칭취소')))
+      ">
+
+</span>
+            <h6 class="fw-bold mb-1" th:text="${vo.title}"></h6>
+            <p class="text-muted mb-0" style="font-size: 12px;">방장: <span th:text="${vo.nickname}"></span></p>
+          </div>
+          <div class="text-end">
+            <span th:if="${vo.apply_status == 1}" class="text-warning fw-bold" style="font-size: 11px;"><span class="waiting-dot"></span>대기 중</span>
+            <span th:if="${vo.apply_status == 2}" class="text-success fw-bold" style="font-size: 11px;">수락됨</span>
+            <span th:if="${vo.apply_status == 3}" style="font-size: 11px;"> 산책중</span>
+            <span th:if="${vo.apply_status == 5}"class="text-danger fw-bold"style="font-size: 11px;">취소됨</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- [3] 나에게 온 요청 (매칭 완료된 내역도 보이도록 수정) -->
+    <div class="tab-pane fade" id="received">
+      <div th:if="${#lists.isEmpty(receivedList)}" class="text-center py-4 text-muted small">받은 요청이 없습니다.</div>
+      <div th:each="rvo : ${receivedList}" 
+           th:classappend="${rvo.apply_status == 1} ? 'card-waiting' : (${rvo.apply_status == 2} ? 'card-matched' : '')" 
+           class="card-link" 
+           th:onclick="openDetail([[${rvo.title}]], [[${rvo.mdate}]], [[${rvo.msg}]], [[${rvo.apply_status}]], [[${rvo.nickname}]], '신청자', [[${rvo.dbti_type}]])">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+<span class="badge mb-1"
+      style="font-size: 10px;"
+
+      th:classappend="
+        ${rvo.apply_status == 1} ? 'bg-warning text-dark' :
+        (${rvo.apply_status == 2} ? 'bg-success' :
+        (${rvo.apply_status == 3} ? 'bg-primary' :
+        (${rvo.apply_status == 4} ? 'bg-secondary' :
+        'bg-danger')))
+      "
+
+      th:text="
+        ${rvo.apply_status == 1} ? '신규 요청' :
+        (${rvo.apply_status == 2} ? '매칭 완료' :
+        (${rvo.apply_status == 3} ? '산책중' :
+        (${rvo.apply_status == 4} ? '산책완료' :
+        '매칭취소')))
+      ">
+
+</span>
+            <h6 class="fw-bold mb-1" th:text="${rvo.title}"></h6>
+            <p class="text-muted mb-0" style="font-size: 12px;">신청자: <span th:text="${rvo.nickname}"></span></p>
+          </div>
+          <span th:if="${rvo.apply_status == 1}" class="text-primary fw-bold" style="font-size: 11px;">검토 필요</span>
+          <span th:if="${rvo.apply_status == 3}" class="text-warning fw-bold"
+			      style="font-size: 11px;">산책 진행중
+			</span>
+			
+			<span th:if="${rvo.apply_status == 4}"
+			      class="text-secondary fw-bold"
+			      style="font-size: 11px;">
+			  산책 완료
+			</span>
+			<span th:if="${rvo.apply_status == 5}"
+			      class="text-danger fw-bold"
+			      style="font-size: 11px;">
+			
+			  취소됨
+			
+			</span>
+        </div>
+      </div>
+    </div>
+
+<!-- [4] 매칭 현황 -->
+    <div class="tab-pane fade" id="matched-tab">
+      
+      <!-- (1) 산책 진행 중 섹션 추가 -->
+      <div class="section-title"><i class="bi bi-person-walking text-primary"></i> 산책 진행 중</div>
+      
+      <!-- 내가 신청한 것 중 산책중 -->
+      <th:block th:each="vo : ${list}" th:if="${vo.apply_status == 3}">
+        <div class="card-link card-walking">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="flex:1" th:onclick="openDetail([[${vo.title}]], [[${vo.mdate}]], [[${vo.msg}]], [[${vo.apply_status}]], [[${vo.nickname}]], '방장', [[${vo.dbti_type}]])">
+              <span class="badge bg-primary mb-1" style="font-size:10px;">산책중</span>
+              <h6 class="fw-bold mb-1" th:text="${vo.title}"></h6>
+              <p class="text-muted mb-0" style="font-size:12px;"><i class="bi bi-person"></i> <span th:text="${vo.nickname}"></span></p>
+            </div>
+            <button class="btn btn-secondary btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="'event.stopPropagation(); endWalk(' + ${vo.applyno} + ')'">산책종료</button>
+          </div>
+        </div>
+      </th:block>
+
+      <!-- 받은 요청 중 산책중 -->
+      <th:block th:each="rvo : ${receivedList}" th:if="${rvo.apply_status == 3}">
+        <div class="card-link card-walking">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="flex:1" th:onclick="openDetail([[${rvo.title}]], [[${rvo.mdate}]], [[${rvo.msg}]], [[${rvo.apply_status}]], [[${rvo.nickname}]], '신청자', [[${rvo.dbti_type}]])">
+              <span class="badge bg-primary mb-1" style="font-size:10px;">산책중</span>
+              <h6 class="fw-bold mb-1" th:text="${rvo.title}"></h6>
+              <p class="text-muted mb-0" style="font-size:12px;"><i class="bi bi-person"></i> <span th:text="${rvo.nickname}"></span></p>
+            </div>
+            <button class="btn btn-secondary btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="'event.stopPropagation(); endWalk(' + ${rvo.applyno} + ')'">산책종료</button>
+          </div>
+        </div>
+      </th:block>
+
+      <!-- (2) 매칭 완료 섹션 -->
+      <div class="section-title mt-4"><i class="bi bi-heart-fill text-success"></i> 매칭 완료</div>
+      
+      <th:block th:each="vo : ${list}" th:if="${vo.apply_status == 2}">
+        <div class="card-link card-matched">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="flex:1" th:onclick="openDetail([[${vo.title}]], [[${vo.mdate}]], [[${vo.msg}]], [[${vo.apply_status}]], [[${vo.nickname}]], '방장', [[${vo.dbti_type}]])">
+              <span class="badge bg-success mb-1" style="font-size:10px;">매칭 완료</span>
+              <h6 class="fw-bold mb-1" th:text="${vo.title}"></h6>
+              <p class="text-muted mb-0" style="font-size:12px;"><i class="bi bi-person"></i> <span th:text="${vo.nickname}"></span></p>
+            </div>
+            <div class="d-flex gap-2 ms-2">
+              <button class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="'event.stopPropagation(); startWalk(' + ${vo.applyno} + ')'">시작</button>
+              <button class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="|event.stopPropagation(); openCancelModal(${vo.applyno})|">취소</button>
+            </div>
+          </div>
+        </div>
+      </th:block>
+
+      <th:block th:each="rvo : ${receivedList}" th:if="${rvo.apply_status == 2}">
+        <div class="card-link card-matched">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="flex:1" th:onclick="openDetail([[${rvo.title}]], [[${rvo.mdate}]], [[${rvo.msg}]], [[${rvo.apply_status}]], [[${rvo.nickname}]], '신청자', [[${rvo.dbti_type}]])">
+              <span class="badge bg-success mb-1" style="font-size:10px;">매칭 완료</span>
+              <h6 class="fw-bold mb-1" th:text="${rvo.title}"></h6>
+              <p class="text-muted mb-0" style="font-size:12px;"><i class="bi bi-person"></i> <span th:text="${rvo.nickname}"></span></p>
+            </div>
+            <div class="d-flex gap-2 ms-2">
+              <button class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="'event.stopPropagation(); startWalk(' + ${rvo.applyno} + ')'">시작</button>
+              <button class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold" style="font-size:12px;" th:onclick="|event.stopPropagation(); openCancelModal(${rvo.applyno})|">취소</button>
+            </div>
+          </div>
+        </div>
+      </th:block>
+
+      <!-- (3) 종료된 산책 섹션 -->
+      <div class="section-title mt-4"><i class="bi bi-check-circle-fill text-success"></i> 종료된 산책</div>
+      
+      <th:block th:each="vo : ${completedList}">
+        <div class="card-link">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="flex:1" th:onclick="openDetail([[${vo.title}]], [[${vo.mdate}]], [[${vo.msg}]], [[${vo.apply_status}]], [[${vo.nickname}]], '완료', [[${vo.dbti_type}]])">
+              <span class="badge bg-light text-secondary mb-1" style="font-size:10px;">산책 완료</span>
+              <h6 class="fw-bold mb-1 text-muted" th:text="${vo.title}"></h6>
+              <p class="text-muted mb-0" style="font-size:12px;">상대: <span th:text="${vo.nickname}"></span></p>
+            </div>
+            <div>
+              <button th:if="${!#lists.contains(reviewList.![matchno + '_' + writer_no], vo.matchno + '_' + session.memberno)}"
+                      class="btn btn-sm btn-review rounded-pill px-3 py-1"
+                      th:attr="data-applyno=${vo.applyno}, data-matchno=${vo.matchno},data-host=${vo.host_memberno},data-applicant=${vo.applicant_memberno}, data-nickname=${vo.nickname}"
+                      onclick="event.stopPropagation(); openReviewModal(
+						this.dataset.applyno,
+						this.dataset.matchno,
+						this.dataset.host,
+						this.dataset.applicant,
+						this.dataset.nickname
+						)">
+                리뷰 쓰기
+              </button>
+              <span th:if="${#lists.contains(reviewList.![matchno + '_' + writer_no], vo.matchno + '_' + session.memberno)}" class="text-muted small">작성완료</span>
+            </div>
+          </div>
+        </div>
+      </th:block>
+    </div>
+
+    <!-- [5] 전체 리뷰 목록 -->
+    <div class="tab-pane fade" id="review-list-tab">
+      <div class="d-flex justify-content-center mb-3">
+        <div class="btn-group p-1 bg-light rounded-pill" role="group">
+          <input type="radio" class="btn-check" name="reviewFilter" id="filterAll" checked onclick="filterReviews('all')">
+          <label class="btn btn-sm rounded-pill px-3 filter-btn" for="filterAll">전체</label>
+          <input type="radio" class="btn-check" name="reviewFilter" id="filterSent" onclick="filterReviews('sent')">
+          <label class="btn btn-sm rounded-pill px-3 filter-btn" for="filterSent">내가 쓴</label>
+          <input type="radio" class="btn-check" name="reviewFilter" id="filterReceived" onclick="filterReviews('received')">
+          <label class="btn btn-sm rounded-pill px-3 filter-btn" for="filterReceived">나에게 온</label>
+        </div>
+      </div>
+      <div th:each="review : ${reviewList}" class="review-card filter-item" th:classappend="${review.writer_no == session.memberno} ? 'sent' : 'received'">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div style="flex:1;">
+            <div class="star-rating mb-1">
+              <th:block th:each="num : ${#numbers.sequence(1, T(java.lang.Math).toIntExact(review.owner_score))}">★</th:block>
+            </div>
+            <p class="review-content-text mb-2 text-dark" th:text="${review.content}" style="white-space: pre-wrap;"></p>
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="mini-review-box" style="background:#fff7f9; border:1px solid #ffe1e7;">
+                  <span class="fw-bold" style="color:#ff6b81; font-size: 10px;">🐶 강아지:</span>
+                  <span th:text="${review.dog_comment}" class="text-truncate"></span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mini-review-box" style="background:#f8f9fa; border:1px solid #eee;">
+                  <span class="fw-bold" style="color:#777; font-size: 10px;">👤 보호자:</span>
+                  <span th:text="${review.owner_comment}" class="text-truncate"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top" style="font-size: 10px; color: #999;">
+          <span><i class="bi bi-person"></i> <span th:text="${review.writer_nickname}"></span></span>
+          <span th:text="${review.rdate}"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 상세 정보 모달 -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 400px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="fw-bold mb-0" id="detailTitle">상세 정보</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-3">
+        <div class="text-center" id="statusStampArea"></div>
+        <div class="detail-section">
+          <div class="detail-label" id="userRoleLabel">정보</div>
+          <div class="detail-value d-flex justify-content-between align-items-center">
+            <span id="detailNickname" class="fw-bold"></span>
+            <span id="detailDmti" class="dog-tag"></span>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label"><i class="bi bi-calendar-check"></i> 일시</div>
+          <div class="detail-value" id="detailDate"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label" id="msgRoleLabel">메시지</div>
+          <div class="detail-value" id="detailMsg" style="white-space: pre-wrap; font-size: 13px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 알림 모달 -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center p-4">
+        <p id="alertModalMessage" class="mb-3 fw-bold"></p>
+        <button type="button" class="btn btn-sm btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- =========================================================
+     🌸 리뷰 작성 모달
+     ========================================================= -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+  <!-- modal-lg 제거하고 가로 폭을 제한함 -->
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 550px; margin: 1.75rem auto;">
+    <div class="modal-content">
+      <div class="modal-header" style="padding: 15px 20px; background: #fff5f6;">
+        <h6 class="fw-bold mb-0" style="color:#ff6b81;"><i class="bi bi-chat-heart-fill"></i> 산책 리뷰 작성</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size: 12px;"></button>
+      </div>
+      
+      <form id="reviewForm" onsubmit="submitReview(event)">
+        <input type="hidden" name="matchno" id="modal_matchno">
+        <input type="hidden" name="applyno" id="modal_applyno">
+        <input type="hidden" name="target_no" id="modal_target_memberno">
+        
+        <div class="modal-body p-3 p-md-4"> <!-- 모바일에서 패딩 축소 -->
+          <div class="text-center mb-3">
+            <div class="fw-bold fs-6"><span id="modal_nickname" class="text-primary"></span> 님과의 산책은 어떠셨나요?</div>
+            <div class="small text-muted" style="font-size: 12px;">따뜻한 리뷰는 큰 힘이 됩니다 🐶</div>
+          </div>
+
+          <div class="row g-2"> <!-- 좌우로 배치하거나 좁게 설정 -->
+            <!-- 반려견 리뷰 섹션 -->
+            <div class="col-12">
+              <div class="p-3 mb-2" style="background:#fffcfd; border-radius:15px; border:1px solid #ffe1e7;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="form-label fw-bold small mb-0"><i class="bi bi-dog"></i> 반려견 평점</label>
+                  <select name="dog_score" class="form-select form-select-sm rounded-pill" style="width: auto;">
+                    <option value="5">5 ★★★★★</option>
+                    <option value="4">4 ★★★★</option>
+                    <option value="3">3 ★★★</option>
+                    <option value="2">2 ★★</option>
+                    <option value="1">1 ★</option>
+                  </select>
+                </div>
+                <textarea name="dog_comment" class="form-control form-control-sm rounded-3" rows="2" placeholder="강아지 성격, 산책 매너 등" required></textarea>
+              </div>
+            </div>
+
+            <!-- 보호자 리뷰 섹션 -->
+            <div class="col-12">
+              <div class="p-3 mb-2" style="background:#f9f9f9; border-radius:15px; border:1px solid #eee;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="form-label fw-bold small mb-0"><i class="bi bi-person-check"></i> 보호자 평점</label>
+                  <select name="owner_score" class="form-select form-select-sm rounded-pill" style="width: auto;">
+                    <option value="5">5 ★★★★★</option>
+                    <option value="4">4 ★★★★</option>
+                    <option value="3">3 ★★★</option>
+                    <option value="2">2 ★★</option>
+                    <option value="1">1 ★</option>
+                  </select>
+                </div>
+                <textarea name="owner_comment" class="form-control form-control-sm rounded-3" rows="2" placeholder="약속 시간, 매너 등" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- 종합 리뷰 -->
+          <div class="mt-2">
+            <label class="form-label fw-bold small"><i class="bi bi-pencil-fill"></i> 종합 후기</label>
+            <textarea name="content" class="form-control form-control-sm rounded-3" rows="3" placeholder="전체적인 경험을 들려주세요." required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 pb-4 pt-0 justify-content-center">
+          <button type="button" class="btn btn-sm btn-light rounded-pill px-4" data-bs-dismiss="modal">취소</button>
+          <button type="submit" id="btnSubmitReview" class="btn btn-sm rounded-pill px-5 text-white fw-bold" style="background:#ff6b81;">리뷰 등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- =========================================================
+     ❌ 매칭 취소 모달
+========================================================= -->
+<div class="modal fade"
+     id="cancelModal"
+     tabindex="-1">
+
+  <div class="modal-dialog modal-dialog-centered"
+       style="max-width:450px;">
+
+    <div class="modal-content">
+
+      <div class="modal-header"
+           style="background:#fff5f5;">
+
+        <h6 class="fw-bold text-danger mb-0">
+
+          매칭 취소
+
+        </h6>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="modal-body">
+
+        <input type="hidden"
+               id="cancel_applyno">
+
+        <label class="form-label fw-bold small">
+
+          취소 사유
+
+        </label>
+
+        <textarea
+            id="cancel_reason"
+            class="form-control rounded-3"
+            rows="4"
+            placeholder="취소 사유를 입력해주세요."></textarea>
+
+      </div>
+
+      <div class="modal-footer border-0">
+
+        <button type="button"
+                class="btn btn-light rounded-pill px-4"
+                data-bs-dismiss="modal">
+
+          닫기
+
+        </button>
+
+        <button type="button"
+                class="btn btn-danger rounded-pill px-4"
+                onclick="submitCancel()">
+
+          취소하기
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+<!-- 알림 모달 -->
+<div class="modal fade" id="alertModal" tabindex="-1">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content alert-modal-content">
+      <div class="alert-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <h5 class="fw-bold mb-3" id="alertModalMessage">알림 메시지</h5>
+      <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-dismiss="modal">확인</button>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  let reviewModal;
+  let alertModal;
+  let cancelModal;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+    cancelModal = new bootstrap.Modal(document.getElementById('cancelModal')
+      );
+  });
+// [수정된] 산책 시작 함수
+function startWalk(applyno) {
+  if(!confirm("산책을 시작하시겠습니까?")) return;
+  const formData = new FormData();
+  formData.append('applyno', applyno);
+  formData.append('apply_status', 3); // status -> apply_status 로 변경
+
+  // URL을 /update_status 로 변경 (언더바 추가)
+  fetch('/match_apply/update_status', { method: 'POST', body: formData })
+  .then(res => res.json())
+  .then(data => {
+    if(data.res === 'success') showModalAlert('🐾 산책이 시작되었습니다!', true);
+    else showModalAlert('처리에 실패했습니다.');
+  })
+  .catch(err => console.error(err));
+}
+
+// [수정된] 산책 종료 함수
+function endWalk(applyno) {
+  if(!confirm("산책을 종료하시겠습니까?")) return;
+  const formData = new FormData();
+  formData.append('applyno', applyno);
+  formData.append('apply_status', 4); // status -> apply_status 로 변경
+
+  // URL을 /update_status 로 변경 (언더바 추가)
+  fetch('/match_apply/update_status', { method: 'POST', body: formData })
+  .then(res => res.json())
+  .then(data => {
+    if(data.res === 'success') showModalAlert('🏁 산책이 완료되었습니다!', true);
+    else showModalAlert('처리에 실패했습니다.');
+  })
+  .catch(err => console.error(err));
+}
+function openCancelModal(applyno) {
+
+  document.getElementById(
+      'cancel_applyno'
+  ).value = applyno;
+
+  document.getElementById(
+      'cancel_reason'
+  ).value = '';
+
+  cancelModal.show();
+
+}
+function submitCancel() {
+
+  const applyno =
+      document.getElementById(
+          'cancel_applyno'
+      ).value;
+
+  const reason =
+      document.getElementById(
+          'cancel_reason'
+      ).value.trim();
+
+  if(reason.length < 2){
+
+    showModalAlert(
+        '취소 사유를 입력해주세요.'
+    );
+
+    return;
+
+  }
+
+  const formData = new FormData();
+
+  formData.append(
+      'applyno',
+      applyno
+  );
+
+  formData.append(
+      'cancel_reason',
+      reason
+  );
+
+  fetch('/match_apply/cancel', {
+
+    method: 'POST',
+    body: formData
+
+  })
+  .then(response => response.json())
+  .then(data => {
+
+    if(data.res === 'success'){
+
+      cancelModal.hide();
+
+      showModalAlert(
+          '매칭이 취소되었습니다.',
+          true
+      );
+
+    } else {
+
+      showModalAlert(
+          '취소 처리 실패'
+      );
+
+    }
+
+  })
+  .catch(error => {
+
+    showModalAlert(
+        '서버 통신 실패'
+    );
+
+  });
+
+}
+  function showModalAlert(msg, reload = false) {
+    document.getElementById('alertModalMessage').innerText = msg;
+    alertModal.show();
+    if(reload) {
+      document.getElementById('alertModal').addEventListener('hidden.bs.modal', function () {
+        location.reload();
+      }, {once: true});
+    }
+  }
+
+  function filterReviews(type) {
+    const items = document.querySelectorAll('.filter-item');
+    items.forEach(item => {
+      if (type === 'all') {
+        item.style.display = 'block';
+      } else if (type === 'sent') {
+        item.style.display = item.classList.contains('sent') ? 'block' : 'none';
+      } else if (type === 'received') {
+        item.style.display = item.classList.contains('received') ? 'block' : 'none';
+      }
+    });
+  }
+
+  function openDetail(title, mdate, msg, status, nickname, role, dmti) {
+    document.getElementById('detailTitle').innerText = title;
+    document.getElementById('detailDate').innerText = mdate;
+    document.getElementById('detailMsg').innerText = msg;
+    document.getElementById('detailNickname').innerText = nickname;
+    document.getElementById('detailDmti').innerText = "DMTI: " + (dmti ? dmti : "미측정");
+    
+    if(role === '방장') {
+      document.getElementById('userRoleLabel').innerHTML = '<i class="bi bi-person-badge"></i> 상대방 (모임 방장)';
+      document.getElementById('msgRoleLabel').innerHTML = '<i class="bi bi-chat-quote"></i> 내가 보낸 신청';
+    } else {
+      document.getElementById('userRoleLabel').innerHTML = '<i class="bi bi-person-badge"></i> 신청자 정보';
+      document.getElementById('msgRoleLabel').innerHTML = '<i class="bi bi-chat-quote"></i> 신청자 메시지';
+    }
+    
+    const stampArea = document.getElementById('statusStampArea');
+let stampHtml =
+    status == 2
+      ? '<div class="status-stamp" style="color:#40c057;border-color:#40c057;">MATCHED</div>'
+
+    : status == 3
+      ? '<div class="status-stamp" style="color:#fcc419;border-color:#fcc419;">WALKING</div>'
+
+    : status == 4
+      ? '<div class="status-stamp" style="color:#868e96;border-color:#868e96;">COMPLETE</div>'
+	: status == 5
+ 	  ? '<div class="status-stamp" style="color:#fa5252;border-color:#fa5252;">CANCEL</div>'
+      : '<div class="status-stamp" style="color:#74c0fc;border-color:#74c0fc;">WAITING</div>';
+    stampArea.innerHTML = stampHtml;
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+  }
+
+function openReviewModal(
+    applyno,
+    matchno,
+    hostNo,
+    applicantNo,
+    nickname
+) {
+
+	const loginMemberno = /*[[${session.memberno}]]*/ null;
+
+    let targetNo = 0;
+
+    // =====================================================
+    // 방장이 리뷰 작성
+    // =====================================================
+
+    if (loginMemberno == hostNo) {
+
+        targetNo = applicantNo;
+
+    }
+
+    // =====================================================
+    // 신청자가 리뷰 작성
+    // =====================================================
+
+    else {
+
+        targetNo = hostNo;
+
+    }
+
+    // =====================================================
+    // 값 세팅
+    // =====================================================
+
+    document.getElementById(
+        'modal_applyno'
+    ).value = applyno;
+
+    document.getElementById(
+        'modal_matchno'
+    ).value = matchno;
+
+    document.getElementById(
+        'modal_target_memberno'
+    ).value = targetNo;
+
+    document.getElementById(
+        'modal_nickname'
+    ).innerText = nickname;
+
+    document.getElementById(
+        'reviewForm'
+    ).reset();
+
+    reviewModal.show();
+
+}
+
+  function submitReview(event) {
+    event.preventDefault();
+    const submitBtn = document.getElementById('btnSubmitReview');
+    const form = document.getElementById('reviewForm');
+    const formData = new FormData(form);
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 등록 중...';
+
+    fetch('/match_review/create.do', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+      if (data === "SUCCESS") {
+        reviewModal.hide();
+        showModalAlert('🐾 리뷰가 성공적으로 등록되었습니다!', true);
+      } else if (data === "DUPLICATE") {
+        reviewModal.hide();
+        showModalAlert('이미 이 매칭에 대해 리뷰를 작성하셨습니다.');
+      } else {
+        showModalAlert('리뷰 등록 중 오류가 발생했습니다.');
+        submitBtn.disabled = false;
+        submitBtn.innerText = '리뷰 등록';
+      }
+    })
+    .catch(error => {
+      showModalAlert('서버와 통신할 수 없습니다.');
+      submitBtn.disabled = false;
+    });
+  }
+</script>
+</div>
+</html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.breed_image.Breed_imageDAOInter">
+
+<insert id="create" parameterType="dev.mvc.breed_image.Breed_imageVO">
+  INSERT INTO breed_image(img_no, breedno, original_name, saved_name, file_path, thumb_path, f_size)
+  VALUES(breed_image_seq.nextval, #{breedno}, 
+         #{original_name, jdbcType=VARCHAR}, 
+         #{saved_name, jdbcType=VARCHAR}, 
+         #{file_path, jdbcType=VARCHAR}, 
+         #{thumb_path, jdbcType=VARCHAR}, 
+         #{f_size, jdbcType=INTEGER})
+</insert>
+
+  <select id="list_by_breedno" resultType="dev.mvc.breed_image.Breed_imageVO" parameterType="int">
+    SELECT img_no, breedno, original_name, saved_name, file_path, thumb_path, f_size
+    FROM breed_image
+    WHERE breedno = #{breedno}
+    ORDER BY img_no ASC
+  </select>
+
+<select id="read_main_img" resultType="dev.mvc.breed_image.Breed_imageVO" parameterType="int">
+  SELECT img_no, breedno, original_name, saved_name, file_path, thumb_path, f_size
+  FROM (
+      SELECT img_no, breedno, original_name, saved_name, file_path, thumb_path, f_size
+      FROM breed_image
+      WHERE breedno = #{breedno}
+      ORDER BY img_no ASC  )
+  WHERE ROWNUM = 1
+</select>
+
+  <select id="read" resultType="dev.mvc.breed_image.Breed_imageVO" parameterType="int">
+    SELECT img_no, breedno, original_name, saved_name, file_path, thumb_path, f_size
+    FROM breed_image
+    WHERE img_no = #{img_no}
+  </select>
+<select id="list_all"
+        resultType="dev.mvc.breed_image.Breed_imageVO"
+        parameterType="String">
+
+    SELECT 
+        i.img_no,
+        i.breedno,
+        i.original_name,
+        i.saved_name,
+        i.file_path,
+        i.thumb_path,
+        i.f_size,
+        b.breed_name
+
+    FROM breed_image i
+    INNER JOIN breed b
+        ON i.breedno = b.breedno
+
+    <if test="_parameter != null and _parameter != ''">
+        WHERE b.breed_name LIKE '%' || #{value} || '%'
+    </if>
+
+    ORDER BY i.img_no DESC
+
+</select>
+  <delete id="delete" parameterType="int">
+    DELETE FROM breed_image
+    WHERE img_no = #{img_no}
+  </delete>
+
+  <delete id="delete_by_breedno" parameterType="int">
+    DELETE FROM breed_image
+    WHERE breedno = #{breedno}
+  </delete>
+
+</mapper>

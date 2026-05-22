@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Paws 마이페이지</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        /* =========================================================
+            🌈 공통 변수 및 초기화
+        ========================================================= */
+        :root {
+            --primary-color: #ff6b81;
+            --primary-hover: #ff4757;
+            --primary-light: #fff0f2;
+            --bg-color: #f8f9fa;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border-color: #f1f2f6;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #fff1f3, #f8f9fa);
+        }
+
+        .mypage-container {
+            max-width: 1280px;
+            margin: 60px auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+        }
+
+        /* =========================================================
+            🐾 사이드바
+        ========================================================= */
+        .sidebar {
+            width: 300px;
+            flex-shrink: 0;
+            background: #fff;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+        }
+
+        .side-profile {
+            padding: 35px 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-img {
+            width: 110px; height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary-color);
+            padding: 4px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 25px rgba(255,107,129,0.18);
+        }
+
+        .profile-name { font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+        .profile-id { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+
+        .profile-stats { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
+        .mini-stat { background: var(--primary-light); color: var(--primary-color); padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+
+        .logout-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid #eee;
+            color: #555;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .logout-btn:hover { background: #fafafa; }
+
+        .side-menu { list-style: none; padding: 14px 0; margin: 0; }
+        .side-menu li {
+            position: relative;
+            padding: 16px 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .side-menu li:hover { background: var(--primary-light); color: var(--primary-color); }
+        .side-menu li.active { background: var(--primary-light); color: var(--primary-color); font-weight: 800; }
+        .side-menu li.active::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--primary-color);
+        }
+
+        /* =========================================================
+            📄 메인 영역 및 컴포넌트
+        ========================================================= */
+        .main-display {
+            flex: 1;
+            background: #fff;
+            border-radius: 28px;
+            padding: 40px;
+            min-height: 700px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.35s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 18px; border-bottom: 2px solid var(--border-color);
+        }
+        .section-title { margin: 0; font-size: 28px; font-weight: 900; color: var(--text-main); }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px;
+            border: none; border-radius: 14px; font-size: 14px; font-weight: 700;
+            cursor: pointer; text-decoration: none; transition: 0.25s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #ff6b81, #ff8fa3); color: white; box-shadow: 0 8px 20px rgba(255,107,129,0.18); }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-outline { background: white; border: 1px solid #eee; color: #444; }
+        .btn-danger { background: white; border: 1px solid #ffd6db; color: #ff4757; }
+        .btn-danger:hover { background: #fff0f2; }
+
+        .info-card { border: 1px solid var(--border-color); border-radius: 24px; overflow: hidden; margin-bottom: 20px; }
+        .row-line { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--border-color); }
+        .row-line:last-child { border-bottom: none; }
+        .label { color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        .value { color: var(--text-main); font-size: 15px; font-weight: 700; }
+
+        /* 자기소개 박스 커스텀 */
+        .intro-box { padding: 24px; background: #fafafa; border-radius: 18px; margin: 10px 24px 24px 24px; }
+        .intro-title { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
+        .intro-content { font-size: 15px; color: var(--text-main); line-height: 1.6; }
+
+        .dog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .dog-card { background: white; border: 1px solid var(--border-color); border-radius: 24px; padding: 22px; transition: 0.25s; }
+        .dog-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .dog-card-content { display: flex; gap: 15px; align-items: center; }
+        .dog-thumb { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background: #fafafa; }
+        .dog-name { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+        .dog-desc { color: var(--text-muted); font-size: 14px; }
+        .dog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--border-color); }
+
+        .table-responsive { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { background: #fafafa; padding: 15px; font-size: 14px; color: #888; text-align: center; border-bottom: 2px solid var(--border-color); }
+        .data-table td { padding: 16px; border-bottom: 1px solid var(--border-color); font-size: 14px; color: #333; text-align: center; }
+        .data-link { text-decoration: none; color: #333; font-weight: 700; }
+        .data-link:hover { color: var(--primary-color); }
+
+        .no-data { text-align: center; padding: 90px 0; color: #aaa; font-size: 16px; }
+
+        @media(max-width: 900px) {
+            .mypage-container { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .row-line { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="mypage-container">
+            
+            <!-- 🐾 사이드바 -->
+            <aside class="sidebar">
+                <div class="side-profile" th:if="${member != null}">
+                    <img th:src="${member.profilesaved != null ? '/member/storage/' + member.profilesaved : '/images/default_profile.jpg'}" class="profile-img">
+                    <div class="profile-name" th:text="${member.nickname}">닉네임</div>
+                    <div class="profile-id" th:text="'@' + ${member.id}">@id</div>
+                    
+                    <div class="profile-stats">
+                        <div class="mini-stat">🌡 <span th:text="${member.manner_temp}">36.5</span>℃</div>
+                        <div class="mini-stat">🐾 <span th:text="${member.match_cnt}">0</span>회</div>
+                    </div>
+                    <a th:href="@{/member/logout}" class="logout-btn">로그아웃</a>
+                </div>
+
+                <ul class="side-menu">
+                    <li class="menu-item active" onclick="changeTab(this, 'section-info')">회원정보</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-dog')">내 반려견</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-order')">주문 내역</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-match')">매칭 내역</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-chat')">채팅 내역</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-post')">내 게시글</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-review')">내 리뷰</li>
+                    <li class="menu-item" onclick="changeTab(this, 'section-comment')">내 댓글</li>
+                    <!-- 로그인 내역 탭 전환 버튼으로 단일화 -->
+                    <li class="menu-item" onclick="changeTab(this, 'section-login')">로그인 내역</li>
+                </ul>
+            </aside>
+
+            <!-- 📄 메인 콘텐츠 -->
+            <main class="main-display">
+                
+                <!-- 👤 회원 정보 -->
+                <div id="section-info" class="tab-content active">
+                    <div class="section-header">
+                        <h2 class="section-title">회원 정보</h2>
+                        <a th:href="@{|/member/update_form?memberno=${member.memberno}|}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square"></i> 정보 수정
+                        </a>
+                    </div>
+                    <div class="info-card">
+                        <div class="row-line"><span class="label">아이디</span><span class="value" th:text="${member.id}"></span></div>
+                        <div class="row-line"><span class="label">닉네임</span><span class="value" th:text="${member.nickname}"></span></div>
+                        <div class="row-line"><span class="label">전화번호</span><span class="value" th:text="${member.tel}"></span></div>
+                        <div class="row-line">
+                            <span class="label">주소</span>
+                            <span class="value" th:text="'[' + ${member.zipcode} + '] ' + ${member.address1} + ' ' + ${member.address2}"></span>
+                        </div>
+                        <div class="row-line">
+                            <span class="label">가입일</span>
+                            <span class="value" th:text="${#strings.substring(member.mdate,0,10)}"></span>
+                        </div>
+                        <div class="row-line">
+                            <span class="label">⭐ 회원등급</span>
+                            <span class="value" th:text="${member.grade}">일반</span>
+                        </div>
+                        <div class="row-line">
+                            <span class="label">🌡 매너온도</span>
+                            <span class="value" th:text="${member.manner_temp} + '℃'"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- 자기소개 박스 -->
+                    <div class="intro-box">
+                        <div class="intro-title">💬 자기소개</div>
+                        <div class="intro-content" th:text="${member.intro != null and member.intro != '' ? member.intro : '등록된 자기소개가 없습니다.'}"></div>
+                    </div>
+                </div>
+
+                <!-- 🐶 내 반려견 -->
+                <div id="section-dog" class="tab-content">
+                    <div class="section-header">
+                        <h2 class="section-title">내 반려견</h2>
+                        <a th:href="@{/dog/create.do}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> 반려견 등록</a>
+                    </div>
+                    <div th:if="${not #lists.isEmpty(dogs)}" class="dog-grid">
+                        <div th:each="dog : ${dogs}" class="dog-card">
+                            <div class="dog-card-content">
+                                <img th:src="${dog.file1saved != null ? '/dog/storage/' + dog.file1saved : '/images/none.jpg'}" class="dog-thumb">
+                                <div>
+                                    <div class="dog-name" th:text="${dog.name}">이름</div>
+                                    <div class="dog-desc"><span th:text="${dog.breed}">견종</span> · <span th:text="${dog.age} + '살'">0살</span></div>
+                                </div>
+                            </div>
+                            <div class="dog-actions">
+                                <a th:href="@{|/dog/update.do?dogno=${dog.dogno}|}" class="btn btn-outline">수정</a>
+                                <form th:action="@{/mypage/dog/delete.do}" method="post" style="display:inline;">
+                                    <input type="hidden" name="dogno" th:value="${dog.dogno}">
+                                    <input type="hidden" name="memberno" th:value="${member.memberno}">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(dogs)}" class="no-data">등록된 반려견이 없습니다.</div>
+                </div>
+
+                <!-- 📦 주문 내역 -->
+                <div id="section-order" class="tab-content">
+                    <div class="section-header"><h2 class="section-title">주문 내역</h2></div>
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(orders)}">
+                        <table class="data-table">
+                            <thead><tr><th>주문번호</th><th>금액</th><th>상태</th></tr></thead>
+                            <tbody>
+                                <tr th:each="o : ${orders}">
+                                    <td th:text="${o.order_id}"></td>
+                                    <td th:text="${#numbers.formatInteger(o.total_price, 0, 'COMMA') + '원'}"></td>
+                                    <td th:text="${o.order_status}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(orders)}" class="no-data">주문 내역이 없습니다.</div>
+                </div>
+
+                <!-- 🐾 매칭 내역 -->
+                <div id="section-match" class="tab-content">
+                    <div class="section-header"><h2 class="section-title">매칭 내역</h2></div>
+                    <div class="no-data">아직 매칭 내역이 없습니다.</div>
+                </div>
+
+                <!-- 💬 채팅 내역 -->
+                <div id="section-chat" class="tab-content">
+                    <div class="section-header"><h2 class="section-title">채팅 내역</h2></div>
+                    <div class="no-data">진행 중인 채팅이 없습니다.</div>
+                </div>
+
+                <!-- 📝 내 게시글 -->
+                <div id="section-post" class="tab-content">
+                    <div class="section-header"><h2 class="section-title">내 게시글</h2></div>
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(posts)}">
+                        <table class="data-table">
+                            <thead><tr><th>번호</th><th>제목</th><th>조회수</th></tr></thead>
+                            <tbody>
+                                <tr th:each="post : ${posts}">
+                                    <td th:text="${post.communityno}"></td>
+                                    <td><a th:href="@{/community/read(communityno=${post.communityno})}" class="data-link" th:text="${post.title}"></a></td>
+                                    <td th:text="${post.viewcnt}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(posts)}" class="no-data">작성한 게시글이 없습니다.</div>
+                </div>
+
+                <!-- 💬 내 댓글 -->
+                <div id="section-comment" class="tab-content">
+                    <div class="section-header"><h2 class="section-title">내 댓글</h2></div>
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(comments)}">
+                        <table class="data-table">
+                            <thead><tr><th>게시글 번호</th><th>댓글 내용</th><th>날짜</th></tr></thead>
+                            <tbody>
+                                <tr th:each="reply : ${comments}">
+                                    <td th:text="${reply.communityno}"></td>
+                                    <td th:text="${reply.content}"></td>
+                                    <td th:text="${#strings.substring(reply.rdate,0,10)}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(comments)}" class="no-data">작성한 댓글이 없습니다.</div>
+                </div>
+
+                <!-- 🔐 로그인 내역 섹션 -->
+                <div id="section-login" class="tab-content">
+                    <div class="section-header">
+                        <h2 class="section-title">로그인 내역</h2>
+                        <!-- 로그인 내역 상세 입력/관리 페이지로 이동하는 링크 -->
+                        <a th:href="@{|/mlogin/mlogin_insert_form?memberno=${member.memberno}|}" class="btn btn-outline">
+                            <i class="bi bi-clock-history"></i> 내역 관리
+                        </a>
+                    </div>
+
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(mlist)}">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>로그인 IP</th>
+                                    <th>로그인 일시</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="mlogin, status : ${mlist}">
+                                    <td th:text="${status.count}">1</td>
+                                    <td th:text="${mlogin.ip}">127.0.0.1</td>
+                                    <td th:text="${mlogin.ldate}">2024-05-20 14:30:00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(mlist)}" class="no-data">
+                        <i class="bi bi-exclamation-circle" style="display: block; font-size: 2rem; margin-bottom: 10px;"></i>
+                        최근 로그인 기록이 없습니다.
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <script>
+            function changeTab(element, sectionId) {
+                // 메뉴 활성화 상태 변경
+                document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+                element.classList.add('active');
+
+                // 콘텐츠 섹션 변경
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                const targetSection = document.getElementById(sectionId);
+                if(targetSection) {
+                    targetSection.classList.add('active');
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.market_cart.MarketCartDAOInter">
+
+  <insert id="create" parameterType="dev.mvc.market_cart.MarketCartVO">
+    MERGE INTO market_cart c
+    USING DUAL
+       ON (c.member_id = #{member_id} AND c.product_id = #{product_id})
+    WHEN MATCHED THEN
+      UPDATE SET c.quantity = c.quantity + #{quantity}
+    WHEN NOT MATCHED THEN
+      INSERT (cart_id, member_id, product_id, quantity, reg_date)
+      VALUES (SEQ_MARKET_CART.NEXTVAL, #{member_id}, #{product_id}, #{quantity}, SYSDATE)
+  </insert>
+
+<select id="list_by_member" resultType="dev.mvc.market_cart.MarketCartVO" parameterType="String">
+    SELECT 
+        c.cart_id, 
+        c.member_id, 
+        c.product_id, 
+        c.quantity, 
+        c.reg_date,
+        p.product_name,   
+        p.price, 
+        p.delivery_fee,
+        p.stock,        i.file_name,      
+        (p.price * c.quantity) as total_price 
+    FROM market_cart c
+    INNER JOIN market p ON c.product_id = p.product_id
+    LEFT OUTER JOIN product_image i ON p.product_id = i.product_id AND i.is_main = 'Y'
+    WHERE c.member_id = #{member_id}
+    ORDER BY c.cart_id DESC
+</select>
+<select id="list_by_cart_ids" resultType="dev.mvc.market_cart.MarketCartVO" parameterType="String">
+  SELECT c.cart_id, 
+         c.product_id, 
+         c.quantity, 
+         c.reg_date,
+         p.product_name, 
+         p.price, 
+         p.delivery_fee, 
+         i.FILE_NAME,  (p.price * c.quantity) as total_price
+  FROM market_cart c
+  JOIN market p ON c.product_id = p.product_id
+  LEFT JOIN product_image i ON p.product_id = i.product_id AND i.IS_MAIN = 'Y'
+  WHERE c.cart_id IN (${cart_ids})
+  ORDER BY c.cart_id ASC
+</select>
+  <update id="update_quantity" parameterType="dev.mvc.market_cart.MarketCartVO">
+    UPDATE market_cart
+    SET quantity = #{quantity}
+    WHERE cart_id = #{cart_id}
+  </update>
+  <update id="update_quantity_by_product" parameterType="dev.mvc.market_cart.MarketCartVO">
+    UPDATE market_cart
+    SET quantity = #{quantity}
+    WHERE product_id = #{product_id} AND member_id = #{member_id}
+</update>
+<delete id="delete_selected" parameterType="String">
+  DELETE FROM market_cart
+  WHERE cart_id IN (${cart_ids})
+</delete>
+  <delete id="delete" parameterType="int">
+    DELETE FROM market_cart
+    WHERE cart_id = #{cart_id}
+  </delete>
+<delete id="delete_by_product" parameterType="dev.mvc.market_cart.MarketCartVO">
+      DELETE FROM market_cart
+      WHERE product_id = #{product_id} AND member_id = #{member_id}
+  </delete>
+  <delete id="delete_by_member" parameterType="String">
+    DELETE FROM market_cart
+    WHERE member_id = #{member_id}
+  </delete>
+
+</mapper>

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Paws 매칭</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    :root {
+      --paws-pink: #ff6b81;
+      --paws-light-pink: #fff3f3;
+      --paws-yellow: #ffc107;
+      --ai-blue: #0d6efd;
+      --ai-purple: #6f42c1;
+    }
+
+    .matching-container {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 15px;
+    }
+
+    .matching-card {
+      border: 1px solid #f1f1f1;
+      border-radius: 18px;
+      background: #fff;
+      overflow: hidden;
+      transition: .25s;
+      border-top: 4px solid var(--paws-pink);
+      cursor: pointer;
+      height: 100%;
+      position: relative;
+    }
+
+    .matching-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 107, 129, .12);
+    }
+
+    .closed-card {
+      opacity: .6;
+      filter: grayscale(.8);
+      cursor: default !important;
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .recommend-badge {
+      background: var(--paws-yellow);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 10px;
+    }
+
+    .dmti-tag {
+      background: var(--paws-light-pink);
+      color: var(--paws-pink);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 10px;
+      font-weight: 800;
+      display: inline-block;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      padding: 4px 9px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .filter-active {
+      background: var(--paws-pink) !important;
+      color: #fff !important;
+      border-color: var(--paws-pink) !important;
+    }
+
+    .filter-btn {
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 14px;
+    }
+
+    .my-dog-box {
+      background: linear-gradient(135deg, #fff3f3 0%, #ffe0e5 100%);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      border: 1px solid #ffd0d8;
+    }
+
+    /* ──── ✨ 새롭게 리뉴얼된 AI 추천 모달 전용 스타일 ✨ ──── */
+    .ai-modal-content {
+      border-radius: 30px !important;
+      border: none !important;
+      background: linear-gradient(180deg, #fbfaff 0%, #ffffff 100%);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .ai-report-box {
+      background: #f3f0ff;
+      border-radius: 20px;
+      padding: 18px;
+      font-size: 0.92rem;
+      color: #4a3b70;
+      line-height: 1.6;
+      border-left: 5px solid var(--ai-purple);
+    }
+
+    .ai-card-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .ai-recom-card {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #eae6f5;
+      border-radius: 20px;
+      padding: 15px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .ai-recom-card:hover {
+      transform: scale(1.02);
+      border-color: var(--paws-pink);
+      box-shadow: 0 8px 20px rgba(255, 107, 129, 0.1);
+    }
+
+    .ai-recom-img {
+      width: 75px;
+      height: 75px;
+      border-radius: 16px;
+      object-fit: cover;
+      margin-right: 15px;
+      border: 2px solid #fff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+
+    .ai-recom-empty {
+      width: 75px;
+      height: 75px;
+      border-radius: 16px;
+      background: #f8f9fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-right: 15px;
+      border: 1px dashed #ccc;
+    }
+
+    .ai-recom-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ai-recom-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #222;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-transform: capitalize;
+      text-overflow: ellipsis;
+    }
+
+    .badge-ai-dmti {
+      background: #f1ecff;
+      color: var(--ai-purple);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .ai-recom-manner {
+      font-size: 12px;
+      color: #ff9800;
+      font-weight: bold;
+    }
+    
+    .ai-click-notice {
+      position: absolute;
+      right: 15px;
+      bottom: 12px;
+      font-size: 11px;
+      color: var(--paws-pink);
+      font-weight: 700;
+    }
+
+    .post-img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; }
+    .post-empty { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border: 1px solid #ddd; font-size: 20px; }
+    .post-title { font-size: .98rem; font-weight: 800; color: #222; margin-top: 8px; line-height: 1.4; min-height: 42px; }
+    .meta-line { font-size: 12px; color: #777; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .count-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f1f1; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #777; }
+    .count-item { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+    .review-box { margin-top: 10px; background: #fff8f8; border-radius: 10px; padding: 10px; font-size: 11px; color: #666; line-height: 1.5; }
+    .review-link { text-decoration: none; color: #ff6b81; font-size: 11px; font-weight: 700; }
+    .review-link:hover { text-decoration: underline; }
+
+    @media(max-width:768px) {
+      .matching-container { margin: 60px auto; }
+      .matching-card { border-radius: 15px; }
+      .my-dog-box { padding: 14px; }
+      .post-title { font-size: .9rem; min-height: auto; }
+      .meta-line { font-size: 11px; }
+      .filter-btn { font-size: 12px; padding: 6px 12px; }
+      .post-img, .post-empty { width: 38px; height: 38px; }
+      .ai-recom-card { padding: 10px; }
+      .ai-recom-img, .ai-recom-empty { width: 60px; height: 60px; }
+    }
+  </style>
+
+<script th:inline="javascript">
+
+  let recommendedNos = [];
+
+  // =========================================================
+  // 📖 게시글 이동
+  // =========================================================
+  function moveRead(matchno) {
+    location.href =
+      '/match_post/read?matchno=' + matchno;
+  }
+
+  // =========================================================
+  // 📍 정렬 변경
+  // =========================================================
+  function changeSort(sortType) {
+
+    let url =
+      new URL(window.location.href);
+
+    // 거리순
+    if (sortType === 'distance') {
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+
+          url.searchParams.set(
+            "sort",
+            "distance");
+
+          url.searchParams.set(
+            "my_lat",
+            position.coords.latitude);
+
+          url.searchParams.set(
+            "my_lng",
+            position.coords.longitude);
+
+          location.href = url.href;
+        });
+
+    } else {
+
+      // 최신순 등
+      url.searchParams.set(
+        "sort",
+        sortType);
+
+      location.href = url.href;
+    }
+  }
+
+  // =========================================================
+  // 🤖 AI 추천 요청
+  // =========================================================
+  function requestAiRecommendation() {
+
+    // -------------------------------------------------------
+    // 초기화
+    // -------------------------------------------------------
+
+    $("#aiAnswerText").html("");
+
+    $("#aiCardsContainer").html("");
+
+    $("#aiResultArea")
+      .addClass("d-none");
+
+    $("#aiLoading")
+      .removeClass("d-none");
+
+    $("#btnApplyFilter").hide();
+
+    $("#aiModal").modal("show");
+
+    // -------------------------------------------------------
+    // AJAX 요청
+    // -------------------------------------------------------
+
+    $.ajax({
+
+      url: "/match_post/recommend_ai",
+
+      type: "POST",
+
+      dataType: "json",
+
+      timeout: 60000,
+
+      // =====================================================
+      // ✅ 성공
+      // =====================================================
+
+      success: function(res) {
+
+        console.log("===== AI SUCCESS =====");
+        console.log(res);
+
+        // ---------------------------------------------------
+        // 로그인 필요
+        // ---------------------------------------------------
+
+        if (res.error === "login_required") {
+
+          alert("로그인이 필요합니다.");
+
+          location.href = "/member/login";
+
+          return;
+        }
+
+        // ---------------------------------------------------
+        // 강아지 없음
+        // ---------------------------------------------------
+
+        if (res.error === "no_dog") {
+
+          alert("반려견 등록이 필요합니다.");
+
+          location.href = "/dog/create";
+
+          return;
+        }
+
+        // ---------------------------------------------------
+        // 로딩 종료
+        // ---------------------------------------------------
+
+        $("#aiLoading")
+          .addClass("d-none");
+
+        $("#aiResultArea")
+          .removeClass("d-none");
+
+        // ---------------------------------------------------
+        // AI 총평
+        // ---------------------------------------------------
+
+        let cleanAnswer =
+          (res.aiAnswer || "")
+            .replace(/픽한 글번호:.*/g, "")
+            .trim();
+
+        $("#aiAnswerText").html(
+          cleanAnswer.replace(/\n/g, "<br>")
+        );
+
+        // ---------------------------------------------------
+        // 추천 결과 없음
+        // ---------------------------------------------------
+
+        if (!res.recommendedPosts ||
+            res.recommendedPosts.length === 0) {
+
+          $("#aiCardsContainer").html(`
+            <div class="text-center text-muted py-4">
+              추천 가능한 친구를 찾지 못했어요 🥺
+            </div>
+          `);
+
+          return;
+        }
+
+        // ---------------------------------------------------
+        // 추천 카드 생성
+        // ---------------------------------------------------
+
+        recommendedNos = [];
+
+        let cardHtml = "";
+
+        (res.recommendedPosts || []).forEach(post => {
+
+          console.log(post);
+
+          // matchno 저장
+          recommendedNos.push(post.matchno);
+
+          // -------------------------------------------------
+          // 대표 이미지
+          // -------------------------------------------------
+
+          let imgTag = "";
+
+          if (post.dog_img &&
+              post.dog_img !== "") {
+
+            imgTag = `
+              <img
+                src="/match_post/storage/${post.dog_img}"
+                class="ai-recom-img"
+                alt="강아지">
+            `;
+
+          } else {
+
+            imgTag = `
+              <div class="ai-recom-empty">
+                🐶
+              </div>
+            `;
+          }
+
+          // -------------------------------------------------
+          // 매너점수
+          // -------------------------------------------------
+
+          let mannerScore =
+            Number(post.manner_score ?? 0);
+
+          // -------------------------------------------------
+          // 제목
+          // -------------------------------------------------
+
+          let title =
+            post.title || "제목 없음";
+
+          // -------------------------------------------------
+          // DMTI
+          // -------------------------------------------------
+
+          let dmti =
+            post.dmti || "UNKNOWN";
+
+          // -------------------------------------------------
+          // 추천 이유
+          // -------------------------------------------------
+
+          let reason =
+            post.reason || "";
+
+          // -------------------------------------------------
+          // 카드 생성
+          // -------------------------------------------------
+
+          cardHtml += `
+
+            <div class="ai-recom-card shadow-sm"
+                 onclick="moveRead(${post.matchno})">
+
+              ${imgTag}
+
+              <div class="ai-recom-info">
+
+                <div class="d-flex align-items-center gap-2 mb-1">
+
+                  <span class="badge-ai-dmti">
+                    DMTI ${dmti}
+                  </span>
+
+                  <span class="ai-recom-manner">
+                    ★ ${mannerScore.toFixed(1)}
+                  </span>
+
+                </div>
+
+                <h5 class="ai-recom-title">
+                  ${title}
+                </h5>
+
+                <div class="small text-muted mt-1"
+                     style="line-height:1.5;">
+
+                  ${reason}
+
+                </div>
+
+              </div>
+
+              <span class="ai-click-notice">
+                자세히 보기
+                <i class="bi bi-chevron-right"></i>
+              </span>
+
+            </div>
+          `;
+        });
+
+        // ---------------------------------------------------
+        // 카드 렌더링
+        // ---------------------------------------------------
+
+        $("#aiCardsContainer").html(cardHtml);
+
+        // ---------------------------------------------------
+        // 필터 버튼 표시
+        // ---------------------------------------------------
+
+        $("#btnApplyFilter").show();
+      },
+
+      // =====================================================
+      // ❌ 실패
+      // =====================================================
+
+      error: function(xhr, status, error) {
+
+        console.log("===== AI ERROR =====");
+
+        console.log(xhr);
+
+        console.log(status);
+
+        console.log(error);
+
+        console.log(xhr.responseText);
+
+        $("#aiLoading")
+          .addClass("d-none");
+
+        $("#aiResultArea")
+          .removeClass("d-none");
+
+        $("#aiAnswerText").html(`
+          <span class="text-danger">
+            AI 추천 분석 실패
+          </span>
+        `);
+
+        $("#aiCardsContainer").html(`
+
+          <div class="alert alert-danger small">
+
+            <div class="fw-bold mb-2">
+              AI 분석 중 오류 발생
+            </div>
+
+            <div>
+              ${xhr.responseText || error}
+            </div>
+
+          </div>
+
+        `);
+      }
+    });
+  }
+
+  // =========================================================
+  // 🎯 추천 게시글만 보기
+  // =========================================================
+  function applyAIFilter() {
+
+    // 추천 없음
+    if (recommendedNos.length === 0) {
+
+      alert("추천 목록이 없습니다.");
+
+      return;
+    }
+
+    // 전체 숨김
+    $(".matching-post-item").hide();
+
+    // 추천 게시글만 표시
+    recommendedNos.forEach(no => {
+
+      $(`
+        .matching-post-item[data-matchno='${no}']
+      `).fadeIn(300);
+    });
+
+    // 모달 닫기
+    $("#aiModal").modal("hide");
+  }
+
+</script>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+  <div class="matching-container">
+
+    <!-- 상단 타이틀 및 검색/버튼 그룹 -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+      <div>
+        <h3 class="fw-bold mb-1">
+          🐾 <span style="color:var(--paws-pink);">산책 매칭</span>
+        </h3>
+        <div class="small text-muted">우리 아이와 맞는 친구를 찾아보세요</div>
+      </div>
+
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <!-- 상단 검색폼 -->
+        <form method="get" action="/match_post/list_all" class="d-flex gap-1" style="max-width: 200px;">
+          <input type="text" name="word" th:value="${word}" placeholder="검색" 
+                 class="form-control form-control-sm" style="border-radius:15px; font-size: 12px; width: 130px;">
+          <button type="submit" class="btn btn-sm text-white px-2" 
+                  style="background:var(--paws-pink); border-radius:15px; font-size: 12px; white-space: nowrap;">
+            검색
+          </button>
+        </form>
+
+        <a th:href="@{/match_apply/list_by_member}" class="btn btn-outline-secondary filter-btn">신청내역</a>
+        <a href="/match_post/create" class="btn text-white filter-btn" style="background:var(--paws-pink);">매칭등록</a>
+      </div>
+    </div>
+
+    <!-- 내 강아지 정보 및 AI 버튼 -->
+    <div th:if="${session.memberno != null and myDog != null}" class="my-dog-box shadow-sm">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <img th:if="${myDog.thumb1 != null}" th:src="@{|/dog/storage/${myDog.thumb1}|}"
+               style="width:65px;height:65px;border-radius:50%;object-fit:cover;">
+          <div th:if="${myDog.thumb1 == null}" class="post-empty" style="width:65px;height:65px;font-size:28px;">🐶</div>
+          <div>
+            <div class="fw-bold fs-5" th:text="${myDog.name}">강아지</div>
+            <div class="small text-muted d-flex flex-wrap gap-2">
+              <span th:text="${myDog.breed}"></span>
+              <span th:text="${myDog.age + '살'}"></span>
+              <span th:text="${myDog.gender == 'M' ? '수컷 ♂️' : '암컷 ♀️'}"></span>
+              <span class="fw-bold" style="color:var(--paws-pink);" th:text="|DBTI ${myDog.dbti_type}|"></span>
+            </div>
+          </div>
+        </div>
+        <button type="button" onclick="requestAiRecommendation()" class="btn mt-3 mt-md-0"
+                style="border:2px solid var(--paws-pink); color:var(--paws-pink); border-radius:20px; font-weight:700;">
+          ✨ AI로 친구 찾기
+        </button>
+      </div>
+    </div>
+
+    <!-- 필터 및 정렬 -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+      <div class="d-flex flex-wrap gap-2">
+        <a th:href="@{/match_post/list_all(status_filter='ALL')}" class="btn btn-sm btn-outline-dark filter-btn">전체</a>
+        <a th:href="@{/match_post/list_all(status_filter=1)}" class="btn btn-sm btn-outline-success filter-btn">모집중</a>
+        <a th:href="@{/match_post/list_all(status_filter=2)}" class="btn btn-sm btn-outline-secondary filter-btn">마감</a>
+        <a th:href="@{/match_post/list_all(manner_filter=${manner_filter == 'Y' ? 'N' : 'Y'})}"
+           class="btn btn-sm border-secondary filter-btn"
+           th:classappend="${manner_filter == 'Y'} ? 'filter-active' : ''">매너4.0↑</a>
+      </div>
+
+      <select id="sort_select" class="form-select form-select-sm" style="width:auto;border-radius:15px;" onchange="changeSort(this.value)">
+        <option value="latest" th:selected="${sort == 'latest' || sort == null}">최신순</option>
+       
+        <option value="distance" th:selected="${sort == 'distance'}">거리순</option>
+      </select>
+    </div>
+
+    <!-- 카드 목록 -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+      <div class="col matching-post-item" th:each="matchPostVO : ${list}" th:attr="data-matchno=${matchPostVO.matchno}">
+        <div class="matching-card p-3 position-relative"
+             th:classappend="${matchPostVO.status == 2} ? 'closed-card' : ''"
+             th:onclick="${matchPostVO.status == 1} ? |moveRead(${matchPostVO.matchno})| : ''">
+          
+          <div th:if="${session.my_dbti == matchPostVO.dmti}" class="position-absolute" style="top:-8px;right:15px;z-index:5;">
+            <span class="recommend-badge">추천</span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <img th:if="${matchPostVO.dog_img != null and matchPostVO.dog_img != ''}"
+                   th:src="@{|/match_post/storage/${matchPostVO.dog_img.split(',')[0]}|}" class="post-img">
+              <div th:if="${matchPostVO.dog_img == null or matchPostVO.dog_img == ''}" class="post-empty">🐶</div>
+              <div>
+                <div class="fw-bold small" th:text="${matchPostVO.nickname}"></div>
+                <div style="font-size:10px;color:#ffb300;">
+                  ★ <span th:text="${#numbers.formatDecimal(matchPostVO.manner_score,1,1)}"></span>
+                </div>
+                <a th:href="@{/match_review/list_by_target.do(target_no=${matchPostVO.memberno})}"
+                   onclick="event.stopPropagation();" class="review-link">리뷰 보기 →</a>
+              </div>
+            </div>
+            <span th:if="${matchPostVO.status == 1}" class="status-badge bg-success text-white">모집중</span>
+            <span th:if="${matchPostVO.status == 2}" class="status-badge bg-secondary text-white">마감</span>
+          </div>
+
+          <div>
+            <div class="dmti-tag" th:text="${matchPostVO.dmti}"></div>
+            <div class="post-title" th:text="${matchPostVO.title}"></div>
+            <div class="mt-2">
+              <div class="meta-line"><i class="bi bi-clock"></i> <span th:text="${matchPostVO.mdate.length() >= 16 ? matchPostVO.mdate.substring(0,16) : matchPostVO.mdate}"></span></div>
+              <div class="meta-line"><i class="bi bi-geo-alt-fill"></i> <span class="text-truncate" th:text="${matchPostVO.mplace}"></span></div>
+            </div>
+
+            <div class="count-box">
+              <div class="count-item"><i class="bi bi-eye"></i> <span th:text="${matchPostVO.viewcnt}"></span></div>
+              <div class="count-item"><i class="bi bi-chat-dots"></i> <span th:text="${matchPostVO.commentcnt}"></span></div>
+              <div class="count-item"><i class="bi bi-people"></i>
+                <span><span th:text="${matchPostVO.current_member}"></span> / <span th:text="${matchPostVO.max_member}"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 빈 목록 -->
+    <div th:if="${#lists.isEmpty(list)}" class="text-center py-5">
+      <div style="font-size:60px;">🐾</div>
+      <div class="fw-bold mt-3" style="font-size:1.1rem;">아직 등록된 산책 매칭이 없어요</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────────────
+       🌟 [리뉴얼] 고품격 AI 추천 카드 스와이프/그리드 모달 컴포넌트
+       ───────────────────────────────────────────────────────────────── -->
+  <div class="modal fade" id="aiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content ai-modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold m-0" style="color:var(--ai-purple)">
+            <i class="bi bi-cpu-fill"></i> Paws AI 정밀 매칭 분석
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body pt-3">
+          <!-- 로딩 상태 스켈레톤 -->
+          <div id="aiLoading" class="text-center py-5">
+            <div class="spinner-border" style="color: var(--ai-purple);" role="status"></div>
+            <div class="mt-3 fw-bold" style="color: var(--ai-purple);">우리 아이와 찰떡인 친구 매칭 분석 중... 🐾</div>
+          </div>
+          
+          <!-- 결과 리포트 출력 구역 -->
+          <div id="aiResultArea" class="d-none">
+            <!-- 1. AI 코멘트 리포트 박스 -->
+            <div class="ai-report-box shadow-sm mb-4">
+              <div class="fw-bold mb-2"><i class="bi bi-chat-heart-fill"></i> AI 큐레이터 한줄평</div>
+              <p id="aiAnswerText" class="m-0"></p>
+            </div>
+            
+            <!-- 2. 매칭 카드 팩 리스트 구역 -->
+            <div class="fw-bold mb-2 text-secondary small px-1">💡 아래 메이트 카드를 선택하면 모집글로 이동합니다.</div>
+            <div id="aiCardsContainer" class="ai-card-grid">
+              <!-- 비동기 스크립트로 렌더링된 카드 컴포넌트들이 주입되는 곳 -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-light px-4" style="border-radius:15px;" data-bs-dismiss="modal">창 닫기</button>
+          <button type="button" id="btnApplyFilter" onclick="applyAIFilter()" class="btn text-white px-4" style="background:var(--ai-purple); border-radius:15px; display:none;">
+            <i class="bi bi-funnel-fill"></i> 추천 메이트만 남기기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

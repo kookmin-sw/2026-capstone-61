@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+<meta charset="UTF-8">
+<title>내 강아지 목록</title>
+
+<style>
+
+  body {
+    background: #f8f9fa;
+    font-family: 'Pretendard', sans-serif;
+  }
+
+  /* =========================================================
+     🐶 전체 컨테이너
+  ========================================================= */
+  .dog-list-container {
+    max-width: 1100px;
+    margin: 100px auto 80px auto;
+    padding: 0 14px;
+  }
+
+  /* =========================================================
+     🐶 헤더
+  ========================================================= */
+  .list-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .list-header h2 {
+    font-size: 25px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .list-header b {
+    color: #ff6b81;
+  }
+
+  .list-header p {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 14px;
+  }
+
+  /* =========================================================
+     🐶 상단 버튼 그룹
+  ========================================================= */
+  .top-btn-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* =========================================================
+     🐶 등록 버튼
+  ========================================================= */
+  .create-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 120px;
+    padding: 8px 15px;
+
+    border-radius: 16px;
+    background: linear-gradient(45deg, #ff6b81, #ff9a9e);
+
+    color: white;
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(255, 107, 129, 0.18);
+  }
+
+  .create-btn:hover {
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  /* =========================================================
+     🐶 DBTI 버튼
+  ========================================================= */
+  .dbti-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 120px;
+    padding: 8px 15px;
+
+    border-radius: 16px;
+    background: #fff0f2;
+
+    border: 1px solid #ffd6dc;
+
+    color: #ff6b81;
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition: 0.2s;
+  }
+
+  .dbti-link:hover {
+    background: #ffe3e8;
+    color: #ff6b81;
+  }
+
+  /* =========================================================
+     🐶 카드 리스트
+  ========================================================= */
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+
+  /* =========================================================
+     🐶 카드
+  ========================================================= */
+  .card {
+    background: white;
+    border-radius: 18px;
+
+    padding: 14px;
+
+    text-align: center;
+
+    border: 1px solid #fff;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+
+    transition: 0.25s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: #ffd6dc;
+  }
+
+  /* =========================================================
+     🐶 이미지
+  ========================================================= */
+  .dog-img-wrapper {
+    width: 100%;
+    height: 145px;
+
+    overflow: hidden;
+
+    border-radius: 14px;
+    margin-bottom: 12px;
+
+    background: #f8f9fa;
+  }
+
+  .dog-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* =========================================================
+     🐶 강아지 이름
+  ========================================================= */
+  .card h3 {
+    color: #222;
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+
+  /* =========================================================
+     🐶 강아지 정보
+  ========================================================= */
+  .dog-info {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  /* =========================================================
+     🐶 DMTI 결과 뱃지
+  ========================================================= */
+  .dbti-badge {
+    display: inline-block;
+
+    padding: 5px 12px;
+
+    border-radius: 12px;
+
+    background: #fff0f2;
+    border: 1px solid #ffd6dc;
+
+    color: #ff6b81;
+
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* =========================================================
+     🐶 DMTI 버튼
+  ========================================================= */
+  .dmti-btn {
+    width: 100%;
+
+    margin-top: 8px;
+    padding: 8px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #ff6b81;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+  }
+
+  .dmti-btn:hover {
+    background: #ff5470;
+  }
+
+  /* =========================================================
+     🐶 모달 버튼
+  ========================================================= */
+  .paws-modal-btn-confirm {
+    background: #ff6b81;
+    color: #fff;
+
+    border: none;
+    border-radius: 12px;
+
+    padding: 10px;
+
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* =========================================================
+     📱 모바일
+  ========================================================= */
+  @media (max-width: 768px) {
+
+    .dog-list-container {
+      margin-top: 85px;
+      padding: 0 10px;
+    }
+
+    .list-header h2 {
+      font-size: 20px;
+    }
+
+    .list-header p {
+      font-size: 11px;
+    }
+
+    /* 🔥 모바일 2개 배치 */
+    .card-container {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .dog-img-wrapper {
+      height: 95px;
+      border-radius: 10px;
+    }
+
+    .card h3 {
+      font-size: 13px;
+    }
+
+    .dog-info {
+      font-size: 10px;
+    }
+
+    .dbti-badge {
+      font-size: 9px;
+      padding: 4px 8px;
+    }
+
+    .dmti-btn {
+      font-size: 10px;
+      padding: 7px;
+      border-radius: 8px;
+    }
+
+    .create-btn,
+    .dbti-link {
+      min-width: 105px;
+      font-size: 11px;
+      padding: 7px 12px;
+      border-radius: 14px;
+    }
+  }
+
+</style>
+
+<script th:inline="javascript">
+
+  /* =========================================================
+     🐶 선택된 강아지 번호 저장
+  ========================================================= */
+  let selectedDogNo = null;
+
+  /* =========================================================
+     🐶 DMTI 선택
+  ========================================================= */
+  function selectDog(dogno) {
+
+    selectedDogNo = dogno;
+
+    const modal =
+      new bootstrap.Modal(
+        document.getElementById('dmtiConfirmModal')
+      );
+
+    modal.show();
+  }
+
+  /* =========================================================
+     🐶 검사 시작
+  ========================================================= */
+  function startDmti() {
+
+    if (selectedDogNo) {
+
+      location.href =
+        "/dog_dmti/select.do?dogNo=" + selectedDogNo;
+    }
+  }
+
+</script>
+
+</head>
+
+<body>
+
+<div layout:fragment="content">
+
+  <div class="dog-list-container">
+
+    <!-- =====================================================
+         🐶 헤더
+    ====================================================== -->
+    <div class="list-header">
+
+      <h2>🐶 내 강아지 <b>목록</b></h2>
+
+      <p>
+        함께하는 소중한 댕댕이들을 관리해보세요.
+      </p>
+
+      <!-- 🔥 버튼 가로 배치 -->
+      <div class="top-btn-group">
+
+        <!-- 강아지 등록 -->
+        <a th:href="@{/dog/create.do}"
+           class="create-btn">
+
+          + 강아지 등록
+
+        </a>
+
+        <!-- DBTI 검사 -->
+        <a href="/dog_dbti/create.do"
+           class="dbti-link">
+
+          🐾 DBTI 검사
+
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- =====================================================
+         🐶 카드 목록
+    ====================================================== -->
+    <div class="card-container">
+
+      <!-- 강아지 반복 -->
+      <div class="card"
+           th:each="dog : ${list}">
+
+        <!-- 상세 페이지 -->
+        <a th:href="@{|/dog/read.do?dogno=${dog.dogno}|}"
+           style="text-decoration: none;">
+
+          <!-- 이미지 -->
+          <div class="dog-img-wrapper">
+
+            <img th:src="${(dog.file1saved != null and dog.file1saved != '')}
+                  ? @{|/dog/storage/${dog.file1saved}|}
+                  : @{/images/none.jpg}">
+
+          </div>
+
+          <!-- 이름 -->
+          <h3 th:text="${dog.name}">
+            이름 없음
+          </h3>
+
+        </a>
+
+        <!-- 정보 -->
+        <div class="dog-info">
+
+          <span th:text="${dog.breed}">
+            품종
+          </span>
+
+          •
+
+          <span th:text="${dog.age} + '살'">
+            나이
+          </span>
+
+          •
+
+          <span th:text="${dog.gender == 'M' ? '수컷' : '암컷'}">
+            성별
+          </span>
+
+        </div>
+
+        <!-- 결과 있음 -->
+        <div th:if="${dog.dbti_type != null}">
+
+          <div class="dbti-badge">
+
+            DMTI :
+            <span th:text="${dog.dbti_type}"></span>
+
+          </div>
+
+        </div>
+
+        <!-- 결과 없음 -->
+        <div th:unless="${dog.dbti_type != null}">
+
+          <button type="button"
+                  class="dmti-btn"
+                  th:onclick="|selectDog('${dog.dogno}')|">
+
+            🐾 DMTI 시작
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       🐶 DMTI 확인 모달
+  ====================================================== -->
+  <div class="modal fade"
+       id="dmtiConfirmModal"
+       tabindex="-1"
+       aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered"
+         style="max-width: 320px;">
+
+      <div class="modal-content"
+           style="border-radius:22px; border:none;">
+
+        <div class="modal-body text-center p-4">
+
+          <div class="mb-3"
+               style="font-size:38px;">
+
+            🧪
+
+          </div>
+
+          <h5 class="fw-bold">
+            DMTI 검사를 시작할까요?
+          </h5>
+
+          <p class="text-muted small">
+            강아지의 성향을 분석해볼게요!
+          </p>
+
+          <div class="d-grid gap-2 mt-4">
+
+            <!-- 검사 시작 -->
+            <button type="button"
+                    class="paws-modal-btn-confirm"
+                    onclick="startDmti()">
+
+              검사 시작
+
+            </button>
+
+            <!-- 닫기 -->
+            <button type="button"
+                    data-bs-dismiss="modal"
+
+                    style="
+                      background:#f1f3f5;
+                      color:#495057;
+                      border:none;
+                      padding:10px;
+                      border-radius:12px;
+                      font-weight:700;
+                    ">
+
+              나중에
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

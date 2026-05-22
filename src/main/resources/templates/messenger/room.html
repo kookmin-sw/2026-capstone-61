@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 기본 레이아웃 설정 */
+        body { margin: 0; font-family: 'Pretendard', sans-serif; background: #fdfdfd; overflow: hidden; }
+
+        /* [1] 채팅 컨테이너 */
+        #chat-container { 
+            display: flex; flex-direction: column; height: 100vh; 
+            box-sizing: border-box;
+        }
+
+        /* [2] 메시지 출력 영역 */
+        #msg-area { 
+            flex: 1; overflow-y: auto; padding: 20px; 
+            display: flex; flex-direction: column; gap: 15px; 
+        }
+
+        /* 내 메시지 그룹 (오른쪽 정렬) */
+        .my-msg-group { align-self: flex-end; display: flex; align-items: flex-end; }
+        
+        /* 상대방 메시지 그룹 (왼쪽 정렬) */
+        .partner-msg-group { align-self: flex-start; display: flex; flex-direction: column; }
+        
+        /* 안 읽음 표시 (숫자 1) */
+        .unread-count { 
+            color: #ff9d00; font-size: 11px; font-weight: bold; 
+            margin-right: 6px; margin-bottom: 18px; 
+        }
+
+        /* 말풍선 공통 스타일 */
+        .msg-box { max-width: 260px; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.5; word-break: break-all; }
+        
+        /* 내 말풍선 */
+        .msg-right { background: #ff9d00; color: #fff; border-top-right-radius: 2px; }
+        
+        /* 상대방 말풍선 */
+        .msg-left { background: #fff; border: 1px solid #eee; border-top-left-radius: 2px; }
+
+        /* 시간 및 아이디 텍스트 */
+        .time { font-size: 10px; color: #999; margin-top: 4px; }
+        .sender-id { font-weight: bold; font-size: 11px; color: #666; margin-bottom: 4px; }
+
+        /* [3] 하단 입력 영역 */
+        #input-area { 
+            padding: 15px; background: #fff; border-top: 1px solid #eee; 
+            display: flex; gap: 10px; align-items: center; 
+        }
+        #message-input { 
+            flex: 1; border: 1px solid #ddd; border-radius: 25px; 
+            padding: 10px 18px; outline: none; font-size: 14px;
+        }
+        #send-btn { 
+            background: #ff9d00; color: #fff; border: none; 
+            width: 40px; height: 40px; border-radius: 50%; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        #send-btn:hover { background: #e68a00; }
+
+        /* 스크롤바 커스텀 */
+        #msg-area::-webkit-scrollbar { width: 4px; }
+        #msg-area::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <!-- 메시지 리스트 영역 -->
+        <div id="msg-area">
+		<th:block th:each="m : ${msg_list}">
+		
+		    <!-- ================================================= -->
+		    <!-- 시스템 메시지 -->
+		    <!-- ================================================= -->
+		    <div th:if="${m.sender_id == 'SYSTEM'}"
+		         style="display:flex;
+		                justify-content:center;
+		                margin:10px 0;">
+		
+		        <div style="background:#f1f3f5;
+		                    color:#666;
+		                    font-size:12px;
+		                    padding:8px 14px;
+		                    border-radius:14px;
+		                    max-width:80%;
+		                    text-align:center;
+		                    line-height:1.6;">
+		
+		            <span th:text="${m.content}">
+		                시스템 메시지
+		            </span>
+		
+		        </div>
+		
+		    </div>
+		
+		    <!-- ================================================= -->
+		    <!-- 내 메시지 -->
+		    <!-- ================================================= -->
+		    <div th:if="${m.sender_id == session_id}"
+		         class="my-msg-group">
+		
+		        <span class="unread-count"
+		              th:if="${m.is_read == 'N'}">
+		
+		            1
+		
+		        </span>
+		
+		        <div style="display:flex;
+		                    flex-direction:column;
+		                    align-items:flex-end;">
+		
+		            <div class="msg-box msg-right"
+		                 th:text="${m.content}">
+		
+		                내 메시지 내용
+		
+		            </div>
+		
+		            <div class="time"
+		                 th:text="${m.updated_at}">
+		
+		                오전 10:30
+		
+		            </div>
+		
+		        </div>
+		
+		    </div>
+		
+		    <!-- ================================================= -->
+		    <!-- 상대방 메시지 -->
+		    <!-- ================================================= -->
+		    <div th:if="${m.sender_id != session_id
+		                 and m.sender_id != 'SYSTEM'}"
+		         class="partner-msg-group">
+		
+		        <div class="sender-id"
+		             th:text="${m.sender_id}">
+		
+		            상대방ID
+		
+		        </div>
+		
+		        <div style="display:flex;
+		                    align-items:flex-end;">
+		
+		            <div class="msg-box msg-left"
+		                 th:text="${m.content}">
+		
+		                상대방 메시지 내용
+		
+		            </div>
+		
+		        </div>
+		
+		        <div class="time"
+		             th:text="${m.updated_at}">
+		
+		            오전 10:31
+		
+		        </div>
+		
+		    </div>
+		
+		</th:block>
+        </div>
+
+        <!-- 메시지 입력 영역 -->
+        <div id="input-area">
+            <input type="text" id="message-input" placeholder="메시지를 입력하세요..." 
+                   onkeypress="if(event.keyCode==13) sendMessage()" autocomplete="off">
+            <button type="button" id="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+<script th:inline="javascript">
+        /*<![CDATA[*/
+        const room_no = /*[[${room_no}]]*/ '0';
+        const partnerName = /*[[${partnerName != null ? partnerName : '대화 상대'}]]*/ '대화 상대';
+        const msgArea = document.getElementById('msg-area');
+        /*]]>*/
+
+        // [수정 및 추가] 채팅방 입장 시 타이틀 변경 및 상단 바 배지 즉시 0개로 클리어 신호 전송
+        if (window.top !== window) {
+            // 1. 기존 타이틀 변경 신호
+            window.top.postMessage({ type: 'UPDATE_CHAT_TITLE', title: partnerName }, '*');
+            
+            // 2. [신규] 읽음 처리 완료 알림 신호 (배지 제거용 0 전송)
+            window.top.postMessage({ type: 'UPDATE_UNREAD_COUNT', count: 0 }, '*');
+        }
+
+        // 페이지 로드 시 최하단으로 스크롤 이동
+        function scrollToBottom() {
+            msgArea.scrollTop = msgArea.scrollHeight;
+        }
+        window.onload = scrollToBottom;
+
+        // 메시지 전송 함수
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+            
+            if(!content) return; // 빈 메시지 전송 방지
+
+            fetch("/messenger/send.do", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `room_no=${room_no}&content=${encodeURIComponent(content)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.code === 'success') {
+                    input.value = ''; // 입력창 초기화
+                    location.reload(); // 화면 갱신 (메시지 및 읽음 상태 동기화)
+                } else {
+                    alert("메시지 전송 실패: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                alert("서버 통신 오류가 발생했습니다.");
+            });
+        }
+    </script>
+</body>
+</html>

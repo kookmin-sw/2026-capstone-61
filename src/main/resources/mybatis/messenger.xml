@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.messenger.MessengerDAOInter">
+
+  <!-- ===================================================== -->
+  <!-- 1. 친구 관리 프로시저 -->
+  <!-- ===================================================== -->
+  <select id="proc_manage_friend"
+          statementType="CALLABLE"
+          parameterType="HashMap">
+
+    { CALL proc_manage_friend(
+
+        #{p_user_id, mode=IN, jdbcType=VARCHAR},
+        #{p_target_id, mode=IN, jdbcType=VARCHAR},
+        #{p_action, mode=IN, jdbcType=VARCHAR}
+
+    ) }
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 2. 친구 + 채팅방 목록 -->
+  <!-- ===================================================== -->
+<select id="list_friends"
+        resultType="dev.mvc.messenger.MessengerVO"
+        parameterType="String">
+
+SELECT
+
+    mr.room_no,
+
+    my.id AS user_id,
+    my.nickname AS user_nickname,
+    my.profile AS user_profile,
+
+    target.id AS target_id,
+    target.nickname AS target_nickname,
+    target.profile AS target_profile,
+
+    NVL(msg.last_msg, '대화 내용이 없습니다.') AS last_msg,
+    NVL(msg.unread_cnt, 0) AS unread_cnt,
+
+    'ACCEPTED' AS status
+
+FROM messenger_room mr
+
+JOIN messenger_member mm1
+ON mr.room_no = mm1.room_no
+
+JOIN member my
+ON mm1.user_id = my.id
+
+JOIN messenger_member mm2
+ON mr.room_no = mm2.room_no
+
+JOIN member target
+ON mm2.user_id = target.id
+
+LEFT JOIN (
+
+    SELECT
+
+        room_no,
+
+        MAX(
+            DBMS_LOB.SUBSTR(content, 100, 1)
+        ) KEEP(
+            DENSE_RANK LAST
+            ORDER BY msg_no
+        ) AS last_msg,
+
+        COUNT(
+            CASE
+                WHEN is_read = 'N'
+                AND sender_id != #{user_id}
+                THEN 1
+            END
+        ) AS unread_cnt
+
+    FROM messenger_data
+
+    GROUP BY room_no
+
+) msg
+ON mr.room_no = msg.room_no
+
+WHERE mm1.user_id = #{user_id}
+AND mm2.user_id != #{user_id}
+
+ORDER BY mr.room_no DESC
+
+</select>
+
+  <!-- ===================================================== -->
+  <!-- 3. 메시지 전송 -->
+  <!-- ===================================================== -->
+  <insert id="send_message"
+          parameterType="dev.mvc.messenger.MessengerVO">
+
+    INSERT INTO messenger_data(
+
+        msg_no,
+        room_no,
+        sender_id,
+        content,
+        mdate,
+        is_read
+
+    )
+
+    VALUES(
+
+        messenger_data_seq.nextval,
+        #{room_no},
+        #{sender_id},
+        #{content},
+        SYSDATE,
+        'N'
+
+    )
+
+  </insert>
+
+  <!-- ===================================================== -->
+  <!-- 4. 채팅방 메시지 목록 -->
+  <!-- ===================================================== -->
+  <select id="list_msg_by_room"
+          resultType="dev.mvc.messenger.MessengerVO"
+          parameterType="int">
+
+    SELECT
+
+        msg_no,
+        room_no,
+        sender_id,
+        content,
+        file_name,
+        is_read,
+
+        TO_CHAR(
+            mdate,
+            'AM HH:MI'
+        ) AS updated_at
+
+    FROM messenger_data
+
+    WHERE room_no = #{room_no}
+
+    ORDER BY msg_no ASC
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 5. 읽음 처리 -->
+  <!-- ===================================================== -->
+  <update id="update_read_status"
+          parameterType="map">
+
+    UPDATE messenger_data
+
+       SET is_read = 'Y'
+
+     WHERE room_no = #{room_no}
+
+       AND sender_id != #{user_id}
+
+       AND is_read = 'N'
+
+  </update>
+
+  <!-- ===================================================== -->
+  <!-- 6. 상대방 닉네임 조회 -->
+  <!-- ===================================================== -->
+  <select id="get_room_partner"
+          resultType="String"
+          parameterType="map">
+
+    SELECT
+
+        m.nickname
+
+    FROM messenger_member mm
+
+    JOIN member m
+      ON mm.user_id = m.id
+
+    WHERE mm.room_no = #{room_no}
+
+      AND mm.user_id != #{user_id}
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 7. 전체 안읽은 메시지 개수 -->
+  <!-- ===================================================== -->
+  <select id="count_unread"
+          resultType="int"
+          parameterType="String">
+
+    SELECT COUNT(*)
+
+    FROM messenger_data
+
+    WHERE room_no IN (
+
+        SELECT room_no
+        FROM messenger_member
+        WHERE user_id = #{user_id}
+
+    )
+
+      AND sender_id != #{user_id}
+
+      AND is_read = 'N'
+
+  </select>
+<!-- ===================================================== -->
+<!-- 친구 요청 목록 -->
+<!-- ===================================================== -->
+<select id="list_request"
+        resultType="dev.mvc.messenger.MessengerVO"
+        parameterType="String">
+
+SELECT
+
+    f.status,
+
+    me.id AS user_id,
+    me.nickname AS user_nickname,
+    me.profile AS user_profile,
+
+    target.id AS target_id,
+    target.nickname AS target_nickname,
+    target.profile AS target_profile,
+
+    0 AS room_no,
+    '' AS last_msg,
+    0 AS unread_cnt
+
+FROM friend f
+
+JOIN member me
+ON f.user_id = me.id
+
+JOIN member target
+ON f.target_id = target.id
+
+WHERE (f.user_id = #{user_id}
+    OR f.target_id = #{user_id})
+
+AND f.status = 'PENDING'
+
+</select>
+</mapper>

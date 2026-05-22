@@ -1,0 +1,180 @@
+<div th:fragment="list_all_fragment">
+  <style>
+    /* 테이블 감싸는 영역 */
+    .table-wrapper {
+      width: 100%;
+      margin: 20px auto;
+      background: #ffffff;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(255, 182, 193, 0.15);
+    }
+
+    /* 테이블 스타일 */
+    .paws-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+
+    .paws-table thead th {
+      background-color: #fff5f7;
+      color: #ff6b81;
+      font-weight: 800;
+      padding: 18px;
+      font-size: 15px;
+      border-bottom: 2px solid #ffebee;
+      text-align: center;
+    }
+
+    .paws-table tbody td {
+      padding: 15px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 14px;
+      color: #555;
+      border-bottom: 1px solid #f9f9f9;
+    }
+
+    /* 버튼 스타일 */
+    .btn-delete-cute {
+      background: #ffe0e3;
+      color: #ff6b81;
+      border: none;
+      padding: 6px 15px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-delete-cute:hover {
+      background: #ff6b81;
+      color: #fff;
+    }
+
+    /* 모달 디자인 커스텀 */
+    .modal-paws-content {
+      border-radius: 30px;
+      border: none;
+      padding: 20px;
+    }
+
+    .btn-paws-confirm {
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      color: white;
+      border: none;
+      border-radius: 15px;
+      padding: 10px 25px;
+      font-weight: 700;
+    }
+
+    .btn-paws-cancel {
+      background: #f1f2f6;
+      color: #57606f;
+      border: none;
+      border-radius: 15px;
+      padding: 10px 25px;
+    }
+  </style>
+
+  <div class="table-wrapper">
+    <table class="paws-table">
+      <thead>
+        <tr>
+          <th>번호</th>
+          <th>분류</th>
+          <th>카테고리명</th>
+          <th>순서</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="categoryVO, status : ${list}">
+          <td th:text="${(search_count ?: 0) - ((now_page - 1) * 10) - status.index}"></td>
+          <td>
+            <span style="color: #ff9a9e;"><i class="fas fa-paw me-1"></i></span>
+            <span th:text="${categoryVO.cat_type}"></span>
+          </td>
+          <td>
+            <a th:href="@{|/category/read/${categoryVO.cat_no}?word=${word}&now_page=${now_page}|}" 
+               th:text="${categoryVO.cat_name}" style="color: #333; font-weight: 700; text-decoration: none;"></a>
+          </td>
+          <td th:text="${categoryVO.seqno}"></td>
+          <td>
+            <button type="button" class="btn-delete-cute" th:onclick="askDelete([[${categoryVO.cat_no}]])">
+              삭제
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- [중요] 이 프래그먼트 전용 모달 HTML -->
+  <div class="modal fade" id="pawsDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-paws-content">
+        <div class="modal-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-trash-alt" style="font-size: 40px; color: #ff6b81;"></i>
+          </div>
+          <h4 class="fw-bold mb-3">정말 삭제하시겠어요?</h4>
+          <p class="text-muted mb-4">카테고리를 삭제하면 연결된 모든 데이터가 사라집니다. 🐾</p>
+          <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn-paws-cancel" data-bs-dismiss="modal">취소</button>
+            <button type="button" id="finalDeleteBtn" class="btn-paws-confirm">삭제</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 페이징 -->
+  <div class="text-center mt-4" th:utext="${paging}"></div>
+
+  <script th:inline="javascript">
+    let deleteNo = null;
+
+    function askDelete(catNo) {
+      deleteNo = catNo;
+      
+      const modalEl = document.getElementById('pawsDeleteModal');
+      
+      // Bootstrap 라이브러리가 있는지 확인
+      if (typeof bootstrap !== 'undefined' && modalEl) {
+        const myModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        
+        // '삭제하기' 버튼에 클릭 이벤트 연결
+        document.getElementById('finalDeleteBtn').onclick = function() {
+          executeAction();
+        };
+        
+        myModal.show();
+      } else {
+        // 모달을 불러올 수 없는 비상 상황용
+        if (confirm('정말 삭제하시겠습니까? (시스템 알림)')) {
+          executeAction();
+        }
+      }
+    }
+
+    function executeAction() {
+      if (deleteNo) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/category/delete';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'cat_no';
+        input.value = deleteNo;
+        
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+  </script>
+</div>

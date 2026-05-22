@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <title>smart__dog Messenger</title>
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --card: #ffffff;
+            --line: #ebeff5;
+            --text: #1f2937;
+            --muted: #8b95a7;
+            --primary: #5f6cff;
+            --primary-2: #7f8cff;
+            --danger: #ff5b6e;
+            --soft: #f8faff;
+        }
+
+        body {
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        #list-container {
+            width: min(100%, 540px);
+            margin: 50px auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 10px 28px rgba(20, 32, 56, .08);
+            border: 1px solid var(--line);
+            overflow: hidden;
+            height: 65vh;
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .friend-menu {
+            display: flex;
+            background: #fbfcff;
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .menu-item {
+            flex: 1;
+            padding: 11px 0 9px;
+            text-align: center;
+            cursor: pointer;
+            color: #9aa3b2;
+            transition: all .2s ease;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        .menu-item i {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .menu-item.active {
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 3px solid var(--primary);
+            background: linear-gradient(180deg, #fff 0%, #f7f8ff 100%);
+        }
+
+        .tab-content {
+            display: none;
+            overflow-y: auto;
+            background: #fff;
+            flex: 1;
+            scrollbar-width: none;
+        }
+        .tab-content::-webkit-scrollbar { display: none; }
+
+        .tab-content.active { display: block; }
+
+        .item-row, .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-bottom: 1px solid #f2f4f8;
+            cursor: pointer;
+            transition: background .15s ease;
+        }
+
+        .item-row:hover, .chat-item:hover { background: var(--soft); }
+
+        .profile-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #e7ecf3;
+            flex-shrink: 0;
+            background: #f3f5f9;
+        }
+
+        .item-info { flex: 1; min-width: 0; overflow: hidden; }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+            gap: 8px;
+        }
+
+        .item-name {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-sub {
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unread-badge {
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .btn-small {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: none;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-main {
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        }
+
+        .btn-gray { background: #eef2f7; color: #5e687a; }
+
+        .search-box {
+            padding: 10px 12px;
+            display: flex;
+            gap: 6px;
+            background: #fff;
+            border-bottom: 1px solid #f1f3f7;
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #dbe1ec;
+            border-radius: 999px;
+            outline: none;
+            font-size: 12px;
+        }
+
+        .section-title {
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #fafbff;
+            border-bottom: 1px solid #f1f3f7;
+        }
+        .section-title.incoming { color: #ff9d00; }
+        .section-title.outgoing { color: #97a0b0; margin-top: 10px; }
+
+        .custom-modal {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .45);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 14px;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 16px;
+            border-radius: 14px;
+            width: min(94%, 320px);
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+
+        @media (max-width: 768px) {
+            #list-container {
+                margin: 10px auto;
+                width: calc(100% - 20px);
+                height: calc(100vh - 20px);
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div id="list-container">
+        <!-- 상단 메뉴 -->
+        <nav class="friend-menu">
+            <div class="menu-item active" onclick="openTab(event, 'tab-chat')"><i class="fas fa-comment"></i><span>채팅</span></div>
+            <div class="menu-item" onclick="openTab(event, 'tab-friends')"><i class="fas fa-users"></i><span>친구</span></div>
+            <div class="menu-item" onclick="openTab(event, 'tab-requests')"><i class="fas fa-user-clock"></i><span>요청</span></div>
+            <div class="menu-item" onclick="openTab(event, 'tab-search')"><i class="fas fa-search"></i><span>찾기</span></div>
+        </nav>
+
+        <!-- 1. 채팅 탭 -->
+        
+        <div id="tab-chat" class="tab-content active">
+            <div th:each="f : ${roomList}" th:if="${f.status == 'ACCEPTED' and f.room_no > 0}"
+                 class="chat-item" 
+                 th:data-unread="${f.unread_cnt ?: 0}"
+                 th:onclick="enterRoom([[${f.room_no}]])">
+                <img th:src="${(f.user_id == session_id ? f.target_profile : f.user_profile) ?: '/images/default_profile.jpg'}" class="profile-img">
+                <div class="item-info">
+                    <div class="item-header">
+                        <div class="item-name" th:text="${f.user_id == session_id ? f.target_nickname : f.user_nickname}">상대방</div>
+                        <span class="unread-badge" th:if="${f.unread_cnt > 0}" th:text="${f.unread_cnt}">1</span>
+                    </div>
+                    <div class="item-sub" th:text="${f.last_msg ?: '대화 내용이 없습니다.'}">마지막 대화 내용</div>
+                </div>
+            </div>
+            <div id="no-chat-msg" th:if="${#lists.isEmpty(roomList)}" style="text-align:center; padding:42px; color:#9aa3b2; font-size:12px;">목록이 비어있습니다.</div>
+        </div>
+
+        <!-- 2. 친구 탭 -->
+        <div id="tab-friends" class="tab-content">
+            <div th:each="f : ${roomList}" class="item-row">
+                <img th:src="${(f.user_id == session_id ? f.target_profile : f.user_profile) ?: '/images/default_profile.jpg'}" class="profile-img">
+                <div class="item-info">
+                    <div class="item-name" th:text="${f.user_id == session_id ? f.target_nickname : f.user_nickname}">닉네임</div>
+                    <div class="item-sub" th:text="${f.user_id == session_id ? f.target_id : f.user_id}">아이디</div>
+                </div>
+                <button class="btn-small btn-main" th:onclick="enterRoom([[${f.room_no}]])">채팅하기</button>
+            </div>
+        </div>
+
+        <!-- 3. 요청 탭 -->
+        <div id="tab-requests" class="tab-content">
+            <div class="section-title incoming">받은 신청</div>
+            <div th:each="f : ${requestList}" th:if="${f.status == 'PENDING' and f.target_id == session_id}" class="item-row">
+                <img th:src="${f.user_profile ?: '/images/default_profile.jpg'}" class="profile-img">
+                <div class="item-info">
+                    <div class="item-name" th:text="${f.user_nickname}">닉네임</div>
+                    <div class="item-sub" th:text="${f.user_id}">아이디</div>
+                </div>
+                <div class="modal-btns" style="margin-top:0;">
+                    <button class="btn-small btn-main" th:onclick="showConfirmModal('수락하시겠습니까?', [[${f.user_id}]], 'ACCEPT')">수락</button>
+                    <button class="btn-small btn-gray" th:onclick="showConfirmModal('거절하시겠습니까?', [[${f.user_id}]], 'DELETE')">거절</button>
+                </div>
+            </div>
+
+            <div class="section-title outgoing">보낸 신청</div>
+            <div th:each="f : ${requestList}" th:if="${f.status == 'PENDING' and f.user_id == session_id}" class="item-row">
+                <img th:src="${f.target_profile ?: '/images/default_profile.jpg'}" class="profile-img">
+                <div class="item-info">
+                    <div class="item-name" th:text="${f.target_nickname}">닉네임</div>
+                    <div class="item-sub">승인 대기 중...</div>
+                </div>
+                <button class="btn-small btn-gray" th:onclick="showConfirmModal('신청을 취소하시겠습니까?', [[${f.target_id}]], 'DELETE')">취소</button>
+            </div>
+        </div>
+
+        <!-- 4. 찾기 탭 -->
+        <div id="tab-search" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="search_id" placeholder="아이디를 입력하세요">
+                <button class="btn-small btn-main" onclick="searchUser()">검색</button>
+            </div>
+            <div id="search_result"></div>
+        </div>
+
+        <!-- 5. 채팅방 탭 (iframe) -->
+        <div id="tab-room" class="tab-content" style="height:100%;">
+            <iframe id="chat-iframe"></iframe>
+        </div>
+
+        <!-- 공통 컨펌 모달 -->
+        <div id="common-modal" class="custom-modal">
+            <div class="modal-content">
+                <div id="modal-msg" style="margin-bottom:14px; font-size:13px; color:#243043;">내용</div>
+                <div class="modal-btns">
+                    <button id="modal-ok" class="btn-small btn-main">확인</button>
+                    <button onclick="closeModal()" class="btn-small btn-gray">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+		/*<![CDATA[*/
+		const roomList = /*[[${roomList}]]*/ [];
+		const requestList = /*[[${requestList}]]*/ [];
+		
+		const myRelations = roomList.concat(requestList);
+		
+		const mySessionId = /*[[${session_id}]]*/ 'guest';
+		/*]]>*/
+
+        function openTab(evt, tabName) {
+            const targetTab = document.getElementById(tabName);
+            if (!targetTab) return;
+
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
+            
+            targetTab.classList.add("active");
+            if (evt) evt.currentTarget.classList.add("active");
+
+            if (tabName !== 'tab-room' && window.top !== window) {
+                window.top.postMessage({ type: 'UPDATE_CHAT_TITLE', title: '메신저' }, '*');
+                // 다른 탭으로 나올 때 최신 안 읽은 상태를 부모 배지에 재업데이트
+                sendUnreadCountToParent();
+            }
+        }
+
+        function enterRoom(roomNo) {
+            if(!roomNo) return;
+            const iframe = document.getElementById("chat-iframe");
+            iframe.src = "/messenger/room.do?room_no=" + roomNo;
+            openTab(null, "tab-room");
+            document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
+        }
+
+        function showConfirmModal(msg, id, action) {
+            document.getElementById("modal-msg").innerText = msg;
+            document.getElementById("common-modal").style.display = "flex";
+            document.getElementById("modal-ok").onclick = () => {
+                closeModal();
+                executeAction(id, action);
+            };
+        }
+
+        function closeModal() {
+            document.getElementById("common-modal").style.display = "none";
+        }
+
+        function executeAction(targetId, action) {
+            fetch("/messenger/manage_friend.do", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `target_id=${targetId}&action=${action}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === "success") location.reload();
+                else alert(data.message);
+            })
+            .catch(err => console.error("Action error:", err));
+        }
+
+        function searchUser() {
+            const idInput = document.getElementById("search_id");
+            const id = idInput.value.trim();
+            if (!id) return;
+            const resDiv = document.getElementById("search_result");
+
+            if (id === mySessionId) {
+                resDiv.innerHTML = `<p style="text-align:center; padding:18px; color:#9aa3b2; font-size:12px;">본인은 검색할 수 없습니다.</p>`;
+                return;
+            }
+
+            fetch("/messenger/search_user.do?id=" + id)
+            .then(res => res.json())
+            .then(data => {
+                if (data.code === "success") {
+                    const rel = myRelations.find(r =>
+    (r.user_id === mySessionId && r.target_id === data.id) ||
+    (r.target_id === mySessionId && r.user_id === data.id)
+);
+                    let btnHtml = "";
+
+                    if (!rel) {
+                        btnHtml = `<button class="btn-small btn-main" onclick="showConfirmModal('${data.id}님께 신청할까요?', '${data.id}', 'CREATE')">친구 신청</button>`;
+                    } else if (rel.status === "PENDING") {
+                        btnHtml = `<button class="btn-small btn-gray" disabled>대기 중</button>`;
+                    } else {
+                        btnHtml = `<button class="btn-small btn-gray" disabled>이미 친구</button>`;
+                    }
+
+                    resDiv.innerHTML = `
+                        <div class="item-row">
+                            <img src="${data.profile || '/images/default_profile.jpg'}" class="profile-img">
+                            <div class="item-info">
+                                <div class="item-name">${data.id}</div>
+                                <div class="item-sub">Paw 회원</div>
+                            </div>
+                            ${btnHtml}
+                        </div>`;
+                } else {
+                    resDiv.innerHTML = `<p style="text-align:center; padding:18px; color:#9aa3b2; font-size:12px;">사용자를 찾을 수 없습니다.</p>`;
+                }
+            });
+        }
+
+        document.getElementById("search_id").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") searchUser();
+        });
+
+        // -------------------------------------------------------------
+        //  [추가 로직] 안 읽은 개수 계산 및 최신(안읽은순) 정렬 처리
+        // -------------------------------------------------------------
+        
+        // 부모 배지에 총 안 읽은 메시지 개수 보내기 함수
+        function sendUnreadCountToParent() {
+            const badges = document.querySelectorAll('.unread-badge');
+            let totalUnread = 0;
+            badges.forEach(b => {
+                totalUnread += (parseInt(b.textContent.trim(), 10) || 0);
+            });
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: "UPDATE_UNREAD_COUNT",
+                    count: totalUnread
+                }, "*");
+            }
+        }
+
+        // 대화방 목록 최신순(안 읽은 메시지가 많은 순) 정렬 함수
+        function sortChatRooms() {
+            const tabChat = document.getElementById("tab-chat");
+            if (!tabChat) return;
+
+            const chatItems = Array.from(tabChat.querySelectorAll(".chat-item"));
+            if (chatItems.length === 0) return;
+
+            // 안읽은 개수가 큰 순서대로 먼저 정렬 상단 노출
+            chatItems.sort((a, b) => {
+                const unreadA = parseInt(a.getAttribute("data-unread"), 10) || 0;
+                const unreadB = parseInt(b.getAttribute("data-unread"), 10) || 0;
+                return unreadB - unreadA; 
+            });
+
+            // 정렬된 순서대로 DOM 재배치
+            chatItems.forEach(item => tabChat.appendChild(item));
+        }
+
+        // 화면 렌더링이 완료되면 즉시 실행
+        document.addEventListener("DOMContentLoaded", function() {
+            sortChatRooms();            // 1. 대화 목록 정렬
+            sendUnreadCountToParent();  // 2. 부모 알림 배지 개수 갱신
+        });
+    </script>
+</div>
+</body>
+</html>

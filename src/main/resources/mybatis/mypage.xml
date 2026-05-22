@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.mypage.MypageMapper">
+
+    <select id="readMember" parameterType="int" resultType="dev.mvc.member.MemberVO">
+        SELECT *
+        FROM member
+        WHERE memberno = #{memberno}
+    </select>
+
+    <select id="listOrder" parameterType="int" resultType="dev.mvc.market_order.MarketOrderVO">
+        SELECT *
+        FROM market_order
+        WHERE memberno = #{memberno}
+        ORDER BY ORDER_ID DESC
+    </select>
+
+    <select id="listDog" parameterType="int" resultType="dev.mvc.dog.DogVO">
+        SELECT *
+        FROM dog
+        WHERE memberno = #{memberno}
+        ORDER BY dogno DESC
+    </select>
+
+    <select id="listComments" parameterType="int" resultType="dev.mvc.comments.CommentsVO">
+        SELECT *
+        FROM comments
+        WHERE memberno = #{memberno}
+        ORDER BY comment_no DESC
+    </select>
+
+    <select id="listCommunity" parameterType="int" resultType="dev.mvc.community.CommunityVO">
+        SELECT *
+        FROM community
+        WHERE memberno = #{memberno}
+        ORDER BY communityno DESC
+    </select>
+
+    <select id="mypageSummary" parameterType="int" resultType="map">
+        SELECT
+            (SELECT COUNT(*) 
+             FROM market_order 
+             WHERE memberno = #{memberno}) AS ORDER_CNT,
+
+            (SELECT NVL(SUM(total_price), 0) 
+             FROM market_order 
+             WHERE memberno = #{memberno}) AS TOTAL_PRICE,
+
+            (SELECT COUNT(*) 
+             FROM dog 
+             WHERE memberno = #{memberno}) AS DOG_CNT,
+
+            (SELECT COUNT(*) 
+             FROM comments 
+             WHERE memberno = #{memberno}) AS COMMENT_CNT,
+
+            (SELECT COUNT(*) 
+             FROM community 
+             WHERE memberno = #{memberno}) AS POST_CNT
+        FROM dual
+    </select>
+
+<select id="listCart" parameterType="int" resultType="map">
+        SELECT C.* FROM market_cart C
+        JOIN member M ON C.MEMBER_ID = M.ID
+        WHERE M.MEMBERNO = #{memberno}
+        ORDER BY C.CART_ID DESC
+    </select>
+
+<select id="listLoginHistory" parameterType="int" resultType="map">
+        SELECT 
+            MLOGINNO, 
+            IP, 
+            TO_CHAR(LOGINDATE, 'YYYY-MM-DD HH24:MI:SS') AS LOGINDATE
+        FROM mlogin
+        WHERE MEMBERNO = #{memberno}
+        ORDER BY MLOGINNO DESC
+    </select>
+
+    <delete id="deleteDog" parameterType="int">
+        DELETE FROM dog
+        WHERE dogno = #{dogno}
+    </delete>
+
+    <delete id="deleteCart" parameterType="int">
+        DELETE FROM market_cart
+        WHERE cart_id = #{cart_id}
+    </delete>
+
+    <delete id="deleteComment" parameterType="int">
+        DELETE FROM comments
+        WHERE comment_no = #{comment_no}
+    </delete>
+
+    <insert id="createDog" parameterType="dev.mvc.dog.DogVO">
+        INSERT INTO dog (dogno, memberno, name, age, breed)
+        VALUES (dog_seq.nextval, #{memberno}, #{name}, #{age}, #{breed})
+    </insert>
+
+    <update id="updateDog" parameterType="dev.mvc.dog.DogVO">
+        UPDATE dog
+        SET name = #{name}, age = #{age}, breed = #{breed}
+        WHERE dogno = #{dogno}
+    </update>
+
+</mapper>

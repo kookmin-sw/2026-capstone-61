@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.market_order.MarketOrderDAOInter">
+
+  <insert id="create" parameterType="dev.mvc.market_order.MarketOrderVO">
+    <selectKey keyProperty="order_id" resultType="int" order="BEFORE">
+      SELECT SEQ_MARKET_ORDER.nextval FROM dual
+    </selectKey>
+    INSERT INTO market_order (
+      ORDER_ID, MEMBERNO, USER_ID, TOTAL_PRICE, PAYMENT_METHOD, 
+      ORDER_STATUS, RECEIVER_NAME, RECEIVER_TEL, ZIPCODE, ADDRESS1, ADDRESS2, ORDER_DATE
+    )
+    VALUES (
+      #{order_id}, #{memberno}, #{user_id}, #{total_price}, #{payment_method}, 
+      'PAID', #{receiver_name}, #{receiver_tel}, #{zipcode}, #{address1}, #{address2}, sysdate
+    )
+  </insert>
+
+<select id="list_by_memberno" resultType="dev.mvc.market_order.MarketOrderVO" parameterType="int">
+    SELECT 
+        o.ORDER_ID, 
+        o.MEMBERNO, 
+        o.TOTAL_PRICE, 
+        o.ORDER_DATE, 
+        o.ORDER_STATUS,
+        p.PRODUCT_NAME, 
+        i.FILE_NAME,
+        item.PRODUCT_ID,    item.ORDER_ITEM_ID, (SELECT COUNT(*) FROM market_order_item WHERE ORDER_ID = o.ORDER_ID) as ORDER_COUNT
+    FROM market_order o
+    LEFT JOIN (
+        SELECT 
+            ORDER_ID, 
+            PRODUCT_ID, 
+            ORDER_ITEM_ID, -- 여기서 가져와야 메인 쿼리에서 쓸 수 있음
+            ROW_NUMBER() OVER(PARTITION BY ORDER_ID ORDER BY ORDER_ITEM_ID ASC) as rn
+        FROM market_order_item
+    ) item ON o.ORDER_ID = item.ORDER_ID AND item.rn = 1
+    LEFT JOIN market p ON item.PRODUCT_ID = p.PRODUCT_ID
+    LEFT JOIN product_image i ON p.PRODUCT_ID = i.PRODUCT_ID AND i.IS_MAIN = 'Y'
+    WHERE o.MEMBERNO = #{memberno}
+    ORDER BY o.ORDER_ID DESC
+</select>
+
+<select id="read" resultType="dev.mvc.market_order.MarketOrderVO" parameterType="int">
+  SELECT ORDER_ID, MEMBERNO, USER_ID, TOTAL_PRICE, PAYMENT_METHOD, 
+         ORDER_STATUS, RECEIVER_NAME, RECEIVER_TEL, ZIPCODE, ADDRESS1, ADDRESS2, ORDER_DATE,
+         REASON, REASON_DETAIL  FROM market_order
+  WHERE ORDER_ID = #{order_id}
+</select>
+
+  <select id="list_all" resultType="dev.mvc.market_order.MarketOrderVO">
+    SELECT ORDER_ID, MEMBERNO, USER_ID, TOTAL_PRICE, ORDER_DATE, ORDER_STATUS, 
+           RECEIVER_NAME, RECEIVER_TEL, REASON FROM market_order
+    ORDER BY ORDER_ID DESC
+  </select>
+
+  <update id="update_status" parameterType="java.util.Map">
+    UPDATE market_order
+    SET ORDER_STATUS = #{order_status}
+        <if test="reason != null">, REASON = #{reason}</if>
+        <if test="reason_detail != null">, REASON_DETAIL = #{reason_detail}</if>
+    WHERE ORDER_ID = #{order_id}
+  </update>
+
+  <insert id="create_item" parameterType="dev.mvc.market_order_item.MarketOrderItemVO">
+    INSERT INTO market_order_item (
+      ORDER_ITEM_ID, ORDER_ID, PRODUCT_ID, QUANTITY, PRICE, TOTAL_PRICE
+    ) VALUES (
+      SEQ_MARKET_ORDER_ITEM.nextval, #{order_id}, #{product_id}, #{quantity}, #{price}, #{total_price}
+    )
+  </insert>
+<select id="list_direct_order"
+        resultType="dev.mvc.market_cart.MarketCartVO">
+
+    SELECT
+        m.PRODUCT_ID,
+        m.PRODUCT_NAME,
+        m.PRICE,
+        m.DELIVERY_FEE,
+        #{quantity} as quantity,
+        (m.PRICE * #{quantity}) as total_price,
+        pi.FILE_NAME
+    FROM market m
+    LEFT JOIN product_image pi
+           ON m.PRODUCT_ID = pi.PRODUCT_ID
+          AND pi.IS_MAIN = 'Y'
+    WHERE m.PRODUCT_ID = #{product_id}
+
+</select>
+  <update id="decrease_stock" parameterType="java.util.Map">
+    UPDATE market
+    SET STOCK = STOCK - #{quantity}
+    WHERE PRODUCT_ID = #{product_id} AND STOCK >= #{quantity}
+  </update>
+
+  <update id="increase_stock" parameterType="java.util.Map">
+    UPDATE market
+    SET STOCK = STOCK + #{quantity}
+    WHERE PRODUCT_ID = #{product_id}
+  </update>
+<update id="update_member_address" parameterType="java.util.Map">
+  UPDATE member 
+  SET zipcode = #{zipcode}, 
+      address1 = #{address1}, 
+      address2 = #{address2}
+  WHERE memberno = #{memberno}
+</update>
+  <delete id="delete" parameterType="int">
+    DELETE FROM market_order
+    WHERE ORDER_ID = #{order_id}
+  </delete>
+<update id="update_address" parameterType="dev.mvc.market_order.MarketOrderVO">
+  UPDATE market_order
+  SET receiver_name = #{receiver_name},
+      receiver_tel = #{receiver_tel},
+      zipcode = #{zipcode},
+      address1 = #{address1},
+      address2 = #{address2}
+  WHERE order_id = #{order_id}
+</update>
+</mapper>

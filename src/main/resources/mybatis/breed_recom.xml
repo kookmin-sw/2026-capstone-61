@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.breed_recom.Breed_recomDAOInter">
+
+  <!-- 최초 추천 -->
+  <insert id="create" parameterType="dev.mvc.breed_recom.Breed_recomVO">
+    INSERT INTO breed_recom (recomno, recom, breedno, memberno)
+    VALUES (breed_recom_seq.nextval, 1, #{breedno}, #{memberno})
+  </insert>
+  
+  <!-- 추천 여부 존재 체크 -->
+  <select id="recom_read" parameterType="HashMap" resultType="int">
+    SELECT COUNT(memberno)
+    FROM breed_recom
+    WHERE breedno = #{breedno} AND memberno = #{memberno}
+  </select>
+  
+  <!-- 추천 상태 조회 -->
+  <select id="recom_check" resultType="dev.mvc.breed_recom.Breed_recomVO" parameterType="HashMap">
+    SELECT recomno, breedno, memberno, recom
+    FROM breed_recom
+    WHERE breedno = #{breedno} AND memberno = #{memberno}
+  </select>
+  
+  <!-- 회원이 누른 추천 목록 -->
+  <select id="member_read" resultType="dev.mvc.breed_recom.Breed_recomVO" parameterType="int">
+    SELECT recomno, recom, breedno, memberno
+    FROM breed_recom
+    WHERE memberno = #{memberno}
+    ORDER BY recomno DESC
+  </select>
+  
+  <!-- 해당 게시글 추천한 회원 -->
+  <select id="breed_read" resultType="dev.mvc.breed_recom.Breed_recomVO" parameterType="int">
+    SELECT recomno, recom, breedno, memberno
+    FROM breed_recom
+    WHERE breedno = #{breedno}
+    ORDER BY recomno DESC
+  </select>
+  
+  <!-- 추천 -->
+  <update id="recom" parameterType="HashMap">
+    UPDATE breed_recom
+    SET recom = 1
+    WHERE breedno = #{breedno} AND memberno = #{memberno}
+  </update>
+  
+  <!-- 추천 취소 -->
+  <update id="recom_cancel" parameterType="HashMap">
+    UPDATE breed_recom
+    SET recom = 0
+    WHERE breedno = #{breedno} AND memberno = #{memberno}
+  </update>
+
+</mapper>

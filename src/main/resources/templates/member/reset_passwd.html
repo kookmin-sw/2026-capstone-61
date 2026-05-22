@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paws | 비밀번호 재설정</title>
+
+  <style>
+    /* =========================================================
+       기본 설정 (로그인 페이지와 동일)
+       ========================================================= */
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0; padding: 0;
+    }
+
+    .form-wrapper {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 85vh; padding: 20px;
+    }
+
+    /* =========================================================
+       카드 및 제목 (로그인 페이지 규격: 400px)
+       ========================================================= */
+    .find-card {
+      width: 100%; max-width: 400px; background: #ffffff;
+      padding: 30px 25px; border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-sizing: border-box;
+    }
+
+    .title-center {
+      text-align: center; font-size: 24px; font-weight: 800;
+      color: #ff6b81; margin-bottom: 20px;
+    }
+
+    /* =========================================================
+       입력창 및 그룹 (로그인 페이지 규격: padding 11px)
+       ========================================================= */
+    .input-group { margin-bottom: 2px; position: relative; }
+
+    .form-control {
+      width: 100%; padding: 11px 16px; border-radius: 10px;
+      border: 1.5px solid #e1e1e1; background-color: #fafafa;
+      font-size: 14px; transition: all 0.3s ease; box-sizing: border-box;
+    }
+
+    .form-control:focus {
+      outline: none; border-color: #ff6b81; background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.1);
+    }
+
+    /* 에러 메시지 스타일 (로그인 페이지 규격: 11px) */
+    .span_warning {
+      display: block; color: #ff4d4d; font-size: 11px;
+      margin-top: 5px; margin-left: 5px; min-height: 16px;
+      margin-bottom: 6px; font-weight: 500;
+    }
+
+    /* =========================================================
+       버튼 스타일 (로그인 페이지 규격)
+       ========================================================= */
+    .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+
+    .btn {
+      flex: 1; border: none; border-radius: 10px; padding: 12px;
+      font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #ff6b81; color: white;
+    }
+
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary { background: #f1f3f5; color: #495057; }
+    .btn-secondary:hover { background: #e9ecef; }
+
+    /* =========================================================
+       커스텀 모달 스타일
+       ========================================================= */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: none; justify-content: center;
+      align-items: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; padding: 24px; border-radius: 20px;
+      width: 90%; max-width: 320px; text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-text { font-size: 15px; color: #333; margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
+    .modal-btn {
+      width: 100%; padding: 12px; border-radius: 12px;
+      border: none; background: #ff6b81; color: white;
+      font-weight: 700; cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      .action-buttons { flex-direction: column; }
+    }
+  </style>
+
+  <script>
+    /* 커스텀 모달 표시 함수 */
+    function showModal(msg, focusId = null) {
+      const modal = document.getElementById('customModal');
+      const modalText = document.getElementById('modalText');
+      modalText.innerHTML = msg;
+      modal.style.display = 'flex';
+      
+      document.getElementById('modalConfirm').onclick = function() {
+        modal.style.display = 'none';
+        if (focusId) {
+          const el = document.getElementById(focusId);
+          if(el) el.focus();
+        }
+      };
+    }
+
+    window.onload = () => {
+      document.querySelector('#passwd').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          document.getElementById('passwd2').focus();
+        }
+      });
+
+      document.querySelector('#passwd2').addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          send();
+        }
+      });
+    }
+
+    function send() {
+      const f = document.getElementById('frm');
+      const passwd = document.getElementById('passwd');
+      const passwd2 = document.getElementById('passwd2');
+      const passwd_msg = document.getElementById('passwd_msg');
+      const passwd2_msg = document.getElementById('passwd2_msg');
+
+      passwd_msg.innerHTML = '';
+      passwd2_msg.innerHTML = '';
+
+      // 비밀번호 정규식: 영문, 숫자, 특수문자 조합 8자 이상
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/;
+
+      if (passwd.value.trim().length === 0) {
+        showModal("🐾 <b>새 비밀번호</b>를 입력해주세요.", "passwd");
+        return;
+      }
+
+      if (!regex.test(passwd.value)) {
+        passwd_msg.innerHTML = '🐾 영문+숫자+특수문자 포함 8자 이상 입력해주세요.';
+        passwd.focus();
+        return;
+      }
+
+      if (passwd.value !== passwd2.value) {
+        passwd2_msg.innerHTML = '🐾 비밀번호가 일치하지 않습니다.';
+        passwd2.focus();
+        return;
+      }
+
+      f.submit();
+    }
+  </script>
+</head>
+
+<body>
+  <div layout:fragment="content">
+    <div class="form-wrapper">
+      <div class="find-card">
+        <div class="title-center">🔐 비밀번호 재설정</div>
+
+        <form id="frm" method="post" action="/member/reset_passwd">
+          <input type="hidden" name="memberno" th:value="${memberno}">
+
+          <!-- 새 비밀번호 -->
+          <div class="input-group">
+            <input type="password" id="passwd" name="passwd" placeholder="새 비밀번호" class="form-control" autocomplete="new-password">
+          </div>
+          <span id="passwd_msg" class="span_warning"></span>
+
+          <!-- 비밀번호 확인 -->
+          <div class="input-group">
+            <input type="password" id="passwd2" name="passwd2" placeholder="비밀번호 확인" class="form-control" autocomplete="new-password">
+          </div>
+          <span id="passwd2_msg" class="span_warning"></span>
+
+          <!-- 버튼 -->
+          <div class="action-buttons">
+            <button type="button" class="btn btn-secondary" onclick="history.back()">취소</button>
+            <button type="button" class="btn btn-primary" onclick="send()">변경하기</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 커스텀 모달 구조 -->
+    <div id="customModal" class="modal-overlay">
+      <div class="modal-content">
+        <div id="modalText" class="modal-text">메시지 내용</div>
+        <button id="modalConfirm" class="modal-btn">확인</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

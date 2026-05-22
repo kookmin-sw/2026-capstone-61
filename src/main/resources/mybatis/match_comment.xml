@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.match_comment.MatchCommentDAOInter">
+
+  <!-- =========================================================
+       📝 댓글 등록
+  ========================================================== -->
+  <insert id="create"
+          parameterType="dev.mvc.match_comment.MatchCommentVO">
+
+    INSERT INTO match_comment (
+
+      commentno,
+      matchno,
+      memberno,
+      parentno,
+      content,
+      comment_type,
+      likecnt,
+      reportcnt,
+      is_secret,
+      is_deleted,
+      rdate
+
+    )
+
+    VALUES (
+
+      match_comment_seq.nextval,
+
+      #{matchno},
+
+      #{memberno},
+
+      #{parentno, jdbcType=INTEGER},
+
+      #{content},
+
+      #{comment_type},
+
+      0,
+
+      0,
+
+      'N',
+
+      'N',
+
+      SYSDATE
+
+    )
+
+  </insert>
+
+
+  <!-- =========================================================
+       📋 게시글 댓글 목록
+  ========================================================== -->
+  <select id="list_by_matchno"
+          parameterType="int"
+          resultType="dev.mvc.match_comment.MatchCommentVO">
+
+    SELECT
+
+        mc.commentno,
+        mc.matchno,
+        mc.memberno,
+        mc.parentno,
+        mc.content,
+        mc.comment_type,
+        mc.likecnt,
+        mc.reportcnt,
+        mc.is_secret,
+        mc.is_deleted,
+        mc.rdate,
+
+        m.nickname,
+        m.profile AS profile_img,
+        m.manner_temp
+
+    FROM match_comment mc
+
+    INNER JOIN member m
+      ON mc.memberno = m.memberno
+
+    WHERE mc.matchno = #{value}
+      AND mc.is_deleted = 'N'
+
+    ORDER BY
+
+      CASE
+        WHEN mc.parentno IS NULL
+        THEN mc.commentno
+        ELSE mc.parentno
+      END ASC,
+
+      mc.commentno ASC
+
+  </select>
+
+
+  <!-- =========================================================
+       💬 대댓글 목록
+  ========================================================== -->
+  <select id="list_by_parentno"
+          parameterType="int"
+          resultType="dev.mvc.match_comment.MatchCommentVO">
+
+    SELECT
+
+        mc.commentno,
+        mc.matchno,
+        mc.memberno,
+        mc.parentno,
+        mc.content,
+        mc.comment_type,
+        mc.likecnt,
+        mc.reportcnt,
+        mc.is_secret,
+        mc.is_deleted,
+        mc.rdate,
+
+        m.nickname,
+        m.profile AS profile_img,
+        m.manner_temp
+
+    FROM match_comment mc
+
+    INNER JOIN member m
+      ON mc.memberno = m.memberno
+
+    WHERE mc.parentno = #{value}
+      AND mc.is_deleted = 'N'
+
+    ORDER BY mc.commentno ASC
+
+  </select>
+
+
+  <!-- =========================================================
+       📖 댓글 상세 조회
+  ========================================================== -->
+  <select id="read"
+          parameterType="int"
+          resultType="dev.mvc.match_comment.MatchCommentVO">
+
+    SELECT
+
+        mc.commentno,
+        mc.matchno,
+        mc.memberno,
+        mc.parentno,
+        mc.content,
+        mc.comment_type,
+        mc.likecnt,
+        mc.reportcnt,
+        mc.is_secret,
+        mc.is_deleted,
+        mc.rdate,
+
+        m.nickname,
+        m.profile AS profile_img,
+        m.manner_temp
+
+    FROM match_comment mc
+
+    INNER JOIN member m
+      ON mc.memberno = m.memberno
+
+    WHERE mc.commentno = #{value}
+
+  </select>
+
+
+  <!-- =========================================================
+       ✏ 댓글 수정
+  ========================================================== -->
+  <update id="update"
+          parameterType="dev.mvc.match_comment.MatchCommentVO">
+
+    UPDATE match_comment
+
+    SET
+      content = #{content}
+
+    WHERE commentno = #{commentno}
+
+  </update>
+
+
+  <!-- =========================================================
+       ❌ 댓글 삭제 (소프트 삭제)
+  ========================================================== -->
+  <update id="delete"
+          parameterType="int">
+
+    UPDATE match_comment
+
+    SET is_deleted = 'Y'
+
+    WHERE commentno = #{value}
+
+  </update>
+
+
+  <!-- =========================================================
+       🔢 게시글 댓글 수 조회
+  ========================================================== -->
+  <select id="count_by_matchno"
+          parameterType="int"
+          resultType="int">
+
+    SELECT COUNT(*)
+
+    FROM match_comment
+
+    WHERE matchno = #{value}
+      AND is_deleted = 'N'
+
+  </select>
+
+
+  <!-- =========================================================
+       🔢 회원 댓글 수 조회
+  ========================================================== -->
+  <select id="count_by_memberno"
+          parameterType="int"
+          resultType="int">
+
+    SELECT COUNT(*)
+
+    FROM match_comment
+
+    WHERE memberno = #{value}
+      AND is_deleted = 'N'
+
+  </select>
+
+
+  <!-- =========================================================
+       👍 좋아요 증가
+  ========================================================== -->
+  <update id="increase_likecnt"
+          parameterType="int">
+
+    UPDATE match_comment
+
+    SET likecnt = likecnt + 1
+
+    WHERE commentno = #{value}
+
+  </update>
+
+
+  <!-- =========================================================
+       👎 좋아요 감소
+  ========================================================== -->
+  <update id="decrease_likecnt"
+          parameterType="int">
+
+    UPDATE match_comment
+
+    SET likecnt =
+
+      CASE
+        WHEN likecnt > 0
+        THEN likecnt - 1
+        ELSE 0
+      END
+
+    WHERE commentno = #{value}
+
+  </update>
+
+
+  <!-- =========================================================
+       🚨 신고 수 증가
+  ========================================================== -->
+  <update id="increase_reportcnt"
+          parameterType="int">
+
+    UPDATE match_comment
+
+    SET reportcnt = reportcnt + 1
+
+    WHERE commentno = #{value}
+
+  </update>
+
+</mapper>

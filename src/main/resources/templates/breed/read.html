@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${breedVO.breed_name} + ' 상세 정보'"></title>
+
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Pretendard', sans-serif; }
+
+        .read-card { 
+            background: #fff; border-radius: 25px; padding: 40px; 
+            box-shadow: 0 15px 35px rgba(255, 182, 193, 0.2); 
+            margin: 70px auto 100px auto;
+        }
+
+        .content-box { 
+            line-height: 1.9; 
+            font-size: 16px; 
+            color: #444;
+            background: #fdfbfb; 
+            padding: 30px; 
+            border-radius: 20px; 
+            margin-top: 20px; 
+            border: 1px solid #eee;
+            white-space: pre-wrap; 
+            word-break: break-all;
+        }
+
+        /* 이미지 갤러리 스타일 */
+        .content-img {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+
+        .thumb-img {
+            width: 70px; height: 70px; 
+            object-fit: cover; cursor: pointer; 
+            border-radius: 10px; opacity: 0.6; 
+            transition: 0.3s; border: 2px solid transparent;
+        }
+
+        .thumb-img:hover {
+            opacity: 1; border-color: #ff6b81;
+            transform: translateY(-3px);
+        }
+
+        .menu-item { 
+            padding: 6px 14px; border-radius: 20px; 
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4); 
+            color: #fff; font-size: 13px; 
+            text-decoration: none; transition: 0.2s; 
+            border: none; cursor: pointer; display: inline-block;
+        }
+
+        .menu-item:hover { transform: scale(1.05); color: #fff; }
+
+        .spec-label { 
+            font-weight: bold; color: #ff6b81; font-size: 13px; 
+            margin-right: 5px; flex-shrink: 0; white-space: nowrap; 
+        }
+        
+        .spec-value { 
+            color: #333; font-size: 13px; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+
+        .stats-box { display: flex; gap: 10px; margin-top: 10px; font-size:14px; }
+        .stat-item { flex: 1; background: #f8f9fa; border-radius: 15px; padding: 12px; text-align: center; }
+
+        h1 { font-size: 34px; color: #ff6b81; font-weight: 700; }
+        .detail-title { font-size: 20px; color: #ff6b81; font-weight: bold; }
+
+        /* 모달 커스텀 스타일 */
+        .modal-content { border-radius: 25px; border: none; overflow: hidden; }
+        .btn-modal-confirm { background: #ff6b81; color: white; border-radius: 12px; padding: 10px 20px; border: none; font-weight: bold; }
+        .btn-modal-cancel { background: #dfe6e9; color: #2d3436; border-radius: 12px; padding: 10px 20px; border: none; font-weight: bold; }
+
+        @media (max-width:768px){
+            .row { flex-direction: column; }
+            .content-img { height: 250px; }
+            h1 { font-size: 26px; }
+            
+            /* 모바일 화면 중앙 정렬 강력 방어 코드 */
+            .modal-dialog-centered {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-height: calc(100% - 3.5rem) !important;
+                margin: 0 auto !important;
+                width: 90% !important;
+            }
+        }
+    </style>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <script th:inline="javascript">
+        const breedno = /*[[${breedVO.breedno}]]*/ 0;
+        const session_id = /*[[${session.id}]]*/ null;
+        const session_memberno = /*[[${session.memberno}]]*/ 0;
+
+        let alertModal, confirmModal;
+
+        window.onload = () => {
+            alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+            confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            if (session_id) recom_check();
+        };
+
+        // confirmBtnClickAction 파라미터 추가하여 확인 버튼 커스텀 기능 구현
+        function showAlert(title, message, icon = '🐾', confirmBtnClickAction = null) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerHTML = message;
+            document.getElementById('alertIcon').innerText = icon;
+            
+            const confirmBtn = document.getElementById('alertConfirmBtn');
+            
+            // 기존에 걸려있을지 모르는 모든 이벤트 제거 후 새로 고정
+            confirmBtn.onclick = null; 
+            if (confirmBtnClickAction) {
+                confirmBtn.onclick = confirmBtnClickAction;
+            }
+            
+            alertModal.show();
+        }
+
+        function delete_confirm() {
+            confirmModal.show();
+        }
+
+        function executeDelete() {
+            document.getElementById("deleteFrm").submit();
+        }
+
+        function recom_check() {
+            fetch(`/breed_recom/check?breedno=${breedno}`)
+            .then(res => res.json())
+            .then(data => {
+                const icon = document.getElementById('likeIcon');
+                const text = document.getElementById('likeText');
+                if (data.res && data.res.recom === 1) {
+                    icon.classList.replace('far', 'fas');
+                    text.innerText = "취소";
+                    text.style.color = "#ff6b81";
+                } else {
+                    icon.classList.replace('fas', 'far');
+                    text.innerText = "추천";
+                    text.style.color = "#333";
+                }
+            })
+            .catch(err => console.error("Error:", err));
+        }
+
+        function handleRecomClick() {
+            if (!session_id) {
+                // 확인 버튼을 누르면 로그인 페이지로 가도록 함수 전달!
+                showAlert('로그인 필요', '로그인 후 추천이 가능합니다.<br>로그인 페이지로 이동할까요?', '🔑', function() {
+                    location.href = '/member/login';
+                });
+                return;
+            }
+            fetch(`/breed_recom/toggle`, {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ breedno: breedno, memberno: session_memberno })
+            })
+            .then(res => res.json())
+            .then(() => { location.reload(); })
+            .catch(err => console.error("Error:", err));
+        }
+
+        function changeImg(src) {
+            document.getElementById('mainDisplayImg').src = src;
+        }
+    </script>
+</head>
+
+<body>
+<div layout:fragment="content" class="container">
+
+    <div class="read-card">
+        
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <button class="menu-item" th:onclick="|location.href='/breed/list_by_cat_no?cat_no=${breedVO.cat_no}'|">
+                목록
+            </button>
+            
+            <div th:if="${session.grade == 'admin'}">
+                <a th:href="@{|/breed/update_text?breedno=${breedVO.breedno}|}" class="menu-item">글 수정</a>
+                <a th:href="@{|/breed/update_file?breedno=${breedVO.breedno}&now_page=${now_page}&word=${word}|}" class="menu-item">사진 수정</a>
+                <form th:action="@{/breed/delete}" method="post" style="display:inline;" id="deleteFrm">
+                    <input type="hidden" name="breedno" th:value="${breedVO.breedno}">
+                    <input type="hidden" name="cat_no" th:value="${breedVO.cat_no}">
+                    <button type="button" class="menu-item" onclick="delete_confirm()">삭제</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5 mb-4">
+                <div th:if="${imgList != null and imgList.size() > 0}">
+                    <div class="text-center mb-3">
+                        <img th:src="@{|/breed/storage/${imgList[0].saved_name}|}" id="mainDisplayImg" class="content-img shadow-sm">
+                    </div>
+                    
+                    <div th:if="${imgList.size() > 1}" class="d-flex flex-wrap justify-content-center gap-2">
+                        <div th:each="imgVO : ${imgList}">
+                            <img th:src="@{|/breed/storage/${imgVO.saved_name}|}" 
+                                 class="thumb-img shadow-sm" 
+                                 th:onmouseover="|changeImg(this.src)|">
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${imgList == null or imgList.size() == 0}" class="text-center">
+                    <img src="/images/none.png" class="content-img" style="opacity: 0.5;">
+                </div>
+            </div>
+
+            <div class="col-lg-7 ps-lg-5">
+                <div class="title-row mb-2 d-flex justify-content-between align-items-center">
+                    <h1 th:text="${breedVO.breed_name}" class="mb-0"></h1>
+                
+                    <button class="menu-item" onclick="handleRecomClick()">
+                        <i id="likeIcon" style="font-size: 16px;" class="far fa-heart"></i>
+                        <span style="font-size: 16px;" id="likeText">추천</span>
+                    </button>
+                </div>
+
+                <div style="font-size: 16px;" class="text-muted fw-normal mb-4" th:text="${breedVO.title}"></div>
+
+                <div class="row g-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="spec-label">원산지</span>
+                        <span class="spec-value" th:text="${breedVO.origin}"></span>
+                
+                        <span class="spec-label">크기구분</span>
+                        <span class="spec-value" th:text="${breedVO.size_type}"></span>
+                    </div>
+                
+                    <div class=" d-flex justify-content-between align-items-center">
+                        <span class="spec-label">평균체중</span>
+                        <span class="spec-value" th:text="${breedVO.kg}"></span>
+                        <span class="spec-label">평균체고</span>
+                        <span class="spec-value" th:text="${breedVO.height}"></span>
+                    </div>
+                
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="spec-label">등록일자</span>
+                        <span class="spec-value" th:text="${breedVO.rdate.substring(0, 16)}"></span>
+                    </div>
+                </div>
+
+                <div class="stats-box">
+                    <div class="stat-item">
+                        <div style="font-size: 14px; color: #ff6b81;">조회수</div>
+                        <div style="font-size: 14px;" th:text="${breedVO.viewcnt}"></div>
+                    </div>
+                    <div class="stat-item">
+                        <div style="font-size: 14px; color: #ff6b81;">추천수</div>
+                        <div style="font-size: 14px;" th:text="${breedVO.recom}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <h4 class="detail-title">🐾 품종 상세 특징</h4>
+                <div class="content-box" th:text="${breedVO.content}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 모달 (확인 버튼에 id="alertConfirmBtn" 추가됨) -->
+    <div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div id="alertIcon" class="mb-3" style="font-size: 50px;">🐾</div>
+                    <h5 id="alertTitle" class="fw-bold mb-2">알림</h5>
+                    <p id="alertMessage" class="text-muted mb-4"></p>
+                    <button type="button" id="alertConfirmBtn" class="btn-modal-confirm w-100" data-bs-dismiss="modal">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="mb-3" style="font-size: 50px;">⚠️</div>
+                    <h5 class="fw-bold mb-2">삭제하시겠습니까?</h5>
+                    <p class="text-muted mb-4">삭제된 데이터는 복구할 수 없습니다.</p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn-modal-cancel flex-fill" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn-modal-confirm flex-fill" onclick="executeDelete()">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 주찬 xml 로그인 내역  (o)표시: 수정 완료  -->
+<!--
+//======================= 주찬 ========================//
+//  CREATE TABLE mlogin(
+//      MLOGINNO     NUMBER(10)     NOT NULL    PRIMARY KEY,
+//      IP           VARCHAR2(16)   NOT NULL,
+//      LOGINDATE    DATE           NOT NULL,
+//      MEMBERNO     NUMBER(10)     NULL (FK)
+//  );
+-->
+<mapper namespace="dev.mvc.mlogin.MloginDAOInter"> <!-- SB가 자동으로 구현하여 연동하는 interface -->
+
+  <!-- (o)  로그인 내역 등록  -->
+  <insert id="mlogin_insert" parameterType="dev.mvc.mlogin.MloginVO">
+    INSERT INTO mlogin(mloginno, ip, logindate, memberno)
+    VALUES (mlogin_seq.nextval, #{ip}, sysdate, #{memberno})
+  </insert>
+  
+  <!-- (o)  로그인 내역 조회 -->
+  <select id="mlogin_read" resultType="dev.mvc.mlogin.MloginVO" parameterType="int">
+    SELECT mloginno, ip, logindate, memberno
+    FROM mlogin
+    WHERE memberno = #{memberno}
+    ORDER BY logindate DESC
+  </select>  
+
+</mapper>

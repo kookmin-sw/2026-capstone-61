@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Paws | 사진 수정</title>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Pretendard', sans-serif; }
+
+        .update-card { 
+            background: #fff; border-radius: 25px; padding: 40px; 
+            box-shadow: 0 15px 35px rgba(255, 182, 193, 0.2); 
+            margin: 70px auto 100px auto; max-width: 800px;
+        }
+
+        .breadcrumb-text { color: #ff6b81; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
+        .title-text { font-size: 24px; font-weight: 700; color: #333; margin-bottom: 30px; }
+
+        /* 현재 등록된 사진 영역 */
+        .current-img-section { 
+            background: #fdfbfb; border-radius: 20px; padding: 25px; 
+            border: 1px solid #eee; margin-bottom: 30px; text-align: center;
+        }
+        .main-img-preview {
+            max-width: 300px; width: 100%; height: 250px; 
+            object-fit: cover; border-radius: 15px; border: 3px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .thumb-img {
+            width: 60px; height: 60px; object-fit: cover; 
+            border-radius: 10px; cursor: pointer; transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .thumb-img:hover { transform: translateY(-3px); border-color: #ff6b81; }
+
+        /* 파일 업로드 영역 */
+        .upload-section { 
+            text-align: center; background-color: #fff5f7; padding: 30px; 
+            border-radius: 20px; border: 2px dashed #ffccd2; margin: 30px 0;
+        }
+        .file-label { 
+            display: block; margin-bottom: 15px; font-weight: bold; 
+            color: #ff6b81; font-size: 18px; 
+        }
+        .file-input { 
+            font-size: 15px; color: #777; 
+            padding: 10px; background: white; border-radius: 10px; width: 100%;
+        }
+
+        /* 버튼 스타일 */
+        .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .btn-paws { 
+            padding: 12px 35px; border-radius: 25px; border: none; 
+            font-weight: bold; transition: 0.3s; cursor: pointer;
+        }
+        .btn-save { background: linear-gradient(135deg, #ff9a9e, #fad0c4); color: white; }
+        .btn-cancel { background: #dfe6e9; color: #2d3436; }
+        .btn-paws:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 107, 129, 0.3); }
+
+        /* 업로드 미리보기 */
+        #uploadPreview img {
+            width: 80px; height: 80px; object-fit: cover; 
+            border-radius: 10px; margin: 5px; border: 2px solid #ffccd2;
+        }
+    </style>
+
+    <script>
+        // 새로 선택한 파일들 미리보기 기능
+        function readURL(input) {
+            const previewContainer = document.getElementById('uploadPreview');
+            previewContainer.innerHTML = ''; // 기존 미리보기 초기화
+            
+            if (input.files) {
+                const filesArray = Array.from(input.files);
+                filesArray.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+
+    <div class="update-card">
+        <!-- 상단 경로 표시 -->
+        <div class="breadcrumb-text text-center">
+            <span th:text="${categoryVO?.cat_name}">카테고리</span> 🐾 
+            <span th:text="${breedVO.breed_name}">견종이름</span> 🐾 
+            사진 수정
+        </div>
+
+        <div class="title-text text-center" th:text="${breedVO.title}">콘텐츠 제목</div>
+
+        <!-- 현재 사진 영역 -->
+        <div class="current-img-section">
+            <p class="text-muted mb-3" style="font-size: 14px;">[ 현재 등록된 사진 ]</p>
+            
+            <div th:if="${imgList != null and imgList.size() > 0}">
+                <img th:src="@{|/breed/storage/${imgList[0].saved_name}|}" 
+                     id="mainImg" class="main-img-preview mb-3">
+                
+                <div class="d-flex justify-content-center gap-2 flex-wrap" th:if="${imgList.size() > 1}">
+                    <div th:each="img : ${imgList}">
+                        <img th:src="@{|/breed/storage/${img.saved_name}|}" 
+                             class="thumb-img"
+                             th:onmouseover="|document.getElementById('mainImg').src=this.src|">
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${imgList == null or imgList.size() == 0}">
+                <img src="/images/none.png" class="main-img-preview" style="opacity: 0.5;">
+                <p class="text-muted mt-2">등록된 이미지가 없습니다.</p>
+            </div>
+        </div>
+
+        <!-- 수정 폼 -->
+        <form name="frm" method="POST" action="/breed/update_file" enctype="multipart/form-data">
+            <input type="hidden" name="cat_no" th:value="${categoryVO.cat_no}">
+            <input type="hidden" name="breedno" th:value="${breedVO.breedno}">
+            <input type="hidden" name="now_page" th:value="${now_page}">
+            <input type="hidden" name="word" th:value="${word}">
+
+            <div class="upload-section">
+                <label for="file1MF" class="file-label">
+                    <i class="fas fa-camera-retro me-2"></i>새로운 사진 선택
+                </label>
+                <input type="file" name="file1MF" id="file1MF" class="file-input" 
+                       multiple="multiple" required onchange="readURL(this);">
+                
+                <!-- 선택한 파일 미리보기 창 -->
+                <div id="uploadPreview" class="mt-3 d-flex justify-content-center flex-wrap"></div>
+                
+                <p class="text-muted mt-3" style="font-size: 13px;">
+                    * 사진을 선택하면 아래에 미리보기가 표시됩니다.
+                </p>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn-paws btn-save shadow-sm">저장</button>
+                <button type="button" onclick="history.back();" class="btn-paws btn-cancel">하기</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

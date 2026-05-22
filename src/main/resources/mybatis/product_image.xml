@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.product_image.ProductImage">
+
+  <insert id="create" parameterType="dev.mvc.product_image.ProductImageVO">
+    INSERT INTO product_image (
+      image_id, product_id, file_name, file_path, is_main, image_order, reg_date
+    ) VALUES (
+      SEQ_PRODUCT_IMAGE.NEXTVAL, #{product_id}, #{file_name}, #{file_path}, #{is_main}, #{image_order}, sysdate
+    )
+  </insert>
+
+  <select id="list_by_product_id" parameterType="int" resultType="dev.mvc.product_image.ProductImageVO">
+    SELECT image_id, product_id, file_name, file_path, is_main, image_order, reg_date
+    FROM product_image
+    WHERE product_id = #{product_id}
+    ORDER BY image_order ASC, image_id ASC
+  </select>
+
+<delete id="delete_by_product_id" parameterType="int">
+    DELETE FROM product_image
+    WHERE product_id = #{product_id}
+</delete>
+
+</mapper>

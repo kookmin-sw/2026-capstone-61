@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 취소 신청 - Paws Market</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --paws-orange: #ff914d;
+            --paws-orange-light: #fff5ed;
+            --paws-orange-hover: #e87d3a;
+            --paws-dark: #333333;
+            --paws-gray: #888888;
+            --paws-border: #eeeeee;
+        }
+
+        .cancel-container { max-width: 650px; margin: 80px auto 120px auto; padding: 0 20px; }
+        
+        .cancel-section { 
+            background: #fff; 
+            padding: 50px; 
+            border-radius: 30px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06); 
+            border: 1px solid #f8f8f8;
+        }
+
+        .cancel-header { 
+            border-bottom: 2px solid #fcfcfc; 
+            margin-bottom: 35px; 
+            padding-bottom: 25px; 
+        }
+
+        .cancel-header h3 { 
+            color: var(--paws-dark);
+            font-weight: 800;
+            font-size: 1.7rem;
+        }
+        .cancel-header h3 span { color: var(--paws-orange); }
+
+        /* 입력 폼 스타일 */
+        .form-label { color: var(--paws-dark); font-size: 1rem; margin-bottom: 12px; font-weight: 700; }
+        
+        .form-select, .form-control {
+            border: 1.5px solid var(--paws-border);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            background-color: #fcfcfc;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--paws-orange);
+            box-shadow: 0 0 0 4px rgba(255, 145, 77, 0.1);
+            outline: none;
+            background-color: #fff;
+        }
+
+        /* 안내 문구 박스 */
+        .paws-alert {
+            background-color: var(--paws-orange-light);
+            border-radius: 18px;
+            padding: 25px;
+            border: none;
+            margin: 40px 0;
+        }
+        .paws-alert-title { color: var(--paws-orange); font-weight: 800; font-size: 0.95rem; margin-bottom: 10px; display: block; }
+
+        /* 버튼 스타일 */
+        .btn-group-paws { display: flex; gap: 15px; justify-content: center; }
+        
+        .btn-paws-back {
+            background: #f1f1f1;
+            color: #666;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-weight: 700;
+            transition: 0.3s;
+            flex: 1;
+        }
+
+        .btn-paws-submit {
+            background: var(--paws-orange);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 40px;
+            font-weight: 700;
+            transition: 0.3s;
+            flex: 2;
+            box-shadow: 0 8px 20px rgba(255, 145, 77, 0.2);
+        }
+
+        .btn-paws-submit:hover {
+            background: var(--paws-orange-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 145, 77, 0.3);
+        }
+        
+        .btn-paws-back:hover { background: #e5e5e5; }
+
+        /* 커스텀 모달 (주문내역과 통일) */
+        #pawsModal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .p-modal-content { background: #fff; padding: 35px; border-radius: 25px; width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.15); animation: pModalShow 0.3s ease; }
+        @keyframes pModalShow { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .p-modal-icon { font-size: 45px; color: var(--paws-orange); margin-bottom: 15px; }
+        .p-modal-text { font-weight: 700; color: #333; margin-bottom: 25px; white-space: pre-line; line-height: 1.6; }
+        .p-modal-btns { display: flex; gap: 12px; }
+        .p-btn { flex: 1; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; border: none; font-size: 15px; transition: 0.2s; }
+        .p-btn-confirm { background: var(--paws-orange); color: #fff; }
+        .p-btn-cancel { background: #f1f1f1; color: #666; }
+    </style>
+</head>
+<body>
+
+<!-- 커스텀 모달 -->
+<div id="pawsModal">
+    <div class="p-modal-content">
+        <div class="p-modal-icon" id="modalIcon"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <div class="p-modal-text" id="modalMessage">신청하시겠습니까?</div>
+        <div class="p-modal-btns" id="modalButtons"></div>
+    </div>
+</div>
+
+<div class="cancel-container">
+    <div class="cancel-section">
+        <div class="cancel-header text-center">
+            <h3 class="m-0">주문 <span>취소 신청</span> 🐾</h3>
+            <p class="text-muted small mt-2">더 나은 포즈마켓이 될 수 있도록 취소 사유를 알려주세요.</p>
+        </div>
+
+        <!-- ID를 부여하여 JS에서 제어 -->
+        <form id="cancelForm" th:action="@{/market_order/cancel_proc.do}" method="post">
+            <input type="hidden" name="order_id" th:value="${orderVO.order_id}">
+
+            <div class="mb-4">
+                <label class="form-label">취소 사유 <span style="color: var(--paws-orange);">*</span></label>
+                <select name="reason" id="cancelReason" class="form-select" required>
+                    <option value="">사유를 선택해주세요</option>
+                    <option value="단순변심">단순 변심 (마음이 변했어요)</option>
+                    <option value="옵션변경">상품 옵션을 잘못 선택했어요</option>
+                    <option value="배송지연">배송이 너무 늦어질 것 같아요</option>
+                    <option value="재주문">정보 수정 후 다시 주문할게요</option>
+                    <option value="기타">기타 (직접 입력)</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">상세 내용 (선택사항)</label>
+                <textarea name="reason_detail" class="form-control" rows="4" placeholder="더 자세한 이야기를 들려주시면 큰 도움이 됩니다."></textarea>
+            </div>
+
+            <div class="paws-alert">
+                <span class="paws-alert-title"><i class="bi bi-info-circle-fill me-1"></i> 꼭 확인해주세요!</span>
+                <ul class="small m-0 ps-3 text-muted" style="line-height: 1.8;">
+                    <li>취소 신청은 관리자 확인 후 1~2일 내에 순차적으로 처리됩니다.</li>
+                    <li>상품이 이미 발송된 경우, 취소 신청이 거부될 수 있으며 반품 절차로 진행될 수 있습니다.</li>
+                    <li>포인트나 쿠폰은 취소 완료 시점에 복구됩니다.</li>
+                </ul>
+            </div>
+
+            <div class="btn-group-paws">
+                <button type="button" class="btn-paws-back" onclick="history.back()">돌아가기</button>
+                <button type="button" class="btn-paws-submit" onclick="validateAndConfirm()">취소 신청하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+/* 모달 제어 함수 */
+function openPawsModal(msg, confirmCallback) {
+    const modal = document.getElementById('pawsModal');
+    document.getElementById('modalMessage').innerText = msg;
+    const btnContainer = document.getElementById('modalButtons');
+    btnContainer.innerHTML = '';
+
+    if (confirmCallback) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'p-btn p-btn-cancel';
+        cancelBtn.innerText = '아니오';
+        cancelBtn.onclick = () => modal.style.display = 'none';
+
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'p-btn p-btn-confirm';
+        confirmBtn.innerText = '네, 신청합니다';
+        confirmBtn.onclick = () => {
+            modal.style.display = 'none';
+            confirmCallback();
+        };
+
+        btnContainer.appendChild(cancelBtn);
+        btnContainer.appendChild(confirmBtn);
+    } else {
+        const okBtn = document.createElement('button');
+        okBtn.className = 'p-btn p-btn-confirm';
+        okBtn.innerText = '확인';
+        okBtn.onclick = () => modal.style.display = 'none';
+        btnContainer.appendChild(okBtn);
+    }
+    modal.style.display = 'flex';
+}
+
+/* 유효성 검사 및 모달 실행 */
+function validateAndConfirm() {
+    const reason = document.getElementById('cancelReason').value;
+    
+    if(!reason) {
+        openPawsModal("취소 사유를 선택해주세요! 🐾");
+        return;
+    }
+
+    openPawsModal("정말로 주문을 취소하시겠습니까?\n관리자 확인 후 결제가 취소됩니다.", function() {
+        document.getElementById('cancelForm').submit();
+    });
+}
+</script>
+
+</body>
+</div>
+</html>

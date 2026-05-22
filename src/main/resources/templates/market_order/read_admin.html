@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout}">
+<div layout:fragment="content">
+    <!-- Daum Postcode Service -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <style>
+        :root {
+            --paws-pink: #ffb6c1;
+            --paws-main-pink: #ff6b81;
+            --paws-bg-pink: #fff8f9;
+            --paws-border-pink: #ffeff1;
+            --paws-orange: #ff914d;
+            --paws-blue: #448aff;
+            --paws-dark: #2d3436;
+        }
+
+        .admin-container { max-width: 1150px; margin: 60px auto 100px auto; padding: 0 20px; font-family: 'Pretendard', sans-serif; }
+        
+        /* 헤더 섹션 */
+        .page-header { background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 30px; }
+        .breadcrumb-item a { color: var(--paws-pink); font-weight: 500; }
+        .order-id-tag { background: var(--paws-bg-pink); color: var(--paws-main-pink); padding: 4px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; }
+
+        /* 카드 공통 스타일 */
+        .card { border-radius: 20px; border: none; box-shadow: 0 5px 25px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 25px; }
+        .card-header { background-color: #fff; border-bottom: 1px solid var(--paws-border-pink); padding: 20px 25px; }
+        .card-header h5 { color: var(--paws-dark); font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px; }
+
+        /* 상태별 알림 박스 (취소/반품 전용) */
+        .cs-alert-card { border-left: 6px solid; }
+        .cs-alert-cancel { background-color: #fffaf0; border-left-color: var(--paws-orange); }
+        .cs-alert-return { background-color: #f0f7ff; border-left-color: var(--paws-blue); }
+        .reason-box { background: rgba(255, 255, 255, 0.7); border-radius: 12px; border: 1px dashed #ccc; padding: 15px; }
+
+        /* 테이블 디자인 */
+        .table { margin-bottom: 0; }
+        .table th { background-color: var(--paws-bg-pink); color: #777; font-weight: 600; padding: 18px 25px; width: 28%; border-right: 1px solid var(--paws-border-pink); }
+        .table td { padding: 18px 25px; color: var(--paws-dark); }
+
+        /* 배지 커스텀 */
+        .badge-paws { padding: 6px 14px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; display: inline-block; }
+        .bg-paid { background: #e7f1ff; color: #0d6efd; }
+        .bg-shipped { background: #fff4e6; color: #fd7e14; }
+        .bg-delivered { background: #e6fcf5; color: #20c997; }
+        .bg-req { background: #fff5f5; color: #fa526a; border: 1px solid #ffccd5; }
+
+        /* 버튼 커스텀 */
+        .btn-paws-main { background: var(--paws-main-pink); color: #fff; border: none; border-radius: 12px; font-weight: 700; padding: 10px 20px; transition: 0.3s; }
+        .btn-paws-main:hover { background: #fa526a; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 129, 0.3); color: #fff; }
+        .btn-paws-outline { border: 2px solid var(--paws-pink); color: var(--paws-main-pink); background: transparent; border-radius: 12px; font-weight: 700; transition: 0.2s; }
+        .btn-paws-outline:hover { background: var(--paws-pink); color: white; }
+
+        /* 상품 리스트 */
+        .product-scroll { max-height: 480px; overflow-y: auto; scrollbar-width: thin; }
+        .product-item { padding: 20px; transition: background 0.2s; border-bottom: 1px solid #f1f1f1; }
+        .product-item:hover { background-color: var(--paws-bg-pink); }
+        .img-placeholder { width: 55px; height: 55px; background: #eee; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+        .sticky-top { top: 100px !important; }
+    </style>
+
+    <div class="admin-container">
+        <!-- 상단 헤더 섹션 -->
+        <div class="page-header d-flex justify-content-between align-items-end">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item"><a href="/market_order/admin_list.do">Admin Home</a></li>
+                        <li class="breadcrumb-item active">주문 상세 관리</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold m-0 text-dark">주문 내역 상세 <span class="order-id-tag ms-2">[[${orderVO.order_id}]]</span></h2>
+            </div>
+            <button class="btn btn-light border fw-bold px-4" onclick="history.back()" style="border-radius: 12px;">
+                <i class="bi bi-arrow-left me-2"></i>목록으로 돌아가기
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <!-- 왼쪽: 주문 정보 및 배송지 -->
+            <div class="col-lg-7">
+                
+                <!-- [특수] 취소/반품 요청 섹션 -->
+                <div class="card cs-alert-card border-0 shadow-sm" 
+                     th:if="${orderVO.order_status.contains('CANCEL') or orderVO.order_status.contains('RETURN')}"
+                     th:classappend="${orderVO.order_status.contains('CANCEL') ? 'cs-alert-cancel' : 'cs-alert-return'}">
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="fw-bold m-0 d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2" th:classappend="${orderVO.order_status.contains('CANCEL') ? 'text-warning' : 'text-primary'}"></i>
+                                [[${orderVO.order_status.contains('CANCEL') ? '주문 취소 요청' : '반품 접수 정보'}]]
+                            </h5>
+                            <span class="badge bg-dark rounded-pill" th:if="${orderVO.order_status.endsWith('DONE')}">처리 완료됨</span>
+                        </div>
+
+                        <div class="reason-box mb-3">
+                            <p class="mb-1 text-muted small">신청 사유: <strong class="text-dark">[[${orderVO.reason}]]</strong></p>
+                            <p class="mb-0 text-dark">[[${orderVO.reason_detail}]]</p>
+                        </div>
+
+                        <!-- CS 처리 버튼 그룹 -->
+                        <div class="d-flex gap-2" th:if="${orderVO.order_status.endsWith('REQC')}">
+                            <th:block th:if="${orderVO.order_status == 'CANCEL_REQC'}">
+                                <button class="btn btn-paws-main px-4" th:onclick="processReturn([[${orderVO.order_id}]], 'CANCEL_DONE')">취소 승인하기</button>
+                                <button class="btn btn-outline-secondary bg-white px-4" th:onclick="processReturn([[${orderVO.order_id}]], 'PAID')">요청 거부</button>
+                            </th:block>
+
+                            <th:block th:if="${orderVO.order_status == 'RETURN_REQC'}">
+                                <div class="bg-white border rounded-3 px-3 d-flex align-items-center me-2">
+                                    <input class="form-check-input me-2" type="checkbox" id="restoreStock" checked>
+                                    <label class="form-check-label small fw-bold" for="restoreStock">판매가능(재고복구)</label>
+                                </div>
+                                <button class="btn btn-primary fw-bold px-4" style="border-radius: 12px;" th:onclick="processReturn([[${orderVO.order_id}]], 'RETURN_DONE')">반품 입고 승인</button>
+                                <button class="btn btn-outline-secondary bg-white px-4" th:onclick="processReturn([[${orderVO.order_id}]], 'DELIVERED')">반품 거부</button>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 기본 정보 카드 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-file-earmark-text text-muted"></i> 주문 기본 정보</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table align-middle">
+                            <tbody>
+                                <tr>
+                                    <th>현재 주문 상태</th>
+                                    <td>
+                                        <span th:if="${orderVO.order_status == 'PAID'}" class="badge-paws bg-paid">결제 완료</span>
+                                        <span th:if="${orderVO.order_status == 'SHIPPED'}" class="badge-paws bg-shipped">배송 중</span>
+                                        <span th:if="${orderVO.order_status == 'DELIVERED'}" class="badge-paws bg-delivered">배송 완료</span>
+                                        <span th:if="${orderVO.order_status.endsWith('REQC')}" class="badge-paws bg-req">⚠️ [[${orderVO.order_status}]]</span>
+                                        <span th:if="${orderVO.order_status.endsWith('DONE')}" class="badge-paws bg-light text-muted border">처리 완료</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>주문자 정보</th>
+                                    <td><span class="fw-bold text-primary">[[${orderVO.user_id}]]</span> <small class="text-muted ms-2">님</small></td>
+                                </tr>
+                                <tr>
+                                    <th>주문 일시</th>
+                                    <td class="text-muted">[[${orderVO.order_date}]]</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 배송지 정보 카드 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="bi bi-geo-alt text-muted"></i> 수령인 및 배송지</h5>
+                        <div id="addr-btn-group">
+                            <button type="button" id="btn-edit" class="btn btn-sm btn-paws-outline px-3" onclick="toggleEditMode(true)">수정 모드</button>
+                            <button type="button" id="btn-save" class="btn btn-sm btn-success d-none px-3" onclick="saveAddress()">저장</button>
+                            <button type="button" id="btn-cancel" class="btn btn-sm btn-outline-secondary d-none ms-1 px-3" onclick="toggleEditMode(false)">취소</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <form id="addressForm">
+                            <input type="hidden" name="order_id" th:value="${orderVO.order_id}">
+                            <table class="table align-middle">
+                                <tbody>
+                                    <tr>
+                                        <th>받는 사람</th>
+                                        <td>
+                                            <div class="view-mode fw-bold">[[${orderVO.receiver_name}]] <span class="text-muted fw-normal ms-2">([[${orderVO.receiver_tel}]])</span></div>
+                                            <div class="edit-mode d-none row g-2">
+                                                <div class="col-6"><input type="text" name="receiver_name" class="form-control" th:value="${orderVO.receiver_name}" placeholder="이름"></div>
+                                                <div class="col-6"><input type="text" name="receiver_tel" class="form-control" th:value="${orderVO.receiver_tel}" placeholder="연락처"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>배송 주소</th>
+                                        <td>
+                                            <div class="view-mode">
+                                                <div class="mb-1"><span class="badge bg-light text-dark border">[[${orderVO.zipcode}]]</span></div>
+                                                <div>[[${orderVO.address1}]]</div>
+                                                <div class="text-muted small">[[${orderVO.address2}]]</div>
+                                            </div>
+                                            <div class="edit-mode d-none">
+                                                <div class="d-flex gap-2 mb-2">
+                                                    <input type="text" id="zipcode" name="zipcode" class="form-control w-25" th:value="${orderVO.zipcode}" readonly>
+                                                    <button type="button" class="btn btn-dark btn-sm px-3" onclick="daumPostcode()">주소 검색</button>
+                                                </div>
+                                                <input type="text" id="address1" name="address1" class="form-control mb-2" th:value="${orderVO.address1}" readonly>
+                                                <input type="text" id="address2" name="address2" class="form-control" th:value="${orderVO.address2}" placeholder="상세주소">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 상품 내역 및 결제 금액 -->
+            <div class="col-lg-5">
+                <div class="card sticky-top border-0 shadow">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="m-0 text-white"><i class="bi bi-box-seam me-2"></i>주문 상품 목록 <span class="badge bg-secondary ms-2">[[${#lists.size(item_list)}]]</span></h5>
+                    </div>
+                    <div class="product-scroll">
+                        <div th:each="item : ${item_list}" class="product-item">
+                            <div class="d-flex align-items-center">
+                                <div class="img-placeholder me-3"><i class="bi bi-image text-light"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark mb-1">[[${item.product_name}]]</div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">[[${item.quantity}]]개 x [[${#numbers.formatInteger(item.price, 0, 'COMMA')}]]원</small>
+                                        <span class="fw-bold">[[${#numbers.formatInteger(item.total_price, 0, 'COMMA')}]]원</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer p-4 bg-light border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">배송비 합계</span>
+                            <span class="fw-bold text-dark">0원</span> <!-- 필요시 orderVO.delivery_fee 추가 -->
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">최종 결제 금액</h5>
+                            <h3 class="fw-bold text-danger mb-0">[[${#numbers.formatInteger(orderVO.total_price, 0, 'COMMA')}]]원</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Scripts -->
+    <script th:inline="javascript">
+        function processReturn(orderId, status) {
+            let msg = "해당 주문의 상태를 변경하시겠습니까?";
+            let restoreStock = 'Y';
+            
+            if(status === 'RETURN_DONE') {
+                const restoreCheckbox = document.getElementById('restoreStock');
+                restoreStock = (restoreCheckbox && restoreCheckbox.checked) ? 'Y' : 'N';
+                msg = (restoreStock === 'Y') ? "반품 승인 및 재고를 복구하시겠습니까?" : "⚠️재고 복구 없이 반품 완료 처리하시겠습니까?";
+            }
+
+            if(!confirm(msg)) return;
+
+            fetch('/market_order/update_status.do', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    order_id: orderId, 
+                    order_status: status,
+                    restore_stock: restoreStock 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.res === "success") {
+                    alert("성공적으로 처리되었습니다.");
+                    location.reload();
+                } else { alert("처리 도중 오류가 발생했습니다."); }
+            });
+        }
+
+        function toggleEditMode(isEdit) {
+            const viewModes = document.querySelectorAll('.view-mode');
+            const editModes = document.querySelectorAll('.edit-mode');
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+            const btnCancel = document.getElementById('btn-cancel');
+
+            if (isEdit) {
+                viewModes.forEach(el => el.classList.add('d-none'));
+                editModes.forEach(el => el.classList.remove('d-none'));
+                btnEdit.classList.add('d-none'); btnSave.classList.remove('d-none'); btnCancel.classList.remove('d-none');
+            } else {
+                viewModes.forEach(el => el.classList.remove('d-none'));
+                editModes.forEach(el => el.classList.add('d-none'));
+                btnEdit.classList.remove('d-none'); btnSave.classList.add('d-none'); btnCancel.classList.add('d-none');
+            }
+        }
+
+        function daumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                    document.getElementById('zipcode').value = data.zonecode;
+                    document.getElementById("address1").value = addr;
+                    document.getElementById("address2").focus();
+                }
+            }).open();
+        }
+
+        function saveAddress() {
+            if(!confirm("수정된 배송지 정보를 저장하시겠습니까?")) return;
+            const form = document.getElementById('addressForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/market_order/update_address.do', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.res === "success") {
+                    alert("배송지가 수정되었습니다.");
+                    location.reload();
+                } else { alert("수정에 실패했습니다."); }
+            });
+        }
+    </script>
+</div>
+</html>

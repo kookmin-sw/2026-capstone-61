@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.attachfile.AttachfileDAOInter">
+
+  <insert id="create" parameterType="dev.mvc.attachfile.AttachfileVO">
+    INSERT INTO attachfile(attachfileno, communityno, fname, fupname, thumb, fsize, rdate, is_dog)
+    VALUES(attachfile_seq.nextval, #{communityno}, #{fname}, #{fupname}, #{thumb}, #{fsize}, sysdate, 'N')
+  </insert>
+
+  <select id="list_by_communityno" resultType="dev.mvc.attachfile.AttachfileVO" parameterType="int">
+    SELECT attachfileno, communityno, fname, fupname, thumb, fsize, rdate, is_dog
+    FROM attachfile
+    WHERE communityno = #{communityno}
+    ORDER BY attachfileno ASC
+  </select>
+
+  <update id="update_is_dog" parameterType="HashMap">
+    UPDATE attachfile
+    SET is_dog = #{is_dog}
+    WHERE attachfileno = #{attachfileno}
+  </update>
+
+  <select id="read_thumb_dog" resultType="dev.mvc.attachfile.AttachfileVO" parameterType="int">
+    SELECT attachfileno, communityno, thumb, is_dog
+    FROM (
+        SELECT attachfileno, communityno, thumb, is_dog,
+               ROW_NUMBER() OVER (PARTITION BY communityno ORDER BY attachfileno ASC) as rn
+        FROM attachfile
+        WHERE communityno = #{communityno} AND is_dog = 'Y'
+    ) WHERE rn = 1
+  </select>
+
+  <delete id="delete" parameterType="int">
+    DELETE FROM attachfile
+    WHERE attachfileno = #{attachfileno}
+  </delete>
+  
+  <delete id="delete_by_communityno" parameterType="int">
+    DELETE FROM attachfile
+    WHERE communityno = #{communityno}
+  </delete>
+
+</mapper>

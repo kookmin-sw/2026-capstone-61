@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+<div layout:fragment="content">
+<head>
+    <meta charset="UTF-8">
+    <title>Paws Market - 상품 목록</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* 전체 기본 글꼴 축소 (기본 16px -> 14px 기반으로 변경) */
+        body { font-size: 14px; }
+        .container { margin: 45px auto 80px auto; max-width: 1200px; padding: 0 15px; }
+        
+        /* 1. 헤더 영역 */
+        .header-area { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            border-bottom: 2px solid #f8f8f8;
+            padding-bottom: 15px;
+            gap: 15px;
+            flex-wrap: wrap; /* 모바일에서 아래로 떨어지도록 허용 */
+        }
+        
+        .title-box { display: flex; align-items: center; }
+        .title { color: #ff914d; font-size: 20px; font-weight: 800; margin: 0; white-space: nowrap; cursor: pointer; }
+        
+        .header-search { flex: 2; max-width: 400px; order: 2; }
+        .search-form {
+            display: flex;
+            border: 2px solid #ff914d;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 36px;
+            background: #fff;
+        }
+        .search-input { flex: 1; padding: 0 12px; border: none; outline: none; font-size: 13px; }
+        .search-btn { background: #ff914d; color: white; border: none; padding: 0 15px; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        .search-btn:hover { background: #e8803d; }
+
+        .header-btns-wrapper { display: flex; justify-content: flex-end; order: 3; }
+        .header-btns { display: flex; gap: 8px; align-items: center; }
+        
+        /* 버튼 공통 스타일 */
+        .btn-head-outline {
+            padding: 0 12px; height: 34px; display: flex; align-items: center; gap: 5px;
+            background-color: #fff; color: #ff914d !important;
+            border: 2px solid #ff914d; border-radius: 25px; text-decoration: none; 
+            font-size: 12px; font-weight: bold; transition: 0.2s;
+        }
+        .btn-head-outline:hover { background-color: #fffaf7; transform: translateY(-2px); }
+
+        .btn-create {
+            padding: 0 14px; height: 34px; line-height: 34px;
+            background-color: #ff914d; color: white !important;
+            border-radius: 25px; text-decoration: none; font-size: 12px; font-weight: bold;
+            box-shadow: 0 2px 0 #e8803d; transition: 0.1s;
+        }
+        .btn-create:active { transform: translateY(2px); box-shadow: 0 1px 0 #e8803d; }
+
+        /* 2. 카테고리 필터 */
+        .category-filter { display: flex; gap: 6px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+        .category-btn {
+            padding: 6px 14px; border: 1px solid #eee; border-radius: 25px;
+            background: #fff; color: #777; text-decoration: none; font-size: 12px; transition: 0.2s;
+        }
+        .category-btn.active { background: #ff914d; color: #fff; border-color: #ff914d; font-weight: bold; }
+
+        /* 3. 상품 그리드 */
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 15px; 
+        }
+
+        .product-card { 
+            background: #fff; border-radius: 16px; overflow: hidden; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: 0.3s; 
+            text-decoration: none; color: inherit; display: flex; flex-direction: column; border: 1px solid #f5f5f5;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); }
+
+        .image-box { width: 100%; height: 160px; background: #fafafa; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+
+        .info-box { padding: 12px; flex-grow: 1; }
+        .category-tag { font-size: 9px; color: #ff914d; font-weight: bold; margin-bottom: 4px; }
+        .product-name { font-size: 12px; font-weight: 700; height: 36px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.5; }
+        .price-area { margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .price { font-size: 14px; font-weight: 800; }
+        
+        .status-badge { font-size: 9px; padding: 1px 6px; border-radius: 20px; font-weight: bold; }
+        .on-sale { background: #e8f5e9; color: #2e7d32; }
+        .sold-out { background: #fef2f2; color: #ef4444; }
+
+        /* 4. 모달 커스텀 */
+        .modal-content { border-radius: 20px; border: none; }
+        #alertIcon { font-size: 40px; margin-bottom: 10px; display: inline-block; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .btn-modal-confirm { background: #333; color: white; border: none; padding: 10px; border-radius: 12px; width: 100%; margin-top: 15px; font-weight: bold; font-size: 13px; cursor: pointer; }
+
+        /* 📱 모바일 환경 전용 미디어 쿼리 (768px 이하) */
+        @media (max-width: 768px) {
+            .container { margin: 45px auto 60px auto; }
+            
+            /* 타이틀과 버튼들을 첫 줄에 나란히 배치 */
+            .title-box { order: 1; flex: unset; }
+            .title { font-size: 18px; }
+            
+            .header-btns-wrapper { order: 2; flex: 1; justify-content: flex-end; }
+            
+            /* 검색 폼을 다음 줄(아래)로 독립 배치 */
+            .header-search { order: 3; flex: none; width: 100%; max-width: 100%; margin-top: 5px; }
+            
+            /* 버튼 텍스트 숨기고 아이콘만 남겨서 간결하게 구성 */
+            .btn-head-outline { padding: 0 10px; height: 32px; font-size: 14px; } /* 아이콘 크기 확보 */
+            .btn-head-outline span { display: none; } /* '주문 내역', '장바구니' 텍스트 숨김 */
+            .btn-create { padding: 0 12px; height: 32px; line-height: 32px; font-size: 11px; }
+
+            /* 모바일 글꼴 및 그리드 추가 축소 */
+            .category-btn { padding: 5px 12px; font-size: 11px; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } /* 모바일은 무조건 2열 배치 */
+            .image-box { height: 140px; }
+            .product-name { font-size: 11px; height: 34px; }
+            .price { font-size: 13px; }
+            
+            /* 모바일 모달 중앙정렬 방어 */
+            .modal-dialog-centered {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 auto !important;
+                width: 90% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 헤더 영역 -->
+    <div class="header-area">
+        <!-- 상단 좌측: 타이틀 -->
+        <div class="title-box">
+            <h2 class="title" th:onclick="|location.href='@{/market/list.do}'|">🐾 Paws Market</h2>
+        </div>
+
+        <!-- 상단 우측: 버튼 배치 (모바일에서 order 설정을 통해 우측 정렬) -->
+        <div class="header-btns-wrapper">
+            <div class="header-btns">
+                <!-- 주문 내역 버튼 -->
+                <a href="javascript:void(0);" onclick="checkLoginOrder()" class="btn-head-outline" title="주문 내역">
+                    <i class="bi bi-receipt"></i> <span>주문 내역</span>
+                </a>
+                <!-- 장바구니 버튼 -->
+                <a href="javascript:void(0);" onclick="checkLoginCart()" class="btn-head-outline" title="장바구니">
+                    <i class="bi bi-cart3"></i> <span>장바구니</span>
+                </a>
+                <!-- 관리자 등록 버튼 -->
+                <a th:if="${session.grade == 'admin'}" th:href="@{/market/create.do}" class="btn-create">등록</a>
+            </div>
+        </div>
+
+        <!-- 하단 전체: 검색창 (모바일에서 100% 가로폭 차지하며 아래로 이동) -->
+        <div class="header-search">
+            <form th:action="@{/market/list.do}" method="get" class="search-form">
+                <input type="hidden" name="className" th:value="${param.className}">
+                <input type="text" name="word" class="search-input" placeholder="우리 아이를 위한 선물 검색" th:value="${param.word}">
+                <button type="submit" class="search-btn"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 카테고리 필터 -->
+    <div class="category-filter">
+        <a th:href="@{/market/list.do}" class="category-btn" th:classappend="${param.className == null || param.className == ''} ? 'active'">전체보기</a>
+        <a th:href="@{/market/list.do(className='사료')}" class="category-btn" th:classappend="${param.className == '사료'} ? 'active'">사료</a>
+        <a th:href="@{/market/list.do(className='간식')}" class="category-btn" th:classappend="${param.className == '간식'} ? 'active'">간식</a>
+        <a th:href="@{/market/list.do(className='장난감')}" class="category-btn" th:classappend="${param.className == '장난감'} ? 'active'">장난감</a>
+        <a th:href="@{/market/list.do(className='의류')}" class="category-btn" th:classappend="${param.className == '의류'} ? 'active'">의류</a>
+        <a th:href="@{/market/list.do(className='위생')}" class="category-btn" th:classappend="${param.className == '위생'} ? 'active'">위생</a>
+    </div>
+
+    <!-- 상품 그리드 -->
+    <div class="product-grid">
+        <div th:each="vo : ${list}" class="product-card">
+            <a th:href="@{/market/read.do(productId=${vo.productId})}" style="text-decoration: none; color: inherit;">
+                <div class="image-box">
+                    <img th:if="${vo.thumbnailName != null && vo.thumbnailName != ''}" th:src="@{|/product/storage/${vo.thumbnailName}|}" class="product-img">
+                    <i th:unless="${vo.thumbnailName != null && vo.thumbnailName != ''}" class="bi bi-image" style="font-size: 30px; color: #eee;"></i>
+                </div>
+                <div class="info-box">
+                    <div class="category-tag" th:text="${vo.className}">분류</div>
+                    <div class="product-name" th:text="${vo.productName}">상품명</div>
+                    <div class="price-area">
+                        <span class="price" th:text="${#numbers.formatInteger(vo.price, 0, 'COMMA')} + '원'"></span>
+                        <div class="status-badge" th:classappend="${vo.productStatus == 'ON_SALE' && vo.stock > 0} ? 'on-sale' : 'sold-out'"
+                             th:text="${vo.productStatus == 'ON_SALE' && vo.stock > 0 ? '판매중' : '품절'}"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 알림용 모달 -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 300px;">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div id="alertIcon">🔑</div>
+                <h5 id="alertTitle" class="fw-bold mb-2" style="font-size: 15px;">알림</h5>
+                <p id="alertMessage" class="mb-0" style="font-size: 12px; color: #666;"></p>
+                <!-- id="btnModalConfirm" 추가 및 기존 data-bs-dismiss 제거 (JS에서 핸들링) -->
+                <button type="button" id="btnModalConfirm" class="btn-modal-confirm">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let alertModal;
+    let isLoginRequired = false; // 로그인 필요 여부를 저장하는 플래그 변수
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const modalElement = document.getElementById('alertModal');
+        if (modalElement) {
+            alertModal = new bootstrap.Modal(modalElement);
+        }
+
+        // 모달의 확인 버튼에 이벤트 핸들러 바인딩
+        const confirmBtn = document.getElementById('btnModalConfirm');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                if (isLoginRequired) {
+                    // 실제 프로젝트의 로그인 폼 주소로 변경하여 사용하세요.
+                    location.href = '/member/login'; 
+                } else {
+                    alertModal.hide(); // 일반 안내 모달인 경우 단순히 닫기
+                }
+            });
+        }
+    });
+
+    const currentMemberId = /*[[${session.memberno}]]*/ null;
+
+    function checkLoginCart() {
+        if (!currentMemberId) {
+            isLoginRequired = true; // 로그인 유도 상태 설정
+            showModal('로그인이 필요해요', '장바구니를 확인하시려면<br>먼저 로그인을 해주세요! 🐾', '🔑');
+        } else {
+            location.href = '/market_cart/list.do?memberno=' + currentMemberId;
+        }
+    }
+
+    function checkLoginOrder() {
+        if (!currentMemberId) {
+            isLoginRequired = true; // 로그인 유도 상태 설정
+            showModal('로그인이 필요해요', '주문 내역을 확인하시려면<br>먼저 로그인을 해주세요! 🐾', '📦');
+        } else {
+            location.href = '/market_order/list_by_memberno.do?memberno=' + currentMemberId;
+        }
+    }
+
+    function showModal(title, message, icon) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertMessage').innerHTML = message;
+        document.getElementById('alertIcon').innerText = icon;
+        alertModal.show();
+    }
+</script>
+
+</body>
+</div>
+</html>

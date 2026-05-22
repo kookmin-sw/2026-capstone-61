@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}">
+<div layout:fragment="content">
+  <div class="container" style="text-align: center; margin-top: 100px;">
+    
+    <!-- 1. 성공 -->
+    <div th:if="${code == 'create_success'}">
+      <h3 class="alert alert-success">리뷰가 성공적으로 등록되었습니다.</h3>
+      <p>소중한 의견 감사합니다.</p>
+    </div>
+
+    <!-- 2. 중복 리뷰 -->
+    <div th:if="${code == 'duplicate_review'}">
+      <h3 class="alert alert-warning">이미 리뷰를 작성하셨습니다.</h3>
+      <p>동일한 매칭에는 한 번만 리뷰 작성이 가능합니다.</p>
+    </div>
+
+    <!-- 3. 로그인 필요 -->
+    <div th:if="${code == 'login_required'}">
+      <h3 class="alert alert-danger">로그인이 필요한 서비스입니다.</h3>
+      <br>
+      <a href="/member/login" class="btn btn-primary">로그인 하러가기</a>
+    </div>
+
+    <!-- 4. 실패 -->
+    <div th:if="${code == 'create_fail'}">
+      <h3 class="alert alert-danger">리뷰 등록에 실패했습니다.</h3>
+      <p>잠시 후 다시 시도해 주세요.</p>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <button type="button" onclick="location.href='/match_post/list_all.do'" class="btn btn-outline-secondary">확인</button>
+    </div>
+  </div>
+</div>
+</html>

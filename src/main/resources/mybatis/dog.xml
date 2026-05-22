@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.dog.DogDAOInter">
+
+    <insert id="create" parameterType="dev.mvc.dog.DogVO">
+        INSERT INTO dog (
+            DOGNO, MEMBERNO, NAME, BREED, AGE, GENDER, 
+            FILE1, FILE1SAVED, THUMB1, SIZE1, DBTI_TYPE, RDATE
+        ) VALUES (
+            DOG_SEQ.NEXTVAL, #{memberno}, #{name}, #{breed}, #{age}, #{gender}, 
+            #{file1}, #{file1saved}, #{thumb1}, #{size1}, #{dbti_type}, SYSDATE
+        )
+    </insert>
+
+    <select id="list_by_memberno" resultType="dev.mvc.dog.DogVO" parameterType="int">
+        SELECT 
+            DOGNO, MEMBERNO, NAME, BREED, AGE, GENDER, 
+            FILE1, FILE1SAVED, THUMB1, SIZE1, DBTI_TYPE, RDATE
+        FROM dog
+        WHERE MEMBERNO = #{memberno}
+        ORDER BY DOGNO DESC
+    </select>
+	<select id="read" resultType="dev.mvc.dog.DogVO" parameterType="int">
+        SELECT 
+            DOGNO, MEMBERNO, NAME, BREED, AGE, GENDER, 
+            FILE1, FILE1SAVED, THUMB1, SIZE1, DBTI_TYPE, RDATE
+        FROM dog
+        WHERE DOGNO = #{dogno}
+    </select>
+    
+	<update id="update" parameterType="dev.mvc.dog.DogVO">
+	    UPDATE dog
+	    SET NAME = #{name},
+	        BREED = #{breed},
+	        AGE = #{age},
+	        GENDER = #{gender},
+	        FILE1 = #{file1},
+	        FILE1SAVED = #{file1saved},
+	        THUMB1 = #{thumb1},
+	        SIZE1 = #{size1}
+	    WHERE DOGNO = #{dogno}
+	</update>
+    <update id="updateDbtiType" parameterType="Map">
+        UPDATE dog
+        SET dbti_type = #{dbti_type}
+        WHERE dogno = #{dogno}
+    </update>
+    <delete id="delete" parameterType="int">
+        DELETE FROM dog
+        WHERE DOGNO = #{dogno}
+    </delete>
+</mapper>

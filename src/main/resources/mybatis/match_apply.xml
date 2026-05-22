@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dev.mvc.match_apply.MatchApplyDAOInter">
+
+  <!-- ===================================================== -->
+  <!-- 신청 등록 -->
+  <!-- ===================================================== -->
+  <insert id="create"
+          parameterType="dev.mvc.match_apply.MatchApplyVO">
+
+    INSERT INTO match_apply (
+      applyno,
+      matchno,
+      memberno,
+      dogno,
+      msg,
+      dmti,
+      apply_status,
+      success_yn,
+      review_written,
+      rdate
+    ) VALUES (
+      match_apply_seq.nextval,
+      #{matchno},
+      #{memberno},
+      #{dogno},
+      #{msg},
+      #{dmti},
+      1, -- 1: 신청대기
+      0,
+      0,
+      sysdate
+    )
+
+  </insert>
+<!-- ===================================================== -->
+<!-- 종료된 산책 통합 목록 -->
+<!-- ===================================================== -->
+<select id="completedList"
+        parameterType="int"
+        resultType="dev.mvc.match_apply.MatchApplyVO">
+
+  SELECT
+    a.*,
+
+    p.title,
+
+    TO_CHAR(
+      p.mdate,
+      'YYYY-MM-DD HH24:MI'
+    ) AS mdate,
+
+	p.memberno AS host_memberno,
+	
+	a.memberno AS applicant_memberno,
+	
+	applicant.nickname AS nickname,
+
+    d.dbti_type
+
+  FROM match_apply a
+
+  JOIN match_post p
+    ON a.matchno = p.matchno
+
+  JOIN member applicant
+    ON a.memberno = applicant.memberno
+
+  JOIN dog d
+    ON a.dogno = d.dogno
+
+  WHERE a.apply_status = 4
+
+  ORDER BY a.applyno DESC
+
+</select>
+
+  <!-- ===================================================== -->
+  <!-- 신청 상세 조회 -->
+  <!-- ===================================================== -->
+  <select id="read"
+          parameterType="int"
+          resultType="dev.mvc.match_apply.MatchApplyVO">
+
+    SELECT
+      a.*,
+
+      m.nickname,
+      m.id,
+
+      p.title,
+      TO_CHAR(p.mdate, 'YYYY-MM-DD HH24:MI') AS mdate,
+      p.mplace,
+      p.status,
+      p.memberno AS host_memberno,
+
+      d.name AS dog_name,
+      d.breed,
+      d.age,
+      d.gender,
+      d.file1,
+      d.file1saved,
+      d.thumb1,
+      d.dbti_type
+
+    FROM match_apply a
+
+    INNER JOIN member m
+      ON a.memberno = m.memberno
+
+    INNER JOIN match_post p
+      ON a.matchno = p.matchno
+
+    INNER JOIN dog d
+      ON a.dogno = d.dogno
+
+    WHERE a.applyno = #{applyno}
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 게시글별 신청 목록 -->
+  <!-- ===================================================== -->
+  <select id="list_by_matchno"
+          parameterType="int"
+          resultType="dev.mvc.match_apply.MatchApplyVO">
+
+    SELECT
+      a.*,
+
+      m.nickname,
+      m.id,
+
+      d.name AS dog_name,
+      d.breed,
+      d.age,
+      d.gender,
+      d.thumb1,
+      d.dbti_type
+
+    FROM match_apply a
+
+    INNER JOIN member m
+      ON a.memberno = m.memberno
+
+    INNER JOIN dog d
+      ON a.dogno = d.dogno
+
+    WHERE a.matchno = #{matchno}
+
+    ORDER BY a.applyno DESC
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 내가 신청한 목록 -->
+  <!-- ===================================================== -->
+  <select id="list_by_memberno"
+          parameterType="int"
+          resultType="dev.mvc.match_apply.MatchApplyVO">
+
+    SELECT
+      a.*,
+
+      p.title,
+      TO_CHAR(p.mdate, 'YYYY-MM-DD HH24:MI') AS mdate,
+      p.mplace,
+      p.status,
+
+      m.nickname AS host_nickname,
+
+      d.name AS dog_name,
+      d.breed,
+      d.age,
+      d.gender,
+      d.thumb1,
+      d.dbti_type
+
+    FROM match_apply a
+
+    INNER JOIN match_post p
+      ON a.matchno = p.matchno
+
+    INNER JOIN member m
+      ON p.memberno = m.memberno
+
+    INNER JOIN dog d
+      ON a.dogno = d.dogno
+
+    WHERE a.memberno = #{memberno}
+
+    ORDER BY a.applyno DESC
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 내가 받은 신청 -->
+  <!-- ===================================================== -->
+  <select id="list_by_author"
+          parameterType="int"
+          resultType="dev.mvc.match_apply.MatchApplyVO">
+
+    SELECT
+      a.*,
+
+      p.title,
+      TO_CHAR(p.mdate, 'YYYY-MM-DD HH24:MI') AS mdate,
+      p.mplace,
+      p.status,
+
+      m.nickname,
+      m.id,
+	  NVL(m.manner_temp, 36.5) AS manner_score,
+      d.name AS dog_name,
+      d.breed,
+      d.age,
+      d.gender,
+      d.thumb1,
+      d.dbti_type
+
+    FROM match_apply a
+
+    INNER JOIN match_post p
+      ON a.matchno = p.matchno
+
+    INNER JOIN member m
+      ON a.memberno = m.memberno
+
+    INNER JOIN dog d
+      ON a.dogno = d.dogno
+
+    WHERE p.memberno = #{memberno}
+
+    ORDER BY a.applyno DESC
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 상태 변경 -->
+  <!-- ===================================================== -->
+  <update id="update_status"
+          parameterType="java.util.HashMap">
+
+    UPDATE match_apply
+    SET apply_status = #{apply_status}
+    WHERE applyno = #{applyno}
+
+  </update>
+
+  <!-- ===================================================== -->
+  <!-- 산책 시작 -->
+  <!-- ===================================================== -->
+  <update id="startWalk"
+          parameterType="int">
+
+    UPDATE match_apply
+    SET apply_status = 3 -- 3: 산책중
+    WHERE applyno = #{applyno}
+
+  </update>
+
+  <!-- ===================================================== -->
+  <!-- 산책 완료 -->
+  <!-- ===================================================== -->
+  <update id="completeMatch"
+          parameterType="int">
+
+    UPDATE match_apply
+    SET
+      apply_status = 4, -- 4: 산책완료
+      complete_date = sysdate
+    WHERE applyno = #{applyno}
+
+  </update>
+
+  <!-- ===================================================== -->
+  <!-- 리뷰 작성 완료 -->
+  <!-- ===================================================== -->
+  <update id="update_review_written"
+          parameterType="int">
+
+    UPDATE match_apply
+    SET review_written = 1
+    WHERE applyno = #{applyno}
+
+  </update>
+
+  <!-- ===================================================== -->
+  <!-- 중복 신청 확인 -->
+  <!-- ===================================================== -->
+  <select id="check_duplicate"
+          parameterType="java.util.HashMap"
+          resultType="int">
+
+    SELECT COUNT(*)
+    FROM match_apply
+    WHERE matchno = #{matchno}
+      AND memberno = #{memberno}
+
+  </select>
+
+  <!-- ===================================================== -->
+  <!-- 신청 삭제 -->
+  <!-- ===================================================== -->
+  <delete id="delete"
+          parameterType="int">
+
+    DELETE FROM match_apply
+    WHERE applyno = #{applyno}
+
+  </delete>
+
+  <!-- ===================================================== -->
+  <!-- 매칭 수락 프로시저 -->
+  <!-- ===================================================== -->
+  <select id="acceptMatch"
+          parameterType="int"
+          statementType="CALLABLE">
+
+    { CALL proc_accept_match(#{applyno}) }
+
+  </select>
+  <!-- ===================================================== -->
+<!-- 약속 시간 도달 시 자동 산책 시작 -->
+<!-- ===================================================== -->
+<update id="auto_start_walk">
+
+  UPDATE match_apply a
+  SET apply_status = 3
+  WHERE apply_status = 2
+    AND EXISTS (
+      SELECT 1
+      FROM match_post p
+      WHERE p.matchno = a.matchno
+        AND p.mdate &lt;= SYSDATE
+    )
+
+</update>
+<!-- ===================================================== -->
+<!-- 매칭 거절 -->
+<!-- ===================================================== -->
+<update id="rejectMatch"
+        parameterType="int">
+
+  UPDATE match_apply
+  SET
+    apply_status = 5,
+    cancel_date = sysdate
+  WHERE applyno = #{applyno}
+
+</update>
+
+<!-- ===================================================== -->
+<!-- 매칭 취소 -->
+<!-- ===================================================== -->
+<update id="cancelMatch"
+        parameterType="dev.mvc.match_apply.MatchApplyVO">
+
+  UPDATE match_apply
+  SET
+    apply_status = 6,
+    cancel_date = sysdate,
+    cancel_reason = #{cancel_reason},
+    cancel_by = #{cancel_by}
+  WHERE applyno = #{applyno}
+
+</update>
+</mapper>

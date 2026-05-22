@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Paws - 매칭 상세보기</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <style>
+    /* 전체 컨테이너 */
+    .read-container {
+      max-width: 750px;
+      margin: 60px auto;
+      padding: 40px;
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+      border: 1px solid #f1f3f5;
+    }
+
+    /* 상단 헤더 */
+    .post-header {
+      border-bottom: 2px solid #f8f9fa;
+      padding-bottom: 25px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left { flex: 1; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-left: 15px;
+    }
+
+    .post-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #212529;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: #adb5bd;
+      font-size: 14px;
+    }
+
+    .meta-info i { margin-right: 4px; }
+
+    /* 이미지 섹션 */
+    .image-section { width: 100%; margin-bottom: 30px; }
+    .main-img-box {
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fdfdfd;
+      border: 1px solid #f1f3f5;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .post-img { width: 100%; max-height: 500px; object-fit: cover; display: block; }
+    .thumb-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .thumb-img {
+      width: 70px; height: 70px; object-fit: cover; cursor: pointer;
+      border-radius: 12px; opacity: 0.6; transition: 0.3s; border: 2px solid transparent;
+    }
+    .thumb-img:hover { opacity: 1; border-color: #ff6b81; transform: translateY(-3px); }
+    .no-image-box { padding: 60px 0; text-align: center; background: #f8f9fa; color: #adb5bd; border-radius: 20px; }
+
+    /* 정보 카드 그리드 */
+    .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+    .info-card {
+      background: #f8f9fa; border-radius: 16px; padding: 18px;
+      transition: 0.2s; border: 1px solid transparent;
+    }
+    .info-card:hover { border-color: #ffccd5; background: #fff; box-shadow: 0 5px 15px rgba(255,107,129,0.05); }
+    .info-label {
+      font-size: 13px; font-weight: 700; color: #ff6b81; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .info-value { font-size: 16px; font-weight: 600; color: #495057; }
+    .location-section { grid-column: span 2; }
+    .location-box { background: #ffffff; border: 1px solid #dee2e6; border-radius: 12px; padding: 15px; margin-top: 10px; }
+    .detail-loc {
+      display: block; margin-top: 8px; font-size: 14px; color: #fd7e14;
+      background: #fff4e6; padding: 6px 12px; border-radius: 8px;
+    }
+
+    /* 본문 */
+    .content-area { line-height: 1.8; font-size: 17px; color: #343a40; min-height: 150px; white-space: pre-wrap; padding: 10px 5px; }
+
+    /* 신청 영역 */
+    .apply-section {
+      background: #fff; border: 2px solid #ffccd5; border-radius: 20px;
+      padding: 30px; margin-top: 40px; position: relative;
+    }
+    .apply-section::before {
+      content: '🐾 Apply'; position: absolute; top: -14px; left: 20px;
+      background: #ff6b81; color: white; padding: 2px 14px; border-radius: 12px; font-size: 12px; font-weight: bold;
+    }
+    .apply-textarea { width: 100%; border: 1px solid #e9ecef; border-radius: 15px; padding: 15px; font-size: 15px; margin-bottom: 15px; }
+    .dog-preview-box { background: #fff0f3; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 5px solid #ff6b81; }
+
+    /* 댓글 영역 */
+    .comment-section { margin-top: 50px; }
+    .comment-write-box { background: #fff; border: 2px solid #ffd6de; border-radius: 20px; padding: 20px; }
+    .comment-textarea { width: 100%; border: 1px solid #e9ecef; border-radius: 16px; padding: 15px; resize: none; font-size: 15px; transition: 0.2s; }
+    .comment-textarea:focus { outline: none; border-color: #ff6b81; box-shadow: 0 0 0 0.2rem rgba(255,107,129,0.12); }
+    .btn-comment-write { margin-top: 15px; border: none; background: linear-gradient(135deg, #ff6b81 0%, #ff8fa3 100%); color: white; border-radius: 14px; padding: 11px 24px; font-weight: 700; transition: 0.2s; }
+    .btn-comment-write:hover { transform: translateY(-2px); }
+    .comment-login-box { background: #f8f9fa; border-radius: 18px; padding: 25px; text-align: center; color: #868e96; font-weight: 600; }
+    .comment-list { display: flex; flex-direction: column; gap: 18px; }
+    .comment-item { display: flex; gap: 15px; background: white; border: 1px solid #f1f3f5; border-radius: 22px; padding: 22px; transition: 0.2s; }
+    .comment-item:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
+    .profile-circle { width: 52px; height: 52px; border-radius: 50%; background: #fff0f3; display: flex; align-items: center; justify-content: center; color: #ff6b81; font-size: 22px; }
+    .comment-body { flex: 1; }
+    .comment-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .comment-user-info { display: flex; align-items: center; gap: 12px; }
+    .comment-nickname { font-weight: 800; color: #343a40; }
+    .comment-date { color: #adb5bd; font-size: 13px; }
+    .comment-content { color: #495057; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+    .comment-action { display: flex; gap: 8px; }
+    .comment-btn-edit, .comment-btn-delete { border: none; border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .comment-btn-edit { background: #fff0f3; color: #ff6b81; }
+    .comment-btn-delete { background: #f1f3f5; color: #495057; }
+    .comment-btn-edit:hover, .comment-btn-delete:hover { opacity: 0.7; }
+    .empty-comment { text-align: center; background: #f8f9fa; border-radius: 22px; padding: 45px 20px; color: #adb5bd; }
+
+    /* 하단 버튼 그룹 */
+    .bottom-btn-group { display: flex; gap: 12px; margin-top: 30px; justify-content: center; border-top: 1px solid #f1f3f5; padding-top: 30px; }
+    .btn-custom { padding: 12px 25px; border-radius: 12px; font-weight: 700; font-size: 15px; border: none; transition: 0.3s; cursor: pointer; text-decoration: none; text-align: center; }
+    .btn-list { background: #f1f3f5; color: #495057; min-width: 100px; }
+    .btn-edit { background: #ff6b81; color: #fff; min-width: 100px; }
+    .btn-delete { background: #fff0f3; color: #ff6b81; min-width: 100px; }
+    .btn-custom:hover { opacity: 0.8; transform: translateY(-2px); }
+
+    /* 모달 */
+    .modal-content { border-radius: 25px; border: none; }
+    .btn-modal-confirm { background: #ff6b81; color: white; border-radius: 12px; padding: 10px 20px; border: none; font-weight: bold; }
+
+/* 모바일 환경 최적화 */
+    @media (max-width: 576px) {
+      .read-container { 
+        margin: 50px 10px; /* 상하 여백 줄임 */
+        padding: 20px 15px; 
+        border-radius: 16px;
+      }
+      
+      /* --- 이미지 섹션 최적화 --- */
+      .post-img { 
+        max-height: 280px; /* 이미지 높이 제한하여 본문이 바로 보이게 조절 */
+        object-fit: cover; 
+      }
+      .main-img-box { margin-bottom: 12px; }
+      .thumb-img {
+        width: 55px; /* 썸네일 크기 축소 */
+        height: 55px;
+        border-radius: 8px;
+      }
+      .no-image-box { padding: 40px 0; }
+      .no-image-box i { font-size: 2.5rem !important; }
+
+      /* --- 제목 및 헤더 --- */
+      .post-title { font-size: 20px; margin-bottom: 10px; }
+      .meta-info { font-size: 12px; gap: 8px; flex-wrap: wrap; }
+      .status-badge { font-size: 11px; padding: 4px 10px; margin-top: 8px; }
+
+      /* --- 정보 카드: 한 줄에 2개씩 --- */
+      .info-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 10px; 
+      }
+      .info-card { padding: 12px 10px; }
+      .info-label { font-size: 11px; margin-bottom: 4px; }
+      .info-value { font-size: 13px; word-break: break-all; }
+      
+      /* 장소 섹션은 가독성을 위해 전체 너비 유지 */
+      .location-section { grid-column: span 2; }
+      .location-box { padding: 10px; }
+      .detail-loc { font-size: 12px; }
+
+      /* --- 본문 폰트 --- */
+      .content-area { font-size: 15px; line-height: 1.6; }
+
+      /* --- 신청 영역 내 강아지 이미지 --- */
+      #preview_img {
+        width: 60px !important;
+        height: 60px !important;
+      }
+
+      /* --- 하단 버튼 그룹: 가로 정렬 --- */
+      .bottom-btn-group { 
+        flex-direction: row; 
+        flex-wrap: nowrap; /* 버튼이 밖으로 나가지 않게 */
+        gap: 6px; 
+      }
+      .btn-custom { 
+        flex: 1; 
+        padding: 12px 0; 
+        font-size: 14px; 
+        min-width: 0; /* flex-item에서 최소너비 해제 */
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+  <div class="read-container">
+
+    <!-- 1. 헤더 영역 -->
+    <div class="post-header">
+      <div class="header-left">
+        <h1 class="post-title" th:text="${matchPostVO.title}">제목</h1>
+        <div class="meta-info">
+          <span><i class="bi bi-person-circle"></i><span th:text="${matchPostVO.nickname}">닉네임</span></span>
+          <span><i class="bi bi-calendar3"></i><span th:text="${matchPostVO.rdate.substring(0,10)}">날짜</span></span>
+          <span><i class="bi bi-eye"></i><span th:text="${matchPostVO.viewcnt}">0</span></span>
+        </div>
+      </div>
+      <div>
+        <span class="status-badge" th:if="${matchPostVO.status == 1}" style="background:#fff0f3;color:#ff6b81;border:1px solid #ffccd5;">● 모집중</span>
+        <span class="status-badge" th:if="${matchPostVO.status == 2}" style="background:#f1f3f5;color:#868e96;border:1px solid #e9ecef;">✓ 모집마감</span>
+        <span class="status-badge" th:if="${matchPostVO.status == 3}" style="background:#fff4e6;color:#fd7e14;border:1px solid #ffd8a8;">🐾 산책중</span>
+        <span class="status-badge" th:if="${matchPostVO.status == 4}" style="background:#f1f3f5;color:#495057;border:1px solid #dee2e6;">✔ 산책완료</span>
+      </div>
+    </div>
+
+    <!-- 2. 이미지 섹션 -->
+    <div class="image-section">
+      <div th:if="${images != null and images.length > 0 and images[0] != ''}">
+        <div class="main-img-box shadow-sm">
+          <img id="mainDisplayImg" class="post-img" th:src="@{|/match_post/storage/${images[0]}|}">
+        </div>
+        <div class="thumb-container" th:if="${images.length > 1}">
+          <div th:each="imgName : ${images}">
+            <img class="thumb-img shadow-sm" th:src="@{|/match_post/storage/${imgName}|}" th:onmouseover="|changeImg(this.src)|">
+          </div>
+        </div>
+      </div>
+      <div th:unless="${images != null and images.length > 0 and images[0] != ''}" class="no-image-box">
+        <i class="bi bi-camera" style="font-size:3.5rem; opacity:0.2;"></i>
+        <p class="mt-3 fw-bold" style="opacity:0.5;">등록된 사진이 없습니다 🐶</p>
+      </div>
+    </div>
+
+    <!-- 3. 상세 정보 그리드 -->
+    <div class="info-grid">
+      <div class="info-card">
+        <span class="info-label"><i class="bi bi-clock-fill"></i> 약속 시간</span>
+        <span class="info-value" th:text="${matchPostVO.mdate.length() >= 16 ? matchPostVO.mdate.substring(0,16) : matchPostVO.mdate}"></span>
+      </div>
+      <div class="info-card">
+        <span class="info-label"><i class="bi bi-clock-history"></i> 모집 마감</span>
+        <span class="info-value" th:text="${matchPostVO.close_date != null and matchPostVO.close_date.length() >= 16 ? matchPostVO.close_date.substring(0,16) : matchPostVO.close_date}"></span>
+      </div>
+      <div class="info-card">
+        <span class="info-label"><i class="bi bi-emoji-smile-fill"></i> 방장 강아지 성향</span>
+        <span class="info-value" th:text="${matchPostVO.dmti}">DMTI</span>
+      </div>
+      <div class="info-card">
+<span class="info-label">
+  <i class="bi bi-people-fill"></i>
+  현재 참여 인원
+</span>
+
+<span class="info-value">
+
+  <span th:text="${matchPostVO.current_member}">1</span>
+
+  /
+
+  <span th:text="${matchPostVO.max_member}">2</span>명 참여중
+
+</span>
+
+<!-- 모집 완료 표시 -->
+<div th:if="${matchPostVO.current_member >= matchPostVO.max_member}"
+     style="
+     margin-top:8px;
+     background:#fff0f3;
+     color:#ff6b81;
+     font-size:12px;
+     font-weight:700;
+     padding:6px 10px;
+     border-radius:10px;
+     text-align:center;">
+
+  🚫 모집 완료
+
+</div>
+      </div>
+      <div class="info-card">
+        <span class="info-label"><i class="bi bi-chat-dots-fill"></i> 댓글 수</span>
+        <span class="info-value" th:text="${matchPostVO.commentcnt}">0</span>
+      </div>
+      <div class="info-card">
+        <span class="info-label"><i class="bi bi-star-fill"></i> 매너 점수</span>
+        <span class="info-value">⭐ <span th:text="${#numbers.formatDecimal(matchPostVO.manner_score,1,1)}">0.0</span></span>
+      </div>
+      <div class="info-card location-section">
+        <span class="info-label"><i class="bi bi-geo-alt-fill"></i> 만날 장소</span>
+        <div class="location-box">
+          <span class="info-value" th:text="${matchPostVO.mplace}">장소명</span>
+          <span class="detail-loc" th:if="${matchPostVO.mplace_detail != null and matchPostVO.mplace_detail != ''}">
+            <i class="bi bi-arrow-return-right"></i> 상세: <span th:text="${matchPostVO.mplace_detail}">상세주소</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 본문 내용 -->
+    <div class="content-section">
+      <span class="info-label" style="margin-bottom:15px;"><i class="bi bi-chat-left-text-fill"></i> 상세 내용</span>
+      <div class="content-area" th:text="${matchPostVO.content}">내용이 들어갑니다.</div>
+    </div>
+
+    <!-- 5. 신청 영역 -->
+
+    <div class="apply-section" th:if="${session.memberno != null}">
+      <th:block th:if="${session.memberno != matchPostVO.memberno}">
+        <th:block th:if="${matchPostVO.status == 1 and matchPostVO.current_member < matchPostVO.max_member}">
+          
+          <!-- 반려견 등록 상태 검증 분기 -->
+          <div th:if="${#lists.isEmpty(dogList)}" class="alert alert-warning text-center rounded-4 mb-3">
+            🐾 등록된 반려견이 없습니다. <br>
+            <a href="/dog/create" class="alert-link fw-bold" style="color: #ff6b81; text-decoration: underline;">마이페이지에서 반려견을 먼저 등록해주세요!</a>
+          </div>
+
+          <div class="mb-3" th:unless="${#lists.isEmpty(dogList)}">
+            <label class="fw-bold mb-2" style="color:#ff6b81;"><i class="bi bi-heart-fill"></i> 함께 보낼 강아지 선택</label>
+            <!-- [수정] 주인의 매너점수를 data-my-score 속성에 함께 보존 -->
+            <select id="dogno" class="form-select" onchange="changeDogPreview()" th:data-my-score="${manner_score}">
+              <option value="">선택하세요</option>
+              <option th:each="dog : ${dogList}" th:value="${dog.dogno}"
+                      th:data-name="${dog.name}" th:data-breed="${dog.breed}"
+                      th:data-age="${dog.age}" th:data-gender="${dog.gender}"
+                      th:data-dbti="${dog.dbti_type}" th:data-thumb="${dog.thumb1}"
+                      th:text="|${dog.name} (${dog.breed})|">강아지명</option>
+            </select>
+          </div>
+          
+          <div id="dog_preview" class="dog-preview-box" style="display:none;">
+            <div class="d-flex align-items-center gap-3">
+              <img id="preview_img" src="" style="width:80px; height:80px; border-radius:15px; object-fit:cover; border:2px solid #fff;">
+              <div style="font-size:14px;">
+                <div><b>이름:</b> <span id="preview_name"></span></div>
+                <div><b>견종:</b> <span id="preview_breed"></span></div>
+                <div><b>나이:</b> <span id="preview_age"></span>살 (<span id="preview_gender"></span>)</div>
+                <div><b>DBTI:</b> <span id="preview_dbti" style="color:#ff6b81; font-weight:700;"></span></div>
+                <div><b>주인 매너점수:</b> ⭐ <span id="preview_manner" style="color:#fd7e14; font-weight:700;"></span>점</div>
+              </div>
+            </div>
+          </div>
+          
+          <textarea id="apply_msg" class="apply-textarea" rows="3" placeholder="방장님께 보낼 메시지를 입력하세요."></textarea>
+          
+          <!-- 반려견이 없으면 버튼 비활성화 처리 -->
+          <button type="button" class="btn-custom btn-edit w-100 shadow-sm" 
+                  th:disabled="${#lists.isEmpty(dogList)}"
+                  onclick="sendApply()">산책 매칭 신청하기 🐾</button>
+        </th:block>
+        <div th:if="${matchPostVO.status != 1}" class="alert alert-secondary text-center rounded-4 mb-0">이미 마감된 매칭입니다.</div>
+      </th:block>
+
+      <div th:if="${session.memberno == matchPostVO.memberno}" class="text-center p-2">
+        <p class="mb-3 fw-bold text-muted">방장님, 현재까지 들어온 신청을 확인해보세요!</p>
+        <button type="button" class="btn-custom btn-edit" th:onclick="|location.href='/match_apply/list_by_match?matchno=${matchPostVO.matchno}'|">신청 현황 확인하기</button>
+      </div>
+    </div>
+
+    <!-- 댓글 영역 -->
+    <div class="comment-section mt-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 class="fw-bold mb-0" style="color:#343a40;">
+          <i class="bi bi-chat-dots-fill" style="color:#ff6b81;"></i> 댓글
+          <span style="color:#ff6b81;" th:text="${commentList != null ? commentList.size() : 0}">0</span>
+        </h6>
+      </div>
+
+      <!-- 댓글 작성 -->
+      <div class="comment-write-box" th:if="${session.memberno != null}">
+        <textarea id="comment_content" class="comment-textarea" rows="3" placeholder="댓글을 입력해주세요 😊"></textarea>
+        <button type="button" class="btn-comment-write" onclick="sendComment()">작성</button>
+      </div>
+
+      <!-- 비로그인 알림 -->
+      <div class="comment-login-box" th:if="${session.memberno == null}">
+        로그인 후 댓글 작성이 가능합니다.
+      </div>
+
+      <!-- 댓글 목록 -->
+      <div class="comment-list mt-4">
+        <div class="comment-item" th:each="comment : ${commentList}">
+          <div class="comment-profile">
+            <div class="profile-circle"><i class="bi bi-person-fill"></i></div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-top">
+              <div class="comment-user-info">
+                <span class="comment-nickname" th:text="${comment.nickname}">닉네임</span>
+                <span class="comment-date" th:text="${comment.rdate}"></span>
+              </div>
+              <div class="comment-action" th:if="${session.memberno == comment.memberno}">
+                <button type="button" class="comment-btn-edit" th:onclick="editComment([[${comment.commentno}]], [[${comment.content}]])">수정</button>
+                <button type="button" class="comment-btn-delete" th:onclick="deleteComment([[${comment.commentno}]])">삭제</button>
+              </div>
+            </div>
+            <div class="comment-content" th:text="${comment.content}">댓글 내용</div>
+          </div>
+        </div>
+
+        <div class="empty-comment" th:if="${commentList == null || commentList.size() == 0}">
+          <i class="bi bi-chat-heart" style="font-size:2.5rem; opacity:0.3;"></i>
+          <p class="mt-3 mb-0">아직 댓글이 없습니다 🐶</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="bottom-btn-group">
+      <a th:href="@{/match_post/list_all}" class="btn-custom btn-list">목록</a>
+      <th:block th:if="${session.memberno == matchPostVO.memberno}">
+        <a th:href="@{|/match_post/update?matchno=${matchPostVO.matchno}|}" class="btn-custom btn-edit">수정</a>
+        <button type="button" class="btn-custom btn-delete" th:onclick="deletePost()">삭제</button>
+      </th:block>
+    </div>
+  </div>
+
+  <!-- 알림 모달 -->
+  <div class="modal fade" id="alertModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
+      <div class="modal-content">
+        <div class="modal-body text-center p-5">
+          <div id="alertIcon" class="mb-3" style="font-size:50px;">🐾</div>
+          <h5 id="alertTitle" class="fw-bold mb-2">알림</h5>
+          <p id="alertMessage" class="text-muted mb-4"></p>
+          <button type="button" class="btn-modal-confirm w-100" data-bs-dismiss="modal">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script th:inline="javascript">
+
+  let alertModal;
+
+  document.addEventListener("DOMContentLoaded", function() {
+
+    alertModal =
+      new bootstrap.Modal(
+        document.getElementById('alertModal')
+      );
+
+  });
+
+
+  /* =========================================================
+     알림 모달
+  ========================================================= */
+
+  function showAlert(title, message, icon) {
+
+    document.getElementById('alertTitle').innerText =
+      title;
+
+    document.getElementById('alertMessage').innerHTML =
+      message;
+
+    document.getElementById('alertIcon').innerText =
+      icon || '🐾';
+
+    alertModal.show();
+  }
+
+
+  /* =========================================================
+     메인 이미지 변경
+  ========================================================= */
+
+  function changeImg(src) {
+
+    document.getElementById(
+      'mainDisplayImg'
+    ).src = src;
+
+  }
+
+
+  /* =========================================================
+     강아지 미리보기 변경
+  ========================================================= */
+
+  function changeDogPreview() {
+
+    const select =
+      document.getElementById("dogno");
+
+    const option =
+      select.options[select.selectedIndex];
+
+    // 선택 안 했을 경우
+    if (!option.value) {
+
+      document.getElementById(
+        "dog_preview"
+      ).style.display = "none";
+
+      return;
+    }
+
+    // 미리보기 표시
+    document.getElementById(
+      "dog_preview"
+    ).style.display = "block";
+
+    document.getElementById(
+      "preview_name"
+    ).innerText = option.dataset.name;
+
+    document.getElementById(
+      "preview_breed"
+    ).innerText = option.dataset.breed;
+
+    document.getElementById(
+      "preview_age"
+    ).innerText = option.dataset.age;
+
+    document.getElementById(
+      "preview_gender"
+    ).innerText =
+      option.dataset.gender === 'M'
+      ? '남아'
+      : '여아';
+
+    document.getElementById(
+      "preview_dbti"
+    ).innerText = option.dataset.dbti;
+
+    // [수정] select 태그의 data-my-score에서 주인 매너점수를 파싱하여 세팅
+    const myScore = parseFloat(select.dataset.myScore) || 0.0;
+    document.getElementById("preview_manner").innerText = myScore.toFixed(1);
+
+    document.getElementById(
+      "preview_img"
+    ).src =
+      `/dog/storage/${option.dataset.thumb}`;
+  }
+
+
+  /* =========================================================
+     게시글 삭제
+  ========================================================= */
+
+  function deletePost() {
+
+    if (
+      !confirm(
+        "정말로 이 게시글을 삭제하시겠습니까?"
+      )
+    ) return;
+
+    const matchno = /*[[${matchPostVO.matchno}]]*/ 0;
+
+    fetch('/match_post/delete', {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/x-www-form-urlencoded'
+      },
+
+      body: `matchno=${matchno}`
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.res === 'success') {
+
+        showAlert(
+          "삭제 완료",
+          "게시글이 삭제되었습니다.",
+          "🗑️"
+        );
+
+        document
+          .getElementById('alertModal')
+          .addEventListener(
+            'hidden.bs.modal',
+            () => {
+              location.href =
+                '/match_post/list_all';
+            },
+            { once: true }
+          );
+
+      } else {
+
+        showAlert(
+          "오류",
+          "삭제 실패",
+          "❌"
+        );
+      }
+
+    })
+    .catch(err => {
+
+      console.error(err);
+
+      showAlert(
+        "서버 오류",
+        "잠시 후 다시 시도해주세요.",
+        "⚠️"
+      );
+
+    });
+
+  }
+
+
+  /* =========================================================
+     매칭 신청
+  ========================================================= */
+
+
+  function sendApply() {
+    const dogno = document.getElementById("dogno").value;
+    const msg = document.getElementById("apply_msg").value;
+
+    if (!dogno) {
+      showAlert("알림", "강아지를 선택해주세요.", "🐶");
+      return;
+    }
+
+    if (!msg.trim()) {
+      showAlert("알림", "신청 메시지를 입력해주세요.", "✍️");
+      return;
+    }
+
+    const matchno = /*[[${matchPostVO.matchno}]]*/ 0;
+
+    fetch('/match_apply/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `matchno=${matchno}&dogno=${dogno}&msg=${encodeURIComponent(msg)}`
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.res === 'success') {
+        showAlert('완료', '매칭 신청이 완료되었습니다.', '🎉');
+        document.getElementById('alertModal').addEventListener('hidden.bs.modal', () => {
+          location.reload();
+        }, { once: true });
+
+      } else if (data.res === 'duplicate') {
+        showAlert('중복 신청', '이미 신청한 매칭입니다.', '😅');
+
+      } else if (data.res === 'self_apply') {
+        showAlert('신청 제한', '본인이 작성한 글에는 신청할 수 없습니다.', '❌');
+
+      } else if (data.res === 'closed') {
+        showAlert('마감 완료', '이미 모집이 마감된 글입니다.', '🚫');
+
+      } else if (data.res === 'member_not_found' || data.res === 'dog_not_found') {
+        showAlert('오류', '회원 또는 반려견 정보를 찾을 수 없습니다.', '❌');
+
+      } else if (data.res === 'login_required') {
+        showAlert('로그인 필요', '로그인 후 다시 시도해주세요.', '🔒');
+
+      } else {
+        // 백엔드에서 실제로 "fail"을 보냈거나 완전히 예외가 났을 때
+        showAlert('오류', '신청 중 오류가 발생했습니다. (DB 또는 서버 에러)', '❌');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showAlert("서버 오류", "잠시 후 다시 시도해주세요.", "⚠️");
+    });
+  }
+
+  /* =========================================================
+     댓글 작성
+  ========================================================= */
+
+  function sendComment() {
+
+    const content =
+      document.getElementById(
+        "comment_content"
+      ).value;
+
+    const matchno =
+      /*[[${matchPostVO.matchno}]]*/ 0;
+
+    // 댓글 미입력
+    if (!content.trim()) {
+
+      showAlert(
+        "알림",
+        "댓글을 입력해주세요.",
+        "✍️"
+      );
+
+      return;
+    }
+
+    fetch('/match_comment/create', {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/x-www-form-urlencoded'
+      },
+
+      body:
+        `matchno=${matchno}`
+        + `&content=${encodeURIComponent(content)}`
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.res === 'success') {
+
+        location.reload();
+
+      } else if (
+        data.res === 'login_required'
+      ) {
+
+        showAlert(
+          "로그인 필요",
+          "로그인 후 이용해주세요.",
+          "🔒"
+        );
+
+      } else {
+
+        showAlert(
+          "오류",
+          "댓글 등록 실패",
+          "❌"
+        );
+      }
+
+    })
+    .catch(err => {
+
+      console.error(err);
+
+      showAlert(
+        "서버 오류",
+        "잠시 후 다시 시도해주세요.",
+        "⚠️"
+      );
+
+    });
+
+  }
+
+
+  /* =========================================================
+     댓글 수정
+  ========================================================= */
+
+function editComment(
+  commentno,
+  oldContent
+) {
+
+  const newContent =
+    prompt(
+      "댓글을 수정하세요:",
+      oldContent
+    );
+
+  // 수정 취소
+  if (
+    newContent === null ||
+    !newContent.trim() ||
+    newContent.trim() === oldContent.trim()
+  ) return;
+
+  const matchno =
+    /*[[${matchPostVO.matchno}]]*/ 0;
+
+  fetch('/match_comment/update', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type':
+        'application/x-www-form-urlencoded'
+    },
+
+    body:
+      `commentno=${commentno}`
+      + `&matchno=${matchno}`
+      + `&content=${encodeURIComponent(newContent)}`
+
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if (data.res === 'success') {
+
+      location.reload();
+
+    } else if (
+      data.res === 'login_required'
+    ) {
+
+      showAlert(
+        "로그인 필요",
+        "로그인 후 이용해주세요.",
+        "🔒"
+      );
+
+    } else if (
+      data.res === 'not_owner'
+    ) {
+
+      showAlert(
+        "권한 없음",
+        "본인 댓글만 수정 가능합니다.",
+        "⚠️"
+      );
+
+    } else {
+
+      showAlert(
+        "오류",
+        "수정 실패",
+        "❌"
+      );
+    }
+
+  })
+  .catch(err => {
+
+    console.error(err);
+
+    showAlert(
+      "서버 오류",
+      "잠시 후 다시 시도해주세요.",
+      "⚠️"
+    );
+
+  });
+
+}
+
+
+  /* =========================================================
+     댓글 삭제
+  ========================================================= */
+
+  function deleteComment(commentno) {
+
+    if (
+      !confirm(
+        "댓글을 삭제하시겠습니까?"
+      )
+    ) return;
+
+    fetch('/match_comment/delete', {
+
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/x-www-form-urlencoded'
+      },
+
+      body: `commentno=${commentno}`
+
+    })
+    .then(res => res.json())
+    .then(data => {
+
+      if (data.res === 'success') {
+
+        location.reload();
+
+      } else if (
+        data.res === 'login_required'
+      ) {
+
+        showAlert(
+          "로그인 필요",
+          "로그인 후 이용해주세요.",
+          "🔒"
+        );
+
+      } else if (
+        data.res === 'not_owner'
+      ) {
+
+        showAlert(
+          "권한 없음",
+          "본인 댓글만 삭제 가능합니다.",
+          "⚠️"
+        );
+
+      } else {
+
+        showAlert(
+          "오류",
+          "삭제 실패",
+          "❌"
+        );
+      }
+
+    })
+    .catch(err => {
+
+      console.error(err);
+
+      showAlert(
+        "서버 오류",
+        "잠시 후 다시 시도해주세요.",
+        "⚠️"
+      );
+
+    });
+
+  }
+
+</script>
+</div>
+</body>
+</html>
