@@ -1,8 +1,22 @@
 # 🐾 PAWS
-## AI 기반 반려견 라이프 통합 플랫폼
+
+## AI 기반 반려견 라이프 플랫폼
 
 > PAWS는 AI와 데이터를 기반으로  
 > 반려인의 일상, 매칭, 커뮤니티, 거래를 연결하는 스마트 반려 라이프 플랫폼입니다.
+
+---
+
+# 📚 목차
+
+- [📌 프로젝트 소개](#-프로젝트-소개)
+- [🖥️ 주요 기능](#️-주요-기능)
+- [🤖 AI 추천 시스템](#-ai-추천-시스템)
+- [💬 실시간 채팅](#-실시간-채팅)
+- [🛒 PAWS 마켓](#-paws-마켓)
+- [⚙️ 기술 스택](#️-기술-스택)
+- [🌐 배포 주소](#-배포-주소)
+- [👨‍💻 개발자](#-개발자)
 
 ---
 
@@ -56,17 +70,7 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 💬 메신저 시스템
-
-<img src="./images/chat.png" width="300"/>
-
-- 매칭 수락 시 자동 채팅방 생성
-- 실시간 메시지 관리
-- 친구 및 요청 시스템
-
----
-
-## 🤖 AI 챗봇
+# 🤖 AI 추천 시스템
 
 <img src="./images/chatbot.png" width="300"/>
 
@@ -76,58 +80,23 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 🛒 PAWS 마켓
+# 💬 실시간 채팅
+
+<img src="./images/chat.png" width="300"/>
+
+- 매칭 수락 시 자동 채팅방 생성
+- 실시간 메시지 관리
+- 친구 및 요청 시스템
+
+---
+
+# 🛒 PAWS 마켓
 
 <img src="./images/market.png" width="300"/>
 
 - 반려견 상품 판매
 - 장바구니 및 주문 기능
 - 리뷰 및 신뢰도 관리
-
----
-
-## 📚 견종 사전
-
-<img src="./images/breed.png" width="300"/>
-
-- 다양한 견종 정보 제공
-- 크기 및 특징 분류
-- 반려견 정보 탐색 지원
-
----
-
-## 📝 커뮤니티
-
-<img src="./images/community.png" width="300"/>
-
-- 자유 / 질문 / 정보 게시판
-- 댓글 및 조회 기능
-- 사용자 간 정보 공유
-
----
-
-# 🧩 시스템 아키텍처
-
-- Spring Boot 기반 MVC 구조
-- MyBatis Mapper 기반 SQL 관리
-- Oracle Database 사용
-- AWS EC2 + Nginx 배포 환경
-
----
-
-# 🗂️ ERD 설계
-
-<img src="./images/erd.png" width="100%"/>
-
-- 회원
-- 반려견
-- 매칭
-- 채팅
-- 리뷰
-- 커뮤니티
-- 마켓
-
-데이터를 통합 관리하도록 설계했습니다.
 
 ---
 
@@ -164,66 +133,12 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-# 📊 핵심 특징
-
-## 🤖 AI 기반 추천 구조
-
-- DBTI 성향 분석
-- 매너온도 기반 신뢰도
-- 사용자 활동 데이터 분석
-- GPT 기반 챗봇 연동
-
----
-
-## 📍 위치 기반 서비스
-
-- 사용자 위치 기반 산책 추천
-- 지역 기반 커뮤니티 연결
-
----
-
-## 📱 모바일 최적화
-
-- 모바일 중심 UI 설계
-- 카드형 레이아웃
-- 반응형 인터페이스
-- 부드러운 인터랙션
-
----
-
-# 🚀 실행 방법
-
-## 프로젝트 Clone
-
-```bash
-git clone https://github.com/kookmin-sw/2026-capstone-61.git
-```
-
----
-
-## DB 설정
-
-```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
-spring.datasource.username=아이디
-spring.datasource.password=비밀번호
-```
-
----
-
-## 실행
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
----
-
 # 🌐 배포 주소
 
 - https://smartpaw.duckdns.org
 - http://100.27.144.120:9091/
+
+- [📂 GitHub Repository](https://github.com/kookmin-sw/2026-capstone-61)
 
 ---
 
@@ -234,24 +149,3 @@ mvn spring-boot:run
 | 장범조 | 기획 / 백엔드 / 프론트엔드 / AI / DB 설계 / 배포 |
 
 ---
-
-# 📈 기대 효과
-
-- 반려인 간 신뢰 기반 연결
-- AI 기반 맞춤 추천 서비스
-- 통합 반려 라이프 플랫폼 구축
-- 데이터 기반 서비스 확장 가능
-
----
-
-# 🙌 프로젝트 소개 영상
-
-추후 업로드 예정
-
----
-
-# 📄 License
-
-MIT License
-
-[GitHub 바로가기](https://github.com/kookmin-sw/2026-capstone-61)
