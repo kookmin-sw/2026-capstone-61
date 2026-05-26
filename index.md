@@ -27,7 +27,6 @@
 - [🚀 Deployment | 배포 주소](#deployment)
 - [📈 Scalability | 확장 가능성](#scalability)
 - [👨‍💻 Developer | 개발자](#developer)
-
 ---
 
 <a id="project-overview"></a>
