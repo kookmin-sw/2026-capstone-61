@@ -16,6 +16,7 @@
 - [💡 Solution | 해결 아이디어](#solution)
 - [🖼️ Service Preview | 서비스 미리보기](#service-preview)
 - [🖥️ Main Features | 주요 기능](#main-features)
+- [🏡 Smart Lifestyle Main | 라이프 메인](#smart-main)
 - [🤖 AI Recommendation System | AI 추천 시스템](#ai-recommendation-system)
 - [🧠 DBTI System | DBTI 시스템](#dbti-system)
 - [💬 Real-time Chat | 실시간 채팅](#real-time-chat)
@@ -189,6 +190,22 @@ PAWS는:
 - Community and gallery integration
 - Responsive mobile UI
 - Personalized dashboard
+
+---
+
+<a id="smart-main"></a>
+
+# 🏡 Smart Lifestyle Main | 라이프 메인
+
+<img src="./images/main.png" width="700"/>
+
+### Features
+
+- Integrated pet lifestyle dashboard
+- Personalized activity recommendation
+- Quick access navigation
+- AI-based content connection
+- User-centered responsive design
 
 ---
 
