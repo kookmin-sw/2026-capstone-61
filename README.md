@@ -1,10 +1,26 @@
 # 🐾 PAWS
+
 ## AI 기반 반려견 라이프 통합 플랫폼
 
 > PAWS는 AI와 데이터를 기반으로  
 > 반려인의 일상, 매칭, 커뮤니티, 거래를 연결하는 스마트 반려 라이프 플랫폼입니다.
 
 ---
+
+# 📚 목차
+
+- [📌 프로젝트 소개](#project)
+- [🖥️ 주요 기능](#features)
+- [🤖 AI 추천 시스템](#ai)
+- [💬 실시간 채팅](#chat)
+- [🛒 PAWS 마켓](#market)
+- [⚙️ 기술 스택](#stack)
+- [🌐 배포 주소](#deploy)
+- [👨‍💻 개발자](#developer)
+
+---
+
+<a id="project"></a>
 
 # 📌 프로젝트 소개
 
@@ -21,6 +37,8 @@ PAWS는 반려견 보호자를 위한:
 기능을 하나의 플랫폼에서 제공하는 통합 반려견 서비스입니다.
 
 ---
+
+<a id="features"></a>
 
 # 🖥️ 주요 기능
 
@@ -56,17 +74,9 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 💬 메신저 시스템
+<a id="ai"></a>
 
-<img src="./images/chat.png" width="300"/>
-
-- 매칭 수락 시 자동 채팅방 생성
-- 실시간 메시지 관리
-- 친구 및 요청 시스템
-
----
-
-## 🤖 AI 챗봇
+# 🤖 AI 추천 시스템
 
 <img src="./images/chatbot.png" width="300"/>
 
@@ -76,7 +86,21 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 🛒 PAWS 마켓
+<a id="chat"></a>
+
+# 💬 실시간 채팅
+
+<img src="./images/chat.png" width="300"/>
+
+- 매칭 수락 시 자동 채팅방 생성
+- 실시간 메시지 관리
+- 친구 및 요청 시스템
+
+---
+
+<a id="market"></a>
+
+# 🛒 PAWS 마켓
 
 <img src="./images/market.png" width="300"/>
 
@@ -86,7 +110,7 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 📚 견종 사전
+# 📚 견종 사전
 
 <img src="./images/breed.png" width="300"/>
 
@@ -96,22 +120,13 @@ PAWS는 반려견 보호자를 위한:
 
 ---
 
-## 📝 커뮤니티
+# 📝 커뮤니티
 
 <img src="./images/community.png" width="300"/>
 
 - 자유 / 질문 / 정보 게시판
 - 댓글 및 조회 기능
 - 사용자 간 정보 공유
-
----
-
-# 🧩 시스템 아키텍처
-
-- Spring Boot 기반 MVC 구조
-- MyBatis Mapper 기반 SQL 관리
-- Oracle Database 사용
-- AWS EC2 + Nginx 배포 환경
 
 ---
 
@@ -130,6 +145,8 @@ PAWS는 반려견 보호자를 위한:
 데이터를 통합 관리하도록 설계했습니다.
 
 ---
+
+<a id="stack"></a>
 
 # ⚙️ 기술 스택
 
@@ -220,12 +237,18 @@ mvn spring-boot:run
 
 ---
 
+<a id="deploy"></a>
+
 # 🌐 배포 주소
 
 - https://smartpaw.duckdns.org
 - http://100.27.144.120:9091/
 
+- [📂 GitHub Repository](https://github.com/kookmin-sw/2026-capstone-61)
+
 ---
+
+<a id="developer"></a>
 
 # 👨‍💻 개발자
 
@@ -253,4 +276,3 @@ mvn spring-boot:run
 # 📄 License
 
 MIT License
-
