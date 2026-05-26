@@ -11,28 +11,26 @@
 
 # 📚 Table of Contents | 목차
 
-- [📌 Project Overview | 프로젝트 소개](#project-overview)
-- [🚨 Problem Definition | 문제 정의](#problem-definition)
-- [💡 Solution | 해결 아이디어](#solution)
-- [🖼️ Service Preview | 서비스 미리보기](#service-preview)
-- [🖥️ Main Features | 주요 기능](#main-features)
-- [🏡 Smart Lifestyle Main | 라이프 메인](#smart-main)
-- [🤖 AI Recommendation System | AI 추천 시스템](#ai-recommendation-system)
-- [🧠 DBTI System | DBTI 시스템](#dbti-system)
-- [💬 Real-time Chat | 실시간 채팅](#real-time-chat)
-- [🛒 PAWS Market | PAWS 마켓](#paws-market)
-- [🗂️ Database Design | DB 설계](#database-design)
-- [🏗️ System Architecture | 시스템 구조](#system-architecture)
-- [⚙️ Tech Stack | 기술 스택](#tech-stack)
-- [🚀 Deployment | 배포 주소](#deployment)
-- [📈 Scalability | 확장 가능성](#scalability)
-- [👨‍💻 Developer | 개발자](#developer)
+- [📌 Project Overview](#-project-overview)
+- [🚨 Problem Definition](#-problem-definition)
+- [💡 Solution](#-solution)
+- [🖼️ Service Preview](#️-service-preview)
+- [🖥️ Main Features](#️-main-features)
+- [🏡 Smart Lifestyle Main](#-smart-lifestyle-main)
+- [🤖 AI Recommendation System](#-ai-recommendation-system)
+- [🧠 DBTI System](#-dbti-system)
+- [💬 Real-time Chat](#-real-time-chat)
+- [🛒 PAWS Market](#-paws-market)
+- [🗂️ Database Design](#️-database-design)
+- [🏗️ System Architecture](#️-system-architecture)
+- [⚙️ Tech Stack](#️-tech-stack)
+- [🚀 Deployment](#-deployment)
+- [📈 Scalability](#-scalability)
+- [👨‍💻 Developer](#-developer)
 
 ---
 
-<a id="project-overview"></a>
-
-# 📌 Project Overview | 프로젝트 소개
+# 📌 Project Overview
 
 PAWS is an integrated platform designed for dog owners.
 
@@ -66,9 +64,7 @@ PAWS는:
 
 ---
 
-<a id="problem-definition"></a>
-
-# 🚨 Problem Definition | 문제 정의
+# 🚨 Problem Definition
 
 ## Existing pet services still have major limitations.
 ## 기존 반려 서비스는 여전히 한계가 존재합니다.
@@ -104,9 +100,7 @@ PAWS는:
 
 ---
 
-<a id="solution"></a>
-
-# 💡 Solution | 해결 아이디어
+# 💡 Solution
 
 ## PAWS connects fragmented pet services using AI and integrated data.
 ## PAWS는 분산된 반려 서비스를 AI와 데이터 기반으로 연결합니다.
@@ -159,9 +153,7 @@ PAWS는:
 
 ---
 
-<a id="service-preview"></a>
-
-# 🖼️ Service Preview | 서비스 미리보기
+# 🖼️ Service Preview
 
 | Main Home | Matching | Chat |
 |---|---|---|
@@ -173,13 +165,11 @@ PAWS는:
 
 ---
 
-<a id="main-features"></a>
-
-# 🖥️ Main Features | 주요 기능
+# 🖥️ Main Features
 
 ---
 
-## 🏠 Main Home | 메인 홈
+## 🏠 Main Home
 
 <img src="./images/home.png" width="700"/>
 
@@ -193,9 +183,7 @@ PAWS는:
 
 ---
 
-<a id="smart-main"></a>
-
-# 🏡 Smart Lifestyle Main | 라이프 메인
+# 🏡 Smart Lifestyle Main
 
 <img src="./images/main.png" width="700"/>
 
@@ -209,7 +197,7 @@ PAWS는:
 
 ---
 
-## 🐕 Walking Matching System | 산책 매칭 시스템
+## 🐕 Walking Matching System
 
 <img src="./images/matching.png" width="700"/>
 
@@ -223,7 +211,7 @@ PAWS는:
 
 ---
 
-## 📝 Community System | 커뮤니티 시스템
+## 📝 Community System
 
 <img src="./images/community.png" width="700"/>
 
@@ -236,7 +224,7 @@ PAWS는:
 
 ---
 
-## 📚 Dog Breed Encyclopedia | 견종 사전
+## 📚 Dog Breed Encyclopedia
 
 <img src="./images/breed.png" width="700"/>
 
@@ -248,15 +236,13 @@ PAWS는:
 
 ---
 
-<a id="ai-recommendation-system"></a>
-
-# 🤖 AI Recommendation System | AI 추천 시스템
+# 🤖 AI Recommendation System
 
 <img src="./images/chatbot.png" width="700"/>
 
 ---
 
-## 🧠 AI Learning Structure | AI 학습 구조
+## 🧠 AI Learning Structure
 
 ### Input Data
 
@@ -298,13 +284,11 @@ PAWS는:
 
 ---
 
-<a id="dbti-system"></a>
-
-# 🧠 DBTI System | DBTI 시스템
+# 🧠 DBTI System
 
 <img src="./images/dbti.png" width="700"/>
 
-## Why DBTI? | 왜 DBTI인가?
+## Why DBTI?
 
 Existing walking services do not consider dog personality compatibility.
 
@@ -319,9 +303,7 @@ to improve matching quality and compatibility.
 
 ---
 
-<a id="real-time-chat"></a>
-
-# 💬 Real-time Chat | 실시간 채팅
+# 💬 Real-time Chat
 
 <img src="./images/chat.png" width="700"/>
 
@@ -334,9 +316,7 @@ to improve matching quality and compatibility.
 
 ---
 
-<a id="paws-market"></a>
-
-# 🛒 PAWS Market | PAWS 마켓
+# 🛒 PAWS Market
 
 <img src="./images/market.png" width="700"/>
 
@@ -349,9 +329,7 @@ to improve matching quality and compatibility.
 
 ---
 
-<a id="database-design"></a>
-
-# 🗂️ Database Design | DB 설계
+# 🗂️ Database Design
 
 <img src="./images/erd.png" width="100%"/>
 
@@ -365,9 +343,7 @@ to improve matching quality and compatibility.
 
 ---
 
-<a id="system-architecture"></a>
-
-# 🏗️ System Architecture | 시스템 구조
+# 🏗️ System Architecture
 
 <img src="./images/architecture.png" width="100%"/>
 
@@ -397,9 +373,7 @@ Oracle DB
 
 ---
 
-<a id="tech-stack"></a>
-
-# ⚙️ Tech Stack | 기술 스택
+# ⚙️ Tech Stack
 
 ## Backend
 
@@ -432,7 +406,7 @@ Oracle DB
 
 ---
 
-# ⚙️ Why These Technologies? | 기술 선택 이유
+# ⚙️ Why These Technologies?
 
 | Technology | Reason |
 |---|---|
@@ -445,9 +419,7 @@ Oracle DB
 
 ---
 
-<a id="deployment"></a>
-
-# 🚀 Deployment | 배포 주소
+# 🚀 Deployment
 
 ## 🌐 Live Service
 
@@ -462,7 +434,7 @@ Oracle DB
 
 ---
 
-# 🚀 Getting Started | 실행 방법
+# 🚀 Getting Started
 
 ## Clone Repository
 
@@ -491,9 +463,7 @@ mvn spring-boot:run
 
 ---
 
-<a id="scalability"></a>
-
-# 📈 Scalability | 확장 가능성
+# 📈 Scalability
 
 ## Future Expansion
 
@@ -507,7 +477,7 @@ mvn spring-boot:run
 
 ---
 
-# 👨‍💻 Solo Development Project | 1인 개발 프로젝트
+# 👨‍💻 Solo Development Project
 
 This project was fully developed by one developer.
 
@@ -525,9 +495,7 @@ This project was fully developed by one developer.
 
 ---
 
-<a id="developer"></a>
-
-# 👨‍💻 Developer | 개발자
+# 👨‍💻 Developer
 
 | Name | Role |
 |---|---|
@@ -535,7 +503,7 @@ This project was fully developed by one developer.
 
 ---
 
-# 📈 Expected Effects | 기대 효과
+# 📈 Expected Effects
 
 ## User Perspective
 
@@ -553,7 +521,7 @@ This project was fully developed by one developer.
 
 ---
 
-# 🙌 Demo Video | 시연 영상
+# 🙌 Demo Video
 
 Coming Soon
 
