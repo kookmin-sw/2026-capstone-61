@@ -1,7 +1,7 @@
 # 🐾 PAWS
 
-# AI-Powered Integrated Dog Life Platform  
-# AI 기반 반려견 라이프 통합 플랫폼
+## AI-Powered Integrated Dog Life Platform  
+## AI 기반 반려견 라이프 통합 플랫폼
 
 > PAWS is a smart pet lifestyle platform that connects dog owners through AI, data, trust-based matching, real-time communication, and integrated pet services.
 >
@@ -27,6 +27,7 @@
 - [🚀 Deployment | 배포 주소](#deployment)
 - [📈 Scalability | 확장 가능성](#scalability)
 - [👨‍💻 Developer | 개발자](#developer)
+
 ---
 
 <a id="project-overview"></a>
