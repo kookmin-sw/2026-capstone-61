@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>🐾 PAWS</title>
+  <title>🐾 PAWS | AI 기반 반려견 플랫폼</title>
 
   <!-- =========================
        🐶 FONT
@@ -26,7 +26,7 @@
       --bg:#fff8fb;
 
       --pink:#ff6b81;
-      --pink2:#ffb3c1;
+      --pink2:#ffb7c5;
 
       --purple:#c084fc;
 
@@ -34,14 +34,16 @@
 
       --mint:#7bdcb5;
 
-      --text:#2b2b2b;
+      --blue:#7ecbff;
+
+      --text:#2d2d2d;
 
       --sub:#6e6e73;
 
-      --card:rgba(255,255,255,.75);
+      --card:rgba(255,255,255,.78);
 
       --shadow:
-      0 15px 40px rgba(255,107,129,.15);
+      0 14px 40px rgba(255,107,129,.12);
 
     }
 
@@ -61,7 +63,7 @@
 
       background:
       radial-gradient(circle at top left,#ffdce5 0%,transparent 28%),
-      radial-gradient(circle at bottom right,#ffe9ef 0%,transparent 25%),
+      radial-gradient(circle at bottom right,#ffeaf1 0%,transparent 28%),
       var(--bg);
 
       color:var(--text);
@@ -85,14 +87,14 @@
     }
 
     /* =========================
-       ☁️ FLOATING PAWS
+       🐾 FLOAT PAW
     ========================== */
 
     .paw{
 
       position:absolute;
 
-      font-size:50px;
+      font-size:54px;
 
       opacity:.08;
 
@@ -100,18 +102,18 @@
     }
 
     .paw1{
-      top:120px;
+      top:140px;
       left:60px;
     }
 
     .paw2{
-      top:40%;
-      right:80px;
+      right:70px;
+      top:45%;
     }
 
     .paw3{
       bottom:100px;
-      left:15%;
+      left:20%;
     }
 
     @keyframes float{
@@ -157,7 +159,7 @@
 
       margin:auto;
 
-      height:80px;
+      height:82px;
 
       display:flex;
 
@@ -172,9 +174,9 @@
 
       font-size:34px;
 
-      font-weight:700;
-
       color:var(--pink);
+
+      font-weight:700;
     }
 
     .menu{
@@ -188,7 +190,7 @@
 
       font-weight:600;
 
-      color:#555;
+      color:#666;
 
       transition:.25s;
     }
@@ -198,7 +200,7 @@
     }
 
     /* =========================
-       🐾 HERO
+       🐶 HERO
     ========================== */
 
     .hero{
@@ -226,26 +228,26 @@
 
       background:white;
 
-      box-shadow:var(--shadow);
-
       color:var(--pink);
 
       font-weight:700;
 
       margin-bottom:28px;
+
+      box-shadow:var(--shadow);
     }
 
     .hero h1{
 
       font-family:'Fredoka',sans-serif;
 
-      font-size:clamp(82px,12vw,170px);
+      font-size:clamp(90px,12vw,180px);
 
       line-height:.9;
 
-      margin-bottom:28px;
-
       color:var(--pink);
+
+      margin-bottom:24px;
     }
 
     .hero h1 span{
@@ -254,20 +256,20 @@
 
     .hero p{
 
-      width:min(760px,92%);
+      width:min(780px,92%);
 
       margin:auto;
 
       line-height:2;
 
-      font-size:20px;
-
       color:var(--sub);
+
+      font-size:20px;
     }
 
     .hero-btns{
 
-      margin-top:45px;
+      margin-top:46px;
 
       display:flex;
 
@@ -295,13 +297,13 @@
       linear-gradient(
       135deg,
       #ff6b81,
-      #ff9bb0
+      #ff9fb1
       );
 
       color:white;
 
       box-shadow:
-      0 12px 30px rgba(255,107,129,.25);
+      0 12px 30px rgba(255,107,129,.22);
     }
 
     .btn-primary:hover{
@@ -316,7 +318,7 @@
     }
 
     /* =========================
-       📌 SECTION TITLE
+       📌 TITLE
     ========================== */
 
     .section-title{
@@ -339,7 +341,7 @@
 
       font-family:'Fredoka',sans-serif;
 
-      font-size:58px;
+      font-size:60px;
 
       margin:18px 0;
 
@@ -348,13 +350,13 @@
 
     .section-title p{
 
-      width:min(700px,92%);
+      width:min(760px,92%);
 
       margin:auto;
 
-      line-height:2;
-
       color:var(--sub);
+
+      line-height:2;
 
       font-size:18px;
     }
@@ -368,7 +370,7 @@
       display:grid;
 
       grid-template-columns:
-      repeat(auto-fit,minmax(270px,1fr));
+      repeat(auto-fit,minmax(280px,1fr));
 
       gap:28px;
     }
@@ -383,11 +385,11 @@
 
       padding:38px;
 
+      border:2px solid rgba(255,255,255,.5);
+
       box-shadow:var(--shadow);
 
       transition:.35s;
-
-      border:2px solid rgba(255,255,255,.5);
     }
 
     .card:hover{
@@ -397,8 +399,8 @@
 
     .emoji{
 
-      width:72px;
-      height:72px;
+      width:74px;
+      height:74px;
 
       border-radius:24px;
 
@@ -427,6 +429,10 @@
 
     .mint{
       background:#dff8ef;
+    }
+
+    .blue{
+      background:#dff2ff;
     }
 
     .card h3{
@@ -467,9 +473,9 @@
 
       font-size:56px;
 
-      margin-bottom:26px;
-
       line-height:1.1;
+
+      margin-bottom:24px;
     }
 
     .big-box p{
@@ -481,7 +487,7 @@
       font-size:18px;
     }
 
-    .small-boxes{
+    .small-grid{
 
       display:grid;
 
@@ -491,11 +497,6 @@
     .small{
 
       padding:34px;
-    }
-
-    .small h3{
-
-      margin-bottom:14px;
     }
 
     /* =========================
@@ -517,7 +518,7 @@
 
     .flow-box{
 
-      width:230px;
+      width:240px;
 
       text-align:center;
 
@@ -526,12 +527,12 @@
 
     .flow-box h3{
 
-      margin-bottom:12px;
+      margin-bottom:14px;
     }
 
     .arrow{
 
-      font-size:40px;
+      font-size:42px;
 
       color:var(--pink);
     }
@@ -554,17 +555,14 @@
 
       text-align:center;
 
-      padding:38px 20px;
-    }
-
-    .stack-card h3{
-
-      margin-top:14px;
+      padding:40px 20px;
     }
 
     .stack-icon{
 
       font-size:42px;
+
+      margin-bottom:14px;
     }
 
     /* =========================
@@ -650,7 +648,7 @@
 <body>
 
 <!-- =========================
-     ☁️ PAWS
+     🐾 FLOATING PAWS
 ========================== -->
 
 <div class="paw paw1">🐾</div>
@@ -673,8 +671,9 @@
 
       <a href="#about">소개</a>
       <a href="#problem">문제</a>
-      <a href="#solution">해결</a>
+      <a href="#features">기능</a>
       <a href="#ai">AI</a>
+      <a href="#architecture">구조</a>
       <a href="#stack">기술</a>
       <a href="#developer">개발자</a>
 
@@ -701,20 +700,19 @@
     </h1>
 
     <p>
-      AI와 데이터를 기반으로
+      PAWS는 AI와 데이터를 기반으로
       반려인의 일상,
       산책 매칭,
       커뮤니티,
       실시간 채팅,
-      반려견 거래 서비스를
-      하나의 플랫폼으로 연결하는
-      스마트 반려견 라이프 서비스
+      반려견 거래 서비스를 하나로 연결한
+      스마트 반려견 라이프 통합 플랫폼입니다.
     </p>
 
     <div class="hero-btns">
 
-      <a href="#solution" class="btn btn-primary">
-        서비스 둘러보기
+      <a href="#features" class="btn btn-primary">
+        서비스 보기
       </a>
 
       <a
@@ -749,69 +747,13 @@
       </h2>
 
       <p>
-        PAWS는 위치 기반 산책 매칭,
-        AI 추천,
-        DBTI 성향 분석,
-        실시간 메신저,
-        커뮤니티와 마켓 서비스를
-        하나의 데이터 기반 플랫폼으로 통합했습니다.
+        기존 반려 서비스는 커뮤니티,
+        거래,
+        산책,
+        추천 기능이 각각 분리되어 있었습니다.
+        PAWS는 이를 AI와 데이터 기반으로 통합하여
+        하나의 연결된 반려 라이프 플랫폼을 제공합니다.
       </p>
-
-    </div>
-
-    <div class="grid">
-
-      <div class="card">
-
-        <div class="emoji pink">📍</div>
-
-        <h3>산책 매칭</h3>
-
-        <p>
-          위치 기반 반려견 산책 매칭과
-          신뢰 기반 추천 시스템
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <div class="emoji purple">🤖</div>
-
-        <h3>AI 추천</h3>
-
-        <p>
-          GPT 기반 사용자 맞춤형
-          AI 추천 구조
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <div class="emoji yellow">💬</div>
-
-        <h3>실시간 채팅</h3>
-
-        <p>
-          매칭 이후 자동 생성되는
-          실시간 메신저 기능
-        </p>
-
-      </div>
-
-      <div class="card">
-
-        <div class="emoji mint">🛒</div>
-
-        <h3>PAWS 마켓</h3>
-
-        <p>
-          리뷰 기반 신뢰 시스템을 적용한
-          반려견 거래 서비스
-        </p>
-
-      </div>
 
     </div>
 
@@ -842,44 +784,181 @@
 
       <div class="card">
 
-        <h3>😢 신뢰 부족</h3>
+        <div class="emoji pink">😢</div>
+
+        <h3>신뢰 부족</h3>
 
         <p>
-          사용자 검증과 활동 기반 데이터 부족으로
-          안전한 산책 연결이 어려움
+          사용자 활동 데이터와 리뷰가
+          연결되지 않아
+          안전한 산책 및 거래 연결이 어려웠습니다.
         </p>
 
       </div>
 
       <div class="card">
 
-        <h3>📚 정보 분산</h3>
+        <div class="emoji purple">📚</div>
+
+        <h3>정보 분산</h3>
 
         <p>
-          커뮤니티와 거래,
-          정보 서비스가 각각 분리됨
+          커뮤니티,
+          마켓,
+          견종 정보,
+          산책 서비스가
+          각각 분리되어 있었습니다.
         </p>
 
       </div>
 
       <div class="card">
 
-        <h3>🤖 AI 부재</h3>
+        <div class="emoji yellow">🤖</div>
+
+        <h3>AI 추천 부재</h3>
 
         <p>
-          사용자 성향을 고려한
-          추천 시스템 부족
+          사용자 성향과 활동 데이터를
+          활용한 개인화 추천 구조가 부족했습니다.
         </p>
 
       </div>
 
       <div class="card">
 
-        <h3>⚡ 실시간 연결 부족</h3>
+        <div class="emoji mint">⚡</div>
+
+        <h3>실시간 연결 부족</h3>
 
         <p>
-          즉각적인 소통과
-          매칭 구조 부족
+          사용자 간 즉각적인 연결과
+          실시간 소통 기능이 부족했습니다.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     🖥️ FEATURES
+========================== -->
+
+<section id="features">
+
+  <div class="container">
+
+    <div class="section-title">
+
+      <span>MAIN FEATURES</span>
+
+      <h2>
+        PAWS 주요 기능
+      </h2>
+
+      <p>
+        AI와 데이터를 기반으로
+        반려인의 일상 경험을
+        하나의 플랫폼으로 연결합니다.
+      </p>
+
+    </div>
+
+    <div class="grid">
+
+      <div class="card">
+
+        <div class="emoji pink">📍</div>
+
+        <h3>산책 매칭 시스템</h3>
+
+        <p>
+          사용자 위치 기반으로
+          산책 모집 및 신청,
+          수락/거절 기능을 제공합니다.
+          매너온도를 활용해
+          신뢰도 높은 산책 연결을 지원합니다.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="emoji purple">🤖</div>
+
+        <h3>AI 추천 시스템</h3>
+
+        <p>
+          OpenAI GPT 기반으로
+          사용자 활동,
+          DBTI,
+          채팅 데이터를 분석하여
+          개인화 추천 서비스를 제공합니다.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="emoji yellow">🧠</div>
+
+        <h3>DBTI 성향 분석</h3>
+
+        <p>
+          반려견의 활동성,
+          사회성,
+          성향 데이터를 기반으로
+          사용자 간 궁합 분석과
+          매칭 품질을 향상시킵니다.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="emoji mint">💬</div>
+
+        <h3>실시간 채팅</h3>
+
+        <p>
+          매칭 수락 시
+          자동 채팅방이 생성되며
+          사용자 간 실시간 메신저 기능을 제공합니다.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="emoji blue">🛒</div>
+
+        <h3>PAWS 마켓</h3>
+
+        <p>
+          반려견 상품 거래,
+          장바구니,
+          주문,
+          리뷰 기능을 제공하며
+          리뷰 기반 신뢰 시스템을 지원합니다.
+        </p>
+
+      </div>
+
+      <div class="card">
+
+        <div class="emoji pink">📝</div>
+
+        <h3>커뮤니티 시스템</h3>
+
+        <p>
+          자유 게시판,
+          질문 게시판,
+          정보 공유 게시판을 통해
+          사용자 간 소통과 정보 공유를 지원합니다.
         </p>
 
       </div>
@@ -894,7 +973,7 @@
      💡 SOLUTION
 ========================== -->
 
-<section id="solution">
+<section>
 
   <div class="container">
 
@@ -903,8 +982,8 @@
       <span>PAWS SOLUTION</span>
 
       <h2>
-        AI와 데이터를 기반으로<br>
-        연결되는 플랫폼
+        AI와 데이터 기반으로<br>
+        연결되는 반려 플랫폼
       </h2>
 
     </div>
@@ -919,24 +998,25 @@
         </h2>
 
         <p>
-          산책 매칭,
+          PAWS는 산책 매칭,
           AI 추천,
           실시간 채팅,
-          커뮤니티,
-          반려견 거래 서비스를
-          하나의 통합 반려 라이프 플랫폼으로 연결합니다.
+          반려견 거래,
+          커뮤니티를 하나의 데이터 구조로 연결하여
+          사용자 경험과 신뢰도를 지속적으로 향상시킵니다.
         </p>
 
       </div>
 
-      <div class="small-boxes">
+      <div class="small-grid">
 
         <div class="card small">
 
           <h3>🌡️ 매너온도</h3>
 
           <p>
-            리뷰 기반 신뢰 시스템
+            활동과 리뷰를 기반으로
+            사용자 신뢰도를 시각화합니다.
           </p>
 
         </div>
@@ -946,7 +1026,7 @@
           <h3>📍 GPS 매칭</h3>
 
           <p>
-            위치 기반 산책 추천
+            사용자 위치 기반 산책 추천 구조
           </p>
 
         </div>
@@ -956,7 +1036,7 @@
           <h3>🤖 GPT AI</h3>
 
           <p>
-            장기 메모리 기반 추천
+            장기 메모리 기반 추천 시스템
           </p>
 
         </div>
@@ -979,7 +1059,7 @@
 
     <div class="section-title">
 
-      <span>AI SYSTEM</span>
+      <span>AI RECOMMENDATION SYSTEM</span>
 
       <h2>
         데이터가 쌓일수록<br>
@@ -997,8 +1077,8 @@
         <p>
           DBTI<br>
           Chat<br>
-          Reviews<br>
-          Activity
+          Review<br>
+          Activity Logs
         </p>
 
       </div>
@@ -1010,8 +1090,8 @@
         <h3>🧠 GPT Analysis</h3>
 
         <p>
-          성향 분석<br>
-          장기 메모리<br>
+          사용자 성향 분석<br>
+          장기 메모리 저장<br>
           추천 계산
         </p>
 
@@ -1029,6 +1109,66 @@
           콘텐츠 추천
         </p>
 
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     🏗️ ARCHITECTURE
+========================== -->
+
+<section id="architecture">
+
+  <div class="container">
+
+    <div class="section-title">
+
+      <span>SYSTEM ARCHITECTURE</span>
+
+      <h2>
+        Spring MVC 기반<br>
+        계층형 구조 설계
+      </h2>
+
+      <p>
+        유지보수성과 확장성을 고려해
+        Spring MVC + MyBatis 기반 계층 구조로 설계했습니다.
+      </p>
+
+    </div>
+
+    <div class="flow">
+
+      <div class="card flow-box">
+        Client UI
+      </div>
+
+      <div class="arrow">↓</div>
+
+      <div class="card flow-box">
+        Spring Boot
+      </div>
+
+      <div class="arrow">↓</div>
+
+      <div class="card flow-box">
+        MyBatis
+      </div>
+
+      <div class="arrow">↓</div>
+
+      <div class="card flow-box">
+        Oracle DB
+      </div>
+
+      <div class="arrow">↓</div>
+
+      <div class="card flow-box">
+        AWS EC2
       </div>
 
     </div>
