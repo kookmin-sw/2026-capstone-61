@@ -1,76 +1,65 @@
 # 🐾 PAWS
 
-## AI-Powered Integrated Dog Life Platform  
-## AI 기반 반려견 라이프 통합 플랫폼
+## AI 기반 반려견 라이프 통합 플랫폼  
+### AI-Powered Integrated Dog Life Platform
 
-> PAWS is a smart pet lifestyle platform that connects dog owners through AI, data, trust-based matching, real-time communication, and integrated pet services.
->
-> PAWS는 AI와 데이터를 기반으로 반려인의 일상, 매칭, 커뮤니티, 거래를 하나의 플랫폼으로 연결하는 스마트 반려견 라이프 플랫폼입니다.
-
----
-
-# 📚 Table of Contents | 목차
-
-- [📌 Project Overview | 프로젝트 소개](#project-overview)
-- [🚨 Problem Definition | 문제 정의](#problem-definition)
-- [💡 Solution | 해결 아이디어](#solution)
-- [🖼️ Service Preview | 서비스 미리보기](#service-preview)
-- [🖥️ Main Features | 주요 기능](#main-features)
-- [🏡 Smart Lifestyle Main | 라이프 메인](#smart-main)
-- [🤖 AI Recommendation System | AI 추천 시스템](#ai-recommendation-system)
-- [🧠 DBTI System | DBTI 시스템](#dbti-system)
-- [💬 Real-time Chat | 실시간 채팅](#real-time-chat)
-- [🛒 PAWS Market | PAWS 마켓](#paws-market)
-- [🗂️ Database Design | DB 설계](#database-design)
-- [🏗️ System Architecture | 시스템 구조](#system-architecture)
-- [⚙️ Tech Stack | 기술 스택](#tech-stack)
-- [🚀 Deployment | 배포 주소](#deployment)
-- [📈 Scalability | 확장 가능성](#scalability)
-- [👨‍💻 Developer | 개발자](#developer)
+> PAWS는 AI와 데이터를 기반으로 반려인의 일상, 매칭, 커뮤니티, 거래를 하나의 플랫폼으로 연결하는 통합 반려견 라이프 플랫폼입니다.  
+> PAWS is an AI-powered integrated dog lifestyle platform that connects daily pet life, matching, community, and commerce services into one ecosystem.
 
 ---
 
-<a id="project-overview"></a>
+# 📚 목차 (Table of Contents)
 
-# 📌 Project Overview | 프로젝트 소개
-
-PAWS is an integrated platform designed for dog owners.
-
-It combines:
-
-- 📍 Location-based walking matching
-- 🤖 AI-powered recommendation system
-- 🧠 DBTI personality analysis
-- 💬 Real-time messenger
-- 🛒 Pet marketplace
-- 🐶 Dog breed encyclopedia
-- 📝 Community system
-
-into one connected ecosystem.
-
----
-
-## 🇰🇷 프로젝트 소개
-
-PAWS는:
-
-- 위치 기반 산책 매칭
-- AI 추천 시스템
-- DBTI 성향 분석
-- 실시간 메신저
-- 반려견 마켓
-- 견종 사전
-- 커뮤니티
-
-기능을 하나의 데이터 기반 플랫폼으로 통합한 서비스입니다.
+- [📌 프로젝트 소개 (Project Overview)](#-프로젝트-소개-project-overview)
+- [🚨 문제 정의 (Problem Definition)](#-문제-정의-problem-definition)
+- [💡 해결 아이디어 (Solution)](#-해결-아이디어-solution)
+- [🖼️ 서비스 미리보기 (Service Preview)](#️-서비스-미리보기-service-preview)
+- [🖥️ 주요 기능 (Main Features)](#️-주요-기능-main-features)
+- [🏡 라이프 메인 (Smart Lifestyle Main)](#-라이프-메인-smart-lifestyle-main)
+- [🤖 AI 추천 시스템 (AI Recommendation System)](#-ai-추천-시스템-ai-recommendation-system)
+- [🧠 DBTI 시스템 (DBTI System)](#-dbti-시스템-dbti-system)
+- [💬 실시간 채팅 (Real-time Chat)](#-실시간-채팅-real-time-chat)
+- [🛒 PAWS 마켓 (PAWS Market)](#-paws-마켓-paws-market)
+- [🗂️ DB 설계 (Database Design)](#️-db-설계-database-design)
+- [🏗️ 시스템 구조 (System Architecture)](#️-시스템-구조-system-architecture)
+- [⚙️ 기술 스택 (Tech Stack)](#️-기술-스택-tech-stack)
+- [🚀 배포 주소 (Deployment)](#-배포-주소-deployment)
+- [📈 확장 가능성 (Scalability)](#-확장-가능성-scalability)
+- [👨‍💻 개발자 (Developer)](#-개발자-developer)
 
 ---
 
-<a id="problem-definition"></a>
+# 📌 프로젝트 소개 (Project Overview)
 
-# 🚨 Problem Definition | 문제 정의
+PAWS는 AI와 데이터를 기반으로 반려인의 일상, 매칭, 커뮤니티, 거래를 하나의 플랫폼으로 연결하는 통합 반려견 라이프 플랫폼입니다.  
+PAWS is an AI-powered integrated dog lifestyle platform that connects daily pet life, matching, community, and commerce services into one ecosystem.
 
-## Existing pet services still have major limitations.
+---
+
+## 🐾 주요 서비스 (Main Services)
+
+- 📍 위치 기반 산책 매칭 (Location-based Walking Matching)
+- 🤖 AI 기반 맞춤 추천 시스템 (AI Recommendation System)
+- 🧠 DBTI 성향 분석 (DBTI Personality Analysis)
+- 💬 실시간 메신저 (Real-time Messenger)
+- 🛒 반려견 마켓 (Pet Marketplace)
+- 🐶 견종 사전 (Dog Breed Encyclopedia)
+- 📝 커뮤니티 시스템 (Community System)
+
+---
+
+## ✨ 핵심 목표 (Core Goals)
+
+- 반려인 간 신뢰 기반 연결 (Trust-based Connections)
+- AI 기반 개인화 서비스 제공 (Personalized AI Services)
+- 데이터 중심 통합 플랫폼 구축 (Data-driven Integrated Platform)
+- 지속 가능한 반려 라이프 생태계 형성 (Sustainable Pet Lifestyle Ecosystem)
+
+---
+
+# 🚨 문제 정의 (Problem Definition)
+
+## Existing pet services still have major limitations.  
 ## 기존 반려 서비스는 여전히 한계가 존재합니다.
 
 | Existing Service | Limitation |
@@ -82,86 +71,78 @@ PAWS는:
 
 ---
 
-## 🐾 Difficulty of Walking Matching
+## 🐾 산책 매칭의 어려움 (Difficulty of Walking Matching)
 
-- Hard to understand dog personalities beforehand
-- No trust-based matching structure
-
-## 🛒 Low Trust in Transactions
-
-- Seller reviews are disconnected from community activity
-- Real experiences are not integrated
-
-## 📚 Fragmented Information
-
-- Community, market, and information services are separated
-- Users repeatedly move between multiple platforms
-
-## 🤖 Lack of Personalization
-
-- Existing services mainly focus on simple bulletin boards
-- No AI-based recommendation or integrated data structure
+- 반려견 성향을 미리 파악하기 어려움 (Hard to understand dog personalities beforehand)
+- 신뢰 기반 매칭 구조 부족 (Lack of trust-based matching structure)
 
 ---
 
-<a id="solution"></a>
+## 🛒 거래 신뢰도의 한계 (Low Trust in Transactions)
 
-# 💡 Solution | 해결 아이디어
+- 판매자 리뷰와 커뮤니티 활동 분리 (Seller reviews are disconnected from community activity)
+- 실제 경험 기반 데이터 부족 (Lack of real experience-based data)
 
-## PAWS connects fragmented pet services using AI and integrated data.
+---
+
+## 📚 정보 서비스의 분산 (Fragmented Information Services)
+
+- 커뮤니티, 거래, 정보 서비스가 각각 분리됨 (Community, market, and information services are separated)
+- 사용자 경험 단절 (Disconnected user experience)
+
+---
+
+## 🤖 개인화 추천 부족 (Lack of Personalization)
+
+- 기존 서비스는 단순 게시판 중심 (Existing services focus mainly on simple bulletin boards)
+- AI 기반 추천 및 통합 데이터 구조 부족 (Lack of AI recommendation and integrated data structure)
+
+---
+
+# 💡 해결 아이디어 (Solution)
+
+## PAWS connects fragmented pet services using AI and integrated data.  
 ## PAWS는 분산된 반려 서비스를 AI와 데이터 기반으로 연결합니다.
 
 ---
 
-## 🤖 AI-Based Personalized Recommendation
+## 🤖 AI 기반 맞춤 추천 (AI-Based Personalized Recommendation)
 
-- GPT-powered recommendation system
-- Personalized chatbot interaction
-- User behavior analysis
-- Long-term user tendency learning
-
----
-
-## 📍 Location-Based Walking Matching
-
-- Nearby walking partner recommendation
-- Personality-based matching support
-- Trust-based recommendation
+- GPT 기반 추천 시스템 (GPT-powered recommendation system)
+- 사용자 행동 데이터 분석 (User behavior analysis)
+- 장기 메모리 기반 추천 구조 (Long-term memory-based recommendation structure)
 
 ---
 
-## 🌡️ Manners Temperature Trust System
+## 📍 위치 기반 산책 매칭 (Location-Based Walking Matching)
 
-- Trust score accumulated from activity and reviews
-- Safer community environment
-- User reliability visualization
-
----
-
-## 💬 Automatic Chat Room Creation
-
-- Real-time communication after matching
-- Instant connection between users
+- 주변 산책 파트너 추천 (Nearby walking partner recommendation)
+- 반려견 성향 기반 매칭 지원 (Personality-based matching support)
 
 ---
 
-## 🛒 Integrated Community & Market
+## 🌡️ 매너온도 신뢰 시스템 (Manners Temperature Trust System)
 
-- Community, market, and reviews connected together
-- Unified pet lifestyle experience
-
----
-
-## 📊 Data-Centered Platform Structure
-
-- Matching, reviews, chat, and user activity integrated
-- AI recommendation quality improves as data accumulates
+- 활동 및 리뷰 기반 신뢰 점수 누적 (Trust score accumulated from activity and reviews)
+- 안전한 커뮤니티 환경 제공 (Safer community environment)
 
 ---
 
-<a id="service-preview"></a>
+## 💬 자동 채팅방 생성 (Automatic Chat Room Creation)
 
-# 🖼️ Service Preview | 서비스 미리보기
+- 매칭 수락 시 실시간 채팅 연결 (Real-time communication after matching)
+- 사용자 간 즉시 소통 가능 (Instant user connection)
+
+---
+
+## 🛒 통합 커뮤니티 & 마켓 (Integrated Community & Market)
+
+- 커뮤니티, 거래, 리뷰 데이터 연결 (Connected community, market, and review data)
+- 하나의 통합 반려 라이프 경험 제공 (Unified pet lifestyle experience)
+
+---
+
+# 🖼️ 서비스 미리보기 (Service Preview)
 
 | Main Home | Matching | Chat |
 |---|---|---|
@@ -173,207 +154,173 @@ PAWS는:
 
 ---
 
-<a id="main-features"></a>
+# 🖥️ 주요 기능 (Main Features)
 
-# 🖥️ Main Features | 주요 기능
-
----
-
-## 🏠 Main Home | 메인 홈
+## 🏠 메인 홈 (Main Home)
 
 <img src="./images/home.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Daily dog recommendations
-- Walking index information
-- Community and gallery integration
-- Responsive mobile UI
-- Personalized dashboard
+- 오늘의 반려견 추천 (Daily Dog Recommendations)
+- 산책 지수 제공 (Walking Index Information)
+- 커뮤니티 및 갤러리 연결 (Community & Gallery Integration)
+- 반응형 모바일 UI (Responsive Mobile UI)
 
 ---
 
-<a id="smart-main"></a>
-
-# 🏡 Smart Lifestyle Main | 라이프 메인
+# 🏡 라이프 메인 (Smart Lifestyle Main)
 
 <img src="./images/main.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Integrated pet lifestyle dashboard
-- Personalized activity recommendation
-- Quick access navigation
-- AI-based content connection
-- User-centered responsive design
+- 통합 반려 라이프 대시보드 (Integrated Pet Lifestyle Dashboard)
+- AI 기반 콘텐츠 연결 (AI-based Content Connection)
+- 빠른 기능 접근 (Quick Access Navigation)
+- 사용자 중심 UI 구조 (User-centered UI Design)
 
 ---
 
-## 🐕 Walking Matching System | 산책 매칭 시스템
+## 🐕 산책 매칭 시스템 (Walking Matching System)
 
 <img src="./images/matching.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Location-based matching
-- Apply / Accept / Reject process
-- Walking status management
-- Review-based trust system
-- Automatic chat room creation
+- 위치 기반 매칭 (Location-based Matching)
+- 신청 / 수락 / 거절 프로세스 (Apply / Accept / Reject Process)
+- 산책 상태 관리 (Walking Status Management)
+- 리뷰 기반 신뢰 시스템 (Review-based Trust System)
+- 자동 채팅방 생성 (Automatic Chat Room Creation)
 
 ---
 
-## 📝 Community System | 커뮤니티 시스템
+## 📝 커뮤니티 시스템 (Community System)
 
 <img src="./images/community.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Free / Question / Information boards
-- Comment and view tracking
-- User interaction and information sharing
-- Responsive community UI
+- 자유 / 질문 / 정보 게시판 (Free / Question / Information Boards)
+- 댓글 및 조회수 기능 (Comments & View Count Features)
+- 사용자 간 정보 공유 (User Interaction & Information Sharing)
+- 반응형 커뮤니티 UI (Responsive Community UI)
 
 ---
 
-## 📚 Dog Breed Encyclopedia | 견종 사전
+## 📚 견종 사전 (Dog Breed Encyclopedia)
 
 <img src="./images/breed.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Dog breed information
-- Size and characteristic classification
-- Easy breed exploration
+- 다양한 견종 정보 제공 (Dog Breed Information)
+- 크기 및 특징 분류 (Size & Characteristic Classification)
+- 견종 탐색 기능 지원 (Easy Breed Exploration)
 
 ---
 
-<a id="ai-recommendation-system"></a>
-
-# 🤖 AI Recommendation System | AI 추천 시스템
+# 🤖 AI 추천 시스템 (AI Recommendation System)
 
 <img src="./images/chatbot.png" width="700"/>
 
 ---
 
-## 🧠 AI Learning Structure | AI 학습 구조
+## 🧠 AI 학습 구조 (AI Learning Structure)
 
-### Input Data
+### 입력 데이터 (Input Data)
 
-- User questions
-- Dog DBTI
-- Match history
-- Review data
-- Chat history
-- User activity logs
-
-⬇️
-
-### AI Processing
-
-- OpenAI GPT analysis
-- Long-term memory accumulation
-- Recommendation score calculation
-- User tendency analysis
+- 사용자 질문 (User Questions)
+- 반려견 DBTI (Dog DBTI)
+- 매칭 기록 (Match History)
+- 리뷰 데이터 (Review Data)
+- 채팅 기록 (Chat History)
+- 사용자 활동 로그 (User Activity Logs)
 
 ⬇️
 
-### Results
+### AI 처리 과정 (AI Processing)
 
-- Personalized walking recommendations
-- AI chatbot responses
-- User-specific recommendations
-- Trust-based matching support
+- OpenAI GPT 분석 (OpenAI GPT Analysis)
+- 장기 메모리 누적 (Long-term Memory Accumulation)
+- 추천 점수 계산 (Recommendation Score Calculation)
+- 사용자 성향 분석 (User Tendency Analysis)
 
----
+⬇️
 
-## 📊 AI Data Architecture
+### 결과 (Results)
 
-| Table | Purpose |
-|---|---|
-| chat | Conversation history |
-| chat_memory | Long-term memory |
-| ai_action_log | GPT recommendation logs |
-| ai_config | Prompt policy management |
+- 맞춤 산책 추천 (Personalized Walking Recommendations)
+- AI 챗봇 응답 (AI Chatbot Responses)
+- 사용자 맞춤 추천 (Personalized Recommendations)
+- 신뢰 기반 매칭 지원 (Trust-based Matching Support)
 
 ---
 
-<a id="dbti-system"></a>
-
-# 🧠 DBTI System | DBTI 시스템
+# 🧠 DBTI 시스템 (DBTI System)
 
 <img src="./images/dbti.png" width="700"/>
 
-## Why DBTI? | 왜 DBTI인가?
+## DBTI란? (Why DBTI?)
 
-Existing walking services do not consider dog personality compatibility.
+PAWS는:
 
-PAWS analyzes:
+- 활동성 (Activity Level)
+- 사회성 (Social Tendency)
+- 공격성 (Aggression Tendency)
+- 외향성 (Extroversion)
 
-- Activity level
-- Social tendency
-- Aggression tendency
-- Extroversion
-
-to improve matching quality and compatibility.
+등을 분석해 매칭 품질을 향상시킵니다.
 
 ---
 
-<a id="real-time-chat"></a>
-
-# 💬 Real-time Chat | 실시간 채팅
+# 💬 실시간 채팅 (Real-time Chat)
 
 <img src="./images/chat.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Automatic chat room creation after acceptance
-- Real-time messaging
-- Friend request system
-- Match-based communication
+- 매칭 수락 시 자동 채팅방 생성 (Automatic Chat Room Creation)
+- 실시간 메시지 (Real-time Messaging)
+- 친구 요청 시스템 (Friend Request System)
+- 매칭 기반 소통 구조 (Match-based Communication)
 
 ---
 
-<a id="paws-market"></a>
-
-# 🛒 PAWS Market | PAWS 마켓
+# 🛒 PAWS 마켓 (PAWS Market)
 
 <img src="./images/market.png" width="700"/>
 
-### Features
+### 주요 기능 (Features)
 
-- Product registration and management
-- Cart and order system
-- Delivery management
-- Review-based trust accumulation
+- 상품 등록 및 관리 (Product Registration & Management)
+- 장바구니 및 주문 기능 (Cart & Order System)
+- 배송 관리 (Delivery Management)
+- 리뷰 기반 신뢰도 누적 (Review-based Trust Accumulation)
 
 ---
 
-<a id="database-design"></a>
-
-# 🗂️ Database Design | DB 설계
+# 🗂️ DB 설계 (Database Design)
 
 <img src="./images/erd.png" width="100%"/>
 
-## Core Design Points
+### 핵심 설계 구조 (Core Design)
 
-- Member-centered data structure
-- Match status flow tracking
-- Review-based trust accumulation
-- AI recommendation data storage structure
-- Expandable relational database design
+- 회원 중심 데이터 구조 (Member-centered Data Structure)
+- 매칭 상태 흐름 관리 (Match Status Flow Tracking)
+- 리뷰 기반 신뢰 데이터 누적 (Review-based Trust Data Accumulation)
+- AI 추천 데이터 저장 구조 (AI Recommendation Data Structure)
 
 ---
 
-<a id="system-architecture"></a>
-
-# 🏗️ System Architecture | 시스템 구조
+# 🏗️ 시스템 구조 (System Architecture)
 
 <img src="./images/architecture.png" width="100%"/>
 
 ---
 
-## Spring MVC + MyBatis Layered Architecture
+## Spring MVC + MyBatis 계층 구조 (Layered Architecture)
 
 Client UI  
 ⬇️  
@@ -387,19 +334,7 @@ Oracle DB
 
 ---
 
-## Design Goals
-
-- Separation of concerns
-- Improved maintainability
-- Reduced modification scope
-- Scalable module structure
-- Efficient SQL management
-
----
-
-<a id="tech-stack"></a>
-
-# ⚙️ Tech Stack | 기술 스택
+# ⚙️ 기술 스택 (Tech Stack)
 
 ## Backend
 
@@ -420,7 +355,7 @@ Oracle DB
 
 - OpenAI API
 - Prompt Engineering
-- User behavior data analysis
+- User behavior analysis
 
 ## Infra
 
@@ -432,22 +367,7 @@ Oracle DB
 
 ---
 
-# ⚙️ Why These Technologies? | 기술 선택 이유
-
-| Technology | Reason |
-|---|---|
-| Spring Boot | Structured architecture and maintainability |
-| MyBatis | Direct SQL control |
-| Oracle DB | Stable relational database structure |
-| OpenAI API | AI conversation and recommendation |
-| AWS EC2 | Real deployment environment |
-| Nginx | Reverse proxy and traffic management |
-
----
-
-<a id="deployment"></a>
-
-# 🚀 Deployment | 배포 주소
+# 🚀 배포 주소 (Deployment)
 
 ## 🌐 Live Service
 
@@ -462,102 +382,23 @@ Oracle DB
 
 ---
 
-# 🚀 Getting Started | 실행 방법
+# 📈 확장 가능성 (Scalability)
 
-## Clone Repository
-
-```bash
-git clone https://github.com/kookmin-sw/2026-capstone-61.git
-```
-
----
-
-## Database Configuration
-
-```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
-spring.datasource.username=YOUR_USERNAME
-spring.datasource.password=YOUR_PASSWORD
-```
+- AI 건강 분석 (AI Health Analysis)
+- 산책 경로 추천 (Walking Route Recommendation)
+- 병원 예약 연동 (Hospital Reservation Integration)
+- 반려견 행동 분석 (Dog Behavior Analysis)
+- AI 기반 신고 탐지 시스템 (AI-based Report Detection System)
+- 실시간 근처 매칭 (Real-time Nearby Matching)
+- 개인화 AI 반려 시스템 (Personalized AI Companion System)
 
 ---
 
-## Run Project
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
----
-
-<a id="scalability"></a>
-
-# 📈 Scalability | 확장 가능성
-
-## Future Expansion
-
-- AI health analysis
-- Walking route recommendation
-- Hospital reservation integration
-- Dog behavior analysis
-- AI-based report detection system
-- Real-time nearby matching
-- Personalized AI companion system
-
----
-
-# 👨‍💻 Solo Development Project | 1인 개발 프로젝트
-
-This project was fully developed by one developer.
-
-본 프로젝트는:
-
-- 기획
-- UI/UX 디자인
-- 프론트엔드 개발
-- 백엔드 개발
-- 데이터베이스 설계
-- AI 기능 구현
-- 서버 배포
-
-전 과정을 1인이 직접 개발했습니다.
-
----
-
-<a id="developer"></a>
-
-# 👨‍💻 Developer | 개발자
+# 👨‍💻 개발자 (Developer)
 
 | Name | Role |
 |---|---|
 | Beomjo Jang (장범조) | Planning / Backend / Frontend / AI / DB Design / Deployment |
-
----
-
-# 📈 Expected Effects | 기대 효과
-
-## User Perspective
-
-- Trust-based walking connections
-- Personalized dog recommendations
-- Integrated pet lifestyle experience
-
----
-
-## Platform Perspective
-
-- AI recommendation improvement through accumulated data
-- Expandable personalized AI services
-- Long-term pet ecosystem platform scalability
-
----
-
-# 🙌 Demo Video | 시연 영상
-
-Coming Soon
-
-추후 업로드 예정
 
 ---
 
